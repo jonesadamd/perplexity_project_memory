@@ -1,7 +1,7 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-04T10:40 EDT
+> Last Updated: 2026-06-04T11:21 EDT
 
 ---
 
@@ -17,6 +17,34 @@
 A SaaS platform for independent touring artists and their management teams. Multi-account, multi-role. Core modules: Events/Tours, Travel, Accommodations, Financials, Contracts, Riders, Press Kit, Setlists, Archive, Storage.
 
 Tech stack: React + Vite, Base44 (BaaS/hosting), Supabase (DB + auth), Tailwind, Lucide icons.
+
+---
+
+## Environment Variables — Supabase API Keys
+
+**All Supabase credentials live in `.env.local` (never committed).**
+
+| Variable | Format | Status |
+|---|---|---|
+| `VITE_SUPABASE_URL` | `https://<project>.supabase.co` | ✅ **Required** |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_...` | ✅ **Required — use this** |
+| `VITE_SUPABASE_ANON_KEY` | `eyJ...` (JWT) | ❌ **Legacy — do not use** |
+
+### ⚠️ Critical — Do NOT use `ANON_KEY`
+
+This project uses `VITE_SUPABASE_PUBLISHABLE_KEY` (`sb_publishable_...` format).
+Supabase deprecated the `anon`/`public` JWT key in favour of publishable keys.
+`VITE_SUPABASE_ANON_KEY` is **not used anywhere in this codebase**.
+
+- Canonical Supabase client: **`src/api/supabaseClient.js`** — import from here everywhere
+- If you see `ANON_KEY` anywhere in the codebase, replace it with `PUBLISHABLE_KEY`
+- Reference: https://supabase.com/docs/guides/auth/publishable-keys
+
+**`.env.local` template:**
+```
+VITE_SUPABASE_URL=https://<your-project-ref>.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
+```
 
 ---
 
@@ -83,12 +111,14 @@ export default function PageName() {
 - `src/components/permissions/PagePermissionGuard.jsx` — page-level guard
 - `src/utils/permissionUtils.js` — `LEVELS`, `meetsLevel()`
 - `src/Layout.jsx` — single file (Base44 constraint), contains all nav logic
+- `src/api/supabaseClient.js` — **canonical Supabase client** — import from here everywhere
 
 **DO NOT revert to:**
 - `base44.entities.PermissionRoleTemplate` (legacy)
 - `base44.entities.UserPermissionOverride` (legacy)
 - old dot-notation `perms['area.action'] === true`
 - `src/components/utils/PermissionContext.jsx` (wrong file, different API)
+- `VITE_SUPABASE_ANON_KEY` (legacy — use `VITE_SUPABASE_PUBLISHABLE_KEY`)
 
 ---
 
@@ -119,7 +149,7 @@ export default function PageName() {
 
 | File | Purpose |
 |---|---|
-| `README.md` | Quick-start index + open issues table |
+| `README.md` | Quick-start index + open issues table + **env var reference** |
 | `SERENOVA-PERMISSION-SYSTEM.md` | Permission deep-dive, resolution logic, Financial Hub tiers |
 | `SERENOVA-BUILD-PHASES.md` | Phase-by-phase checklist with status |
 | `SERENOVA-DECISIONS-LOG.md` | All architectural + product decisions with timestamps |
@@ -145,4 +175,5 @@ Rules:
 5. Update docs/SERENOVA-BUILD-PHASES.md on step completion
 6. Layout.jsx stays single file (Base44 constraint)
 7. Permission system is Supabase-native — never revert to Base44 entities
+8. Supabase client key = VITE_SUPABASE_PUBLISHABLE_KEY — ANON_KEY is legacy, do not use
 ```
