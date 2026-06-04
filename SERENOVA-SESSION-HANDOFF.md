@@ -1,7 +1,7 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-04T10:02 EDT
+> Last Updated: 2026-06-04T10:40 EDT
 
 ---
 
@@ -22,7 +22,7 @@ Tech stack: React + Vite, Base44 (BaaS/hosting), Supabase (DB + auth), Tailwind,
 
 ## Current Phase
 
-**Phase 1 — Permission System & Auth Foundation**
+**Phase 1 — Permission System & Auth Foundation — ✅ COMPLETE**
 
 | Step | Description | Status |
 |---|---|---|
@@ -33,7 +33,9 @@ Tech stack: React + Vite, Base44 (BaaS/hosting), Supabase (DB + auth), Tailwind,
 | 5 | Fix `PermissionGate.jsx` (WARN-01) — Rules of Hooks fix | ✅ Done |
 | 6 | Extract `LEVELS` + `meetsLevel()` to `permissionUtils.js` | ✅ Done |
 | 7 | Wire permission gating into Layout nav | ✅ Done |
-| **8** | **Gate `Events`, `FinancialHub`, `Contracts` pages** | ⬅️ **NEXT** |
+| 8 | Gate `Events`, `FinancialHub`, `Contracts` pages | ✅ Done |
+
+**Next phase:** Phase 2 — Events & Tours (see `docs/SERENOVA-BUILD-PHASES.md` for step list)
 
 ---
 
@@ -63,10 +65,22 @@ Layout.jsx
 5. entity-scoped grants (`entity_access_grants` table, upgrade-only)
 6. temporal expiry check
 
+**Page-level gating pattern (all 3 pages confirmed following this):**
+```jsx
+export default function PageName() {
+  return (
+    <PagePermissionGuard area="<area>" require="view">
+      <PageNameContent />
+    </PagePermissionGuard>
+  );
+}
+```
+
 **Key files:**
 - `src/hooks/usePermissions.js` — core hook
 - `src/components/PermissionContext.jsx` — provider + `usePermissionContext()`
 - `src/components/PermissionGate.jsx` — `<PermissionGate>` + `useCanAccess()`
+- `src/components/permissions/PagePermissionGuard.jsx` — page-level guard
 - `src/utils/permissionUtils.js` — `LEVELS`, `meetsLevel()`
 - `src/Layout.jsx` — single file (Base44 constraint), contains all nav logic
 
