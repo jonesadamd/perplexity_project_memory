@@ -1,7 +1,7 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-04T11:21 EDT
+> Last Updated: 2026-06-05T16:58 EDT
 
 ---
 
@@ -51,6 +51,9 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 ## Current Phase
 
 **Phase 1 — Permission System & Auth Foundation — ✅ COMPLETE**
+**Phase 2 — Events & Tours — 🔄 IN PROGRESS (Step 4 is next)**
+
+### Phase 1 — All Steps Complete
 
 | Step | Description | Status |
 |---|---|---|
@@ -62,8 +65,19 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 | 6 | Extract `LEVELS` + `meetsLevel()` to `permissionUtils.js` | ✅ Done |
 | 7 | Wire permission gating into Layout nav | ✅ Done |
 | 8 | Gate `Events`, `FinancialHub`, `Contracts` pages | ✅ Done |
+| 9 | Create `src/api/supabaseClient.js` — missed Phase 1 prerequisite; fixed bad import in `usePermissions.js` | ✅ Done |
 
-**Next phase:** Phase 2 — Events & Tours (see `docs/SERENOVA-BUILD-PHASES.md` for step list)
+### Phase 2 — Events & Tours
+
+| Step | Description | Status |
+|---|---|---|
+| 1 | Confirm `Events.jsx` reads from `events` table (not mock data) — audit complete; DDL applied (`event_type`, `promoter`) | ✅ Done |
+| 2 | `Events.jsx` search aligned to canonical `title` field — dual `title`/`name` check with Phase 9 inline comment | ✅ Done |
+| 3 pre-work | Audit `CreateEvent.jsx` + `EditEvent.jsx` — Base44 only confirmed, no Supabase client, full entity inventory logged | ✅ Done |
+| 3 | Gate `CreateEvent` / `EditEvent` behind `canEdit('events')` — `CreateEvent` already correct; `PagePermissionGuard` outer wrapper added to `EditEvent` | ✅ Done |
+| **4** | **Gate `EventFinancialDetails` behind `canView('financials')`** | **⬅ NEXT** |
+| 5 | Link events to tours via `event_tour_links` | [ ] |
+| 6 | Tour status flow: draft → active → completed → cancelled | [ ] |
 
 ---
 
@@ -93,7 +107,7 @@ Layout.jsx
 5. entity-scoped grants (`entity_access_grants` table, upgrade-only)
 6. temporal expiry check
 
-**Page-level gating pattern (all 3 pages confirmed following this):**
+**Page-level gating pattern (all confirmed pages following this):**
 ```jsx
 export default function PageName() {
   return (
@@ -104,9 +118,18 @@ export default function PageName() {
 }
 ```
 
+**withPermission HOC (available for component-level gating — use for Step 4):**
+```jsx
+// Defined at bottom of src/components/PermissionContext.jsx
+export function withPermission(Component, area, requiredLevel = 'view', fallback = null)
+
+// Usage:
+export default withPermission(EventFinancialDetails, 'financials', 'view');
+```
+
 **Key files:**
 - `src/hooks/usePermissions.js` — core hook
-- `src/components/PermissionContext.jsx` — provider + `usePermissionContext()`
+- `src/components/PermissionContext.jsx` — provider + `usePermissionContext()` + `withPermission()` HOC
 - `src/components/PermissionGate.jsx` — `<PermissionGate>` + `useCanAccess()`
 - `src/components/permissions/PagePermissionGuard.jsx` — page-level guard
 - `src/utils/permissionUtils.js` — `LEVELS`, `meetsLevel()`
@@ -122,6 +145,40 @@ export default function PageName() {
 
 ---
 
+## Supabase Project
+
+**Project name:** `serenova-hub-production`
+**Project ID:** `jpoharsecyebkhsnbnfe`
+**Region:** `us-east-1`
+**Status:** ACTIVE_HEALTHY
+
+### Phase 2 Tables — Confirmed Present in `public` schema (all RLS enabled)
+
+| Table | Status |
+|---|---|
+| `events` | ✅ Schema-ready (`event_type`, `promoter`, `title` confirmed) |
+| `memberships` | ✅ Present |
+| `tours` | ✅ Present |
+| `event_venue_details` | ✅ Present |
+| `team_assignments` | ✅ Present |
+| `contracts` | ✅ Present |
+| `performance_ticket_links` | ✅ Present |
+| `band_groups` | ❌ **Not yet created — deferred to Phase 7** |
+
+### Known Schema Gaps (Phase 9 work — no DDL until then)
+- `events.status` enum missing `Prospect/Tentative` — Base44 uses this; Supabase has `inquiry` as closest match. Decision deferred to Phase 9.
+- `events` canonical field is `title`; Base44 entity uses `name`. Phase 9 task: rename `form.name` → `form.title` in CreateEvent.
+- `EditEvent.jsx` uses `localStorage.getItem('currentAccountId')` in two places — replace with `AppContext.currentAccount.account_id` at Phase 9 rewrite.
+- `base44.functions.invoke('autoLinkCompaniesToEvent')` in EditEvent — needs Supabase-native equivalent at Phase 9.
+
+### Tables still needing DDL (before Phase 9)
+- `event_tasks`
+- `event_user_assignments`
+- `event_venue_snapshots`
+- `booking_agencies`
+
+---
+
 ## Key Architecture Rules
 
 - `Layout.jsx` stays as a **single file** — Base44 platform constraint, accepted tech debt
@@ -130,6 +187,7 @@ export default function PageName() {
 - `memberships` table replaces old `account_members` table
 - Entity grants are **upgrade-only** — never downgrade below role template floor
 - Financial Hub has 3 render tiers: `full` (edit+), `limited` (view), `none` (redirect)
+- **BandGroup** — `base44.entities.BandGroup` calls in `Events.jsx` are stubbed as `[]` until Phase 7 when `band_groups` table is created. Do not create the table early.
 
 ---
 
@@ -157,6 +215,7 @@ export default function PageName() {
 | `SERENOVA-HUB-DOCS-2.md` | Master reference — account model, schema, pages |
 | `SERENOVA-ACCESS-RIGHTS-MIGRATION-PLAN.md` | Access rights matrix, termination rules |
 | `SERENOVA-PRICING-MODEL.md` | Subscription tiers, seat model, Stripe plan |
+| `SERENOVA-BASE44-ENTITY-REFERENCE.md` | All 56 Base44 entities mapped to phases 2–9 |
 
 ---
 
