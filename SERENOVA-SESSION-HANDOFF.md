@@ -1,7 +1,7 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-05T16:58 EDT
+> Last Updated: 2026-06-05T17:35 EDT
 
 ---
 
@@ -51,7 +51,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 ## Current Phase
 
 **Phase 1 — Permission System & Auth Foundation — ✅ COMPLETE**
-**Phase 2 — Events & Tours — 🔄 IN PROGRESS (Step 4 is next)**
+**Phase 2 — Events & Tours — 🔄 IN PROGRESS (Step 5 is next)**
 
 ### Phase 1 — All Steps Complete
 
@@ -75,8 +75,8 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 | 2 | `Events.jsx` search aligned to canonical `title` field — dual `title`/`name` check with Phase 9 inline comment | ✅ Done |
 | 3 pre-work | Audit `CreateEvent.jsx` + `EditEvent.jsx` — Base44 only confirmed, no Supabase client, full entity inventory logged | ✅ Done |
 | 3 | Gate `CreateEvent` / `EditEvent` behind `canEdit('events')` — `CreateEvent` already correct; `PagePermissionGuard` outer wrapper added to `EditEvent` | ✅ Done |
-| **4** | **Gate `EventFinancialDetails` behind `canView('financials')`** | **⬅ NEXT** |
-| 5 | Link events to tours via `event_tour_links` | [ ] |
+| 4 | Gate `EventFinancialDetails` behind `canView('financials')` — `withPermission` HOC applied at default export; inline `useEffect` guard retained (belt-and-suspenders). Commit: `0d1cc54` | ✅ Done |
+| **5** | **Link events to tours via `event_tour_links`** | **⬅ NEXT** |
 | 6 | Tour status flow: draft → active → completed → cancelled | [ ] |
 
 ---
@@ -118,12 +118,12 @@ export default function PageName() {
 }
 ```
 
-**withPermission HOC (available for component-level gating — use for Step 4):**
+**withPermission HOC (component-level gating — used for EventFinancialDetails):**
 ```jsx
 // Defined at bottom of src/components/PermissionContext.jsx
 export function withPermission(Component, area, requiredLevel = 'view', fallback = null)
 
-// Usage:
+// Usage (as applied to EventFinancialDetails):
 export default withPermission(EventFinancialDetails, 'financials', 'view');
 ```
 
