@@ -1,7 +1,7 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-05T17:35 EDT
+> Last Updated: 2026-06-08T16:43 EDT
 
 ---
 
@@ -51,7 +51,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 ## Current Phase
 
 **Phase 1 — Permission System & Auth Foundation — ✅ COMPLETE**
-**Phase 2 — Events & Tours — 🔄 IN PROGRESS (Step 5 is next)**
+**Phase 2 — Events & Tours — 🔄 IN PROGRESS (Step 6 is next)**
 
 ### Phase 1 — All Steps Complete
 
@@ -76,8 +76,8 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 | 3 pre-work | Audit `CreateEvent.jsx` + `EditEvent.jsx` — Base44 only confirmed, no Supabase client, full entity inventory logged | ✅ Done |
 | 3 | Gate `CreateEvent` / `EditEvent` behind `canEdit('events')` — `CreateEvent` already correct; `PagePermissionGuard` outer wrapper added to `EditEvent` | ✅ Done |
 | 4 | Gate `EventFinancialDetails` behind `canView('financials')` — `withPermission` HOC applied at default export; inline `useEffect` guard retained (belt-and-suspenders). Commit: `0d1cc54` | ✅ Done |
-| **5** | **Link events to tours via `event_tour_links`** | **⬅ NEXT** |
-| 6 | Tour status flow: draft → active → completed → cancelled | [ ] |
+| 5 | `event_tour_links` DDL — table confirmed in Supabase with full spec. `id`, `event_id` (FK→events CASCADE), `tour_id` (FK→tours CASCADE), `account_id` (FK→accounts CASCADE), `created_at`. UNIQUE `(event_id, tour_id)`. RLS + `account_isolation` policy. Indexes on `event_id`, `tour_id`, `account_id`. | ✅ Done |
+| **6** | **Tour status flow: draft → active → completed → cancelled** | **⬅ NEXT** |
 
 ---
 
@@ -159,6 +159,7 @@ export default withPermission(EventFinancialDetails, 'financials', 'view');
 | `events` | ✅ Schema-ready (`event_type`, `promoter`, `title` confirmed) |
 | `memberships` | ✅ Present |
 | `tours` | ✅ Present |
+| `event_tour_links` | ✅ Schema-ready — FK cascade on `event_id`, `tour_id`, `account_id`; UNIQUE `(event_id, tour_id)`; RLS `account_isolation` policy |
 | `event_venue_details` | ✅ Present |
 | `team_assignments` | ✅ Present |
 | `contracts` | ✅ Present |
