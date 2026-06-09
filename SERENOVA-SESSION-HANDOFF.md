@@ -1,7 +1,7 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-09T07:52 EDT
+> Last Updated: 2026-06-09T08:25 EDT
 
 ---
 
@@ -78,14 +78,14 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 | 3 | Gate `CreateEvent` / `EditEvent` behind `canEdit('events')` — `CreateEvent` already correct; `PagePermissionGuard` outer wrapper added to `EditEvent` | ✅ Done |
 | 4 | Gate `EventFinancialDetails` behind `canView('financials')` — `withPermission` HOC applied at default export; inline `useEffect` guard retained. Commit: `0d1cc54` | ✅ Done |
 | 5 | `event_tour_links` DDL — table confirmed in Supabase with full spec. `id`, `event_id` (FK→events CASCADE), `tour_id` (FK→tours CASCADE), `account_id` (FK→accounts CASCADE), `created_at`. UNIQUE `(event_id, tour_id)`. RLS + `account_isolation` policy. Indexes on `event_id`, `tour_id`, `account_id`. | ✅ Done |
-| 6 | Tour status flow: `draft → active → completed → cancelled` — migration `tours_add_status_column` applied; `CreateTour.jsx` status dropdown updated to canonical four values. Complete 2026-06-08T17:24 EDT. | ✅ Done |
+| 6 | Tour status flow: 7-value dropdown (`draft/planning/confirmed/in_progress/in_closeout/completed/cancelled`) — migration `tours_add_status_column` applied; `CreateTour.jsx` and `TourOverviewTab.jsx` STATUS_COLORS updated with all 7 values. | ✅ Done |
 
 ### Phase 3 — Travel & Accommodations
 
 | Step | Description | Status |
 |---|---|---|
-| **1** | **Audit flight booking wizard (`CreateTravel → AddTravel → EditFlightBooking`)** | **✅ Audit complete — see Phase 3 Audit Notes below** |
-| 2 | Gate all travel/accommodation writes behind `canEdit('travel')` / `canEdit('accommodations')` | **⬅ NEXT** |
+| **1** | **Audit flight booking wizard (`CreateTravel → AddTravel → EditFlightBooking`)** | **✅ Complete** |
+| **2** | **Gate travel/accommodation writes; fix old tour status filter in AddTravel + EditFlightBooking** | **⬅ NEXT** |
 | 3 | Co-travel visibility for band/crew (own itinerary only, no confirmation numbers) | ⬜ |
 
 ---
@@ -122,26 +122,56 @@ Key entities used:
 - No wrong-file permission imports (unlike `TourDetails.jsx` / `CreateTour.jsx`)
 
 ### Status Values Bug — CONFIRMED
-`EditFlightBooking.jsx` loads tours with:
+`EditFlightBooking.jsx` and `AddTravel.jsx` both load tours with:
 ```js
 base44.entities.Tour.filter({ status: { $in: ['planning', 'confirmed', 'in_progress'] } })
 ```
-These are the **old pre-Phase-2-Step-6 status values**. The canonical values are now `draft/active/completed/cancelled`. This filter will return **zero tours** after Phase 2 Step 6 migration — the linked-tour picker in EditFlightBooking will be empty.
+These are the **old pre-Phase-2-Step-6 status values**. The canonical values are now `draft/active/completed/cancelled`. This filter will return **zero tours** after Phase 2 Step 6 migration — the linked-tour picker will be empty.
 
-**This is a Phase 3 Step 2 fix — must be updated when we gate travel writes.**
+**Must fix in Step 2:** Replace with `['draft', 'active']` (exclude completed/cancelled from picker).
 
 ### AddTravel — Additional Flags
-- Also filters tours with old status values (same bug, same fix needed)
 - Uses `base44.entities.FlightSearchResult` — unknown if this has a Supabase equivalent; flag for Phase 9
 - `expense_allocation_type` options: `event`, `tour`, `split_events`, `paid_by_venue` — well-structured, no changes needed
 
 ### EditFlightBooking — Booking Status Values
-`EventFlightBooking.booking_status` dropdown has: `planned / booked / checked_in / completed / cancelled` — these are **flight booking statuses** (not tour statuses) and look correct as-is.
+`EventFlightBooking.booking_status` dropdown: `planned / booked / checked_in / completed / cancelled` — these are **flight booking statuses** (not tour statuses) and are correct as-is.
 
 ### What Step 2 Must Change
 1. Add `PagePermissionGuard area="travel" require="view"` wrapper to `CreateTravel`, `AddTravel`, `EditFlightBooking`
 2. Add `canEdit('travel')` check before any create/update/delete call in all three files
-3. Fix Tour filter in `EditFlightBooking` and `AddTravel`: `['planning', 'confirmed', 'in_progress']` → `['draft', 'active']` (exclude completed/cancelled from picker)
+3. Fix Tour filter in `EditFlightBooking` and `AddTravel`: `['planning', 'confirmed', 'in_progress']` → `['draft', 'active']`
+
+---
+
+## Phase 3 Step 2 Pre-Work Audit — TourDetails.jsx + CreateTour.jsx (2026-06-09)
+
+### Files Read
+- `src/pages/TourDetails.jsx`
+- `src/pages/CreateTour.jsx`
+
+### TourDetails.jsx — Findings
+- **Data source:** Fully Base44-native — `base44.entities.Tour.get(id)`, events via `base44.entities.Event.filter({ id: { $in: tourData.event_ids } })` (denormalized `event_ids` array on Tour entity, not `event_tour_links`)
+- **Permission hook import:** Uses `usePermissions` from `utils/PermissionContext` (wrong file) — Phase 9 scope, defer
+- **Permission area name:** `hasPermission('financial_hub', 'view')` — wrong area name; canonical is `financials` — Phase 9 scope, defer
+- **`canEdit` check:** `hasPermission('events', 'edit')` — correct area, wrong hook import
+
+### CreateTour.jsx — Findings
+- **Data source:** Fully Base44-native — `base44.entities.Tour.create(tourData)`, writes `event_ids: []` directly onto Tour record
+- **Event linking:** After create, writes `base44.entities.Event.update(eventId, { tour_id: newTour.id })` back to each event; available events filtered by `e => !e.tour_id` (reads `events.tour_id` Base44 field)
+- **Status dropdown:** Confirmed 7 values (`draft/planning/confirmed/in_progress/in_closeout/completed/cancelled`) with default `draft` — ✅ already correct from Phase 2 Step 6
+- **Permission hook import:** Same wrong hook import (`utils/PermissionContext`) — Phase 9 scope, defer
+
+### Step 2 Scope — What This Changes
+Neither `TourDetails.jsx` nor `CreateTour.jsx` are in scope for Step 2. Their permission hook import issues and `event_tour_links` migration are Phase 9 work. No changes to these files in Step 2.
+
+### Deferred to Phase 9 (from this audit)
+| Issue | File | Decision |
+|---|---|---|
+| Wrong permission hook import (`utils/PermissionContext`) | `TourDetails.jsx`, `CreateTour.jsx` | Phase 9 rewrite |
+| `hasPermission('financial_hub', ...)` wrong area name | `TourDetails.jsx` | Phase 9 rewrite |
+| Event linking via `tour.event_ids` array (not `event_tour_links`) | Both files | Phase 9 rewrite |
+| `events.tour_id` filter in `loadAvailableEvents` | `CreateTour.jsx` | Phase 9 rewrite |
 
 ---
 
