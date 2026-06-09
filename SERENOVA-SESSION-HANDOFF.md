@@ -1,7 +1,7 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-08T16:43 EDT
+> Last Updated: 2026-06-09T07:39 EDT
 
 ---
 
@@ -51,7 +51,8 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 ## Current Phase
 
 **Phase 1 — Permission System & Auth Foundation — ✅ COMPLETE**
-**Phase 2 — Events & Tours — 🔄 IN PROGRESS (Step 6 is next)**
+**Phase 2 — Events & Tours — ✅ COMPLETE**
+**Phase 3 — Travel & Accommodations — 🔄 IN PROGRESS (Step 1 is next)**
 
 ### Phase 1 — All Steps Complete
 
@@ -67,17 +68,25 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 | 8 | Gate `Events`, `FinancialHub`, `Contracts` pages | ✅ Done |
 | 9 | Create `src/api/supabaseClient.js` — missed Phase 1 prerequisite; fixed bad import in `usePermissions.js` | ✅ Done |
 
-### Phase 2 — Events & Tours
+### Phase 2 — Events & Tours — All Steps Complete
 
 | Step | Description | Status |
 |---|---|---|
-| 1 | Confirm `Events.jsx` reads from `events` table (not mock data) — audit complete; DDL applied (`event_type`, `promoter`) | ✅ Done |
+| 1 | Confirm `Events.jsx` reads from `events` table — audit complete; DDL applied (`event_type`, `promoter`) | ✅ Done |
 | 2 | `Events.jsx` search aligned to canonical `title` field — dual `title`/`name` check with Phase 9 inline comment | ✅ Done |
 | 3 pre-work | Audit `CreateEvent.jsx` + `EditEvent.jsx` — Base44 only confirmed, no Supabase client, full entity inventory logged | ✅ Done |
 | 3 | Gate `CreateEvent` / `EditEvent` behind `canEdit('events')` — `CreateEvent` already correct; `PagePermissionGuard` outer wrapper added to `EditEvent` | ✅ Done |
-| 4 | Gate `EventFinancialDetails` behind `canView('financials')` — `withPermission` HOC applied at default export; inline `useEffect` guard retained (belt-and-suspenders). Commit: `0d1cc54` | ✅ Done |
+| 4 | Gate `EventFinancialDetails` behind `canView('financials')` — `withPermission` HOC applied at default export; inline `useEffect` guard retained. Commit: `0d1cc54` | ✅ Done |
 | 5 | `event_tour_links` DDL — table confirmed in Supabase with full spec. `id`, `event_id` (FK→events CASCADE), `tour_id` (FK→tours CASCADE), `account_id` (FK→accounts CASCADE), `created_at`. UNIQUE `(event_id, tour_id)`. RLS + `account_isolation` policy. Indexes on `event_id`, `tour_id`, `account_id`. | ✅ Done |
-| **6** | **Tour status flow: draft → active → completed → cancelled** | **⬅ NEXT** |
+| 6 | Tour status flow: `draft → active → completed → cancelled` — migration `tours_add_status_column` applied; `CreateTour.jsx` status dropdown updated to canonical four values. Complete 2026-06-08T17:24 EDT. | ✅ Done |
+
+### Phase 3 — Travel & Accommodations
+
+| Step | Description | Status |
+|---|---|---|
+| **1** | **Audit flight booking wizard (`CreateTravel → AddTravel → EditFlightBooking → segments → confirm`)** | **⬅ NEXT** |
+| 2 | Gate all travel/accommodation writes behind `canEdit('travel')` / `canEdit('accommodations')` | ⬜ |
+| 3 | Co-travel visibility for band/crew (own itinerary only, no confirmation numbers) | ⬜ |
 
 ---
 
@@ -152,13 +161,13 @@ export default withPermission(EventFinancialDetails, 'financials', 'view');
 **Region:** `us-east-1`
 **Status:** ACTIVE_HEALTHY
 
-### Phase 2 Tables — Confirmed Present in `public` schema (all RLS enabled)
+### Tables — Confirmed Present in `public` schema (all RLS enabled)
 
 | Table | Status |
 |---|---|
 | `events` | ✅ Schema-ready (`event_type`, `promoter`, `title` confirmed) |
 | `memberships` | ✅ Present |
-| `tours` | ✅ Present |
+| `tours` | ✅ Present (`status` column added — `draft/active/completed/cancelled`) |
 | `event_tour_links` | ✅ Schema-ready — FK cascade on `event_id`, `tour_id`, `account_id`; UNIQUE `(event_id, tour_id)`; RLS `account_isolation` policy |
 | `event_venue_details` | ✅ Present |
 | `team_assignments` | ✅ Present |
