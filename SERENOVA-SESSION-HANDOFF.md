@@ -1,7 +1,7 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-09T07:39 EDT
+> Last Updated: 2026-06-09T07:52 EDT
 
 ---
 
@@ -52,7 +52,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 
 **Phase 1 — Permission System & Auth Foundation — ✅ COMPLETE**
 **Phase 2 — Events & Tours — ✅ COMPLETE**
-**Phase 3 — Travel & Accommodations — 🔄 IN PROGRESS (Step 1 is next)**
+**Phase 3 — Travel & Accommodations — 🔄 IN PROGRESS (Step 1 audit complete; Step 2 is next)**
 
 ### Phase 1 — All Steps Complete
 
@@ -84,9 +84,64 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 
 | Step | Description | Status |
 |---|---|---|
-| **1** | **Audit flight booking wizard (`CreateTravel → AddTravel → EditFlightBooking → segments → confirm`)** | **⬅ NEXT** |
-| 2 | Gate all travel/accommodation writes behind `canEdit('travel')` / `canEdit('accommodations')` | ⬜ |
+| **1** | **Audit flight booking wizard (`CreateTravel → AddTravel → EditFlightBooking`)** | **✅ Audit complete — see Phase 3 Audit Notes below** |
+| 2 | Gate all travel/accommodation writes behind `canEdit('travel')` / `canEdit('accommodations')` | **⬅ NEXT** |
 | 3 | Co-travel visibility for band/crew (own itinerary only, no confirmation numbers) | ⬜ |
+
+---
+
+## Phase 3 Step 1 — Audit Findings (2026-06-09)
+
+### Files Read
+- `src/pages/CreateTravel.jsx`
+- `src/pages/AddTravel.jsx` (54KB — largest travel file)
+- `src/pages/EditFlightBooking.jsx`
+
+### What the Wizard Does
+The flight booking wizard is a 3-page flow:
+1. **`CreateTravel`** → entry point; routes to `AddTravel` or accommodation create
+2. **`AddTravel`** → full flight booking creation: flight search, PNR entry, traveler selection, cost, event/tour linking, expense allocation
+3. **`EditFlightBooking`** → edits a single `EventFlightBooking` record + its `FlightBookingGroup`; supports PNR separation, per-traveler seat/class edits, segment management via `PnrSegmentManager`
+
+### Data Sources — All Still Base44
+All three files use **only `base44.entities.*`** — no Supabase reads or writes anywhere in the wizard.
+
+Key entities used:
+- `base44.entities.EventFlightBooking` — per-traveler booking record
+- `base44.entities.FlightBookingGroup` — PNR-level group (cost, allocation, links)
+- `base44.entities.Flight` — individual flight segments
+- `base44.entities.Event` — linked events (for context/expense)
+- `base44.entities.Tour` — linked tours (filter: `status: { $in: ['planning', 'confirmed', 'in_progress'] }` ← **uses old status values**)
+- `base44.entities.Membership` — team member list for traveler selector
+- `base44.functions.invoke('getUsersByEmailsForAccount')` — enriches membership with display names
+- `base44.entities.FlightSearchResult` — used in AddTravel for flight lookup
+
+### Permission Issues (Phase 9 scope — defer)
+- `EditFlightBooking` imports `useAppContext` correctly ✅
+- No permission gating at all on any travel page (Step 2 will fix this)
+- No wrong-file permission imports (unlike `TourDetails.jsx` / `CreateTour.jsx`)
+
+### Status Values Bug — CONFIRMED
+`EditFlightBooking.jsx` loads tours with:
+```js
+base44.entities.Tour.filter({ status: { $in: ['planning', 'confirmed', 'in_progress'] } })
+```
+These are the **old pre-Phase-2-Step-6 status values**. The canonical values are now `draft/active/completed/cancelled`. This filter will return **zero tours** after Phase 2 Step 6 migration — the linked-tour picker in EditFlightBooking will be empty.
+
+**This is a Phase 3 Step 2 fix — must be updated when we gate travel writes.**
+
+### AddTravel — Additional Flags
+- Also filters tours with old status values (same bug, same fix needed)
+- Uses `base44.entities.FlightSearchResult` — unknown if this has a Supabase equivalent; flag for Phase 9
+- `expense_allocation_type` options: `event`, `tour`, `split_events`, `paid_by_venue` — well-structured, no changes needed
+
+### EditFlightBooking — Booking Status Values
+`EventFlightBooking.booking_status` dropdown has: `planned / booked / checked_in / completed / cancelled` — these are **flight booking statuses** (not tour statuses) and look correct as-is.
+
+### What Step 2 Must Change
+1. Add `PagePermissionGuard area="travel" require="view"` wrapper to `CreateTravel`, `AddTravel`, `EditFlightBooking`
+2. Add `canEdit('travel')` check before any create/update/delete call in all three files
+3. Fix Tour filter in `EditFlightBooking` and `AddTravel`: `['planning', 'confirmed', 'in_progress']` → `['draft', 'active']` (exclude completed/cancelled from picker)
 
 ---
 
