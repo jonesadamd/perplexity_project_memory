@@ -1,7 +1,7 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-09T08:25 EDT
+> Last Updated: 2026-06-09T12:56 EDT
 
 ---
 
@@ -78,7 +78,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 | 3 | Gate `CreateEvent` / `EditEvent` behind `canEdit('events')` — `CreateEvent` already correct; `PagePermissionGuard` outer wrapper added to `EditEvent` | ✅ Done |
 | 4 | Gate `EventFinancialDetails` behind `canView('financials')` — `withPermission` HOC applied at default export; inline `useEffect` guard retained. Commit: `0d1cc54` | ✅ Done |
 | 5 | `event_tour_links` DDL — table confirmed in Supabase with full spec. `id`, `event_id` (FK→events CASCADE), `tour_id` (FK→tours CASCADE), `account_id` (FK→accounts CASCADE), `created_at`. UNIQUE `(event_id, tour_id)`. RLS + `account_isolation` policy. Indexes on `event_id`, `tour_id`, `account_id`. | ✅ Done |
-| 6 | Tour status flow: 7-value dropdown (`draft/planning/confirmed/in_progress/in_closeout/completed/cancelled`) — migration `tours_add_status_column` applied; `CreateTour.jsx` and `TourOverviewTab.jsx` STATUS_COLORS updated with all 7 values. | ✅ Done |
+| 6 | Tour status flow: 7-value dropdown (`draft/planning/confirmed/in_progress/in_closeout/completed/cancelled`) in `CreateTour.jsx` and `TourOverviewTab.jsx` STATUS_COLORS. `in_closeout` badge = purple. Commits: migration `tours_add_status_column`; code commit `49b9952`. | ✅ Done |
 
 ### Phase 3 — Travel & Accommodations
 
@@ -126,9 +126,7 @@ Key entities used:
 ```js
 base44.entities.Tour.filter({ status: { $in: ['planning', 'confirmed', 'in_progress'] } })
 ```
-These are the **old pre-Phase-2-Step-6 status values**. The canonical values are now `draft/active/completed/cancelled`. This filter will return **zero tours** after Phase 2 Step 6 migration — the linked-tour picker will be empty.
-
-**Must fix in Step 2:** Replace with `['draft', 'active']` (exclude completed/cancelled from picker).
+These are the **old pre-Phase-2-Step-6 status values**. The canonical values are now `draft/planning/confirmed/in_progress/in_closeout/completed/cancelled`. This filter will return **zero active-lifecycle tours** for any tour in `draft` or `in_closeout` status. **Must fix in Step 2:** Replace with `['draft', 'planning', 'confirmed', 'in_progress', 'in_closeout']`.
 
 ### AddTravel — Additional Flags
 - Uses `base44.entities.FlightSearchResult` — unknown if this has a Supabase equivalent; flag for Phase 9
@@ -140,7 +138,7 @@ These are the **old pre-Phase-2-Step-6 status values**. The canonical values are
 ### What Step 2 Must Change
 1. Add `PagePermissionGuard area="travel" require="view"` wrapper to `CreateTravel`, `AddTravel`, `EditFlightBooking`
 2. Add `canEdit('travel')` check before any create/update/delete call in all three files
-3. Fix Tour filter in `EditFlightBooking` and `AddTravel`: `['planning', 'confirmed', 'in_progress']` → `['draft', 'active']`
+3. Fix Tour filter in `EditFlightBooking` and `AddTravel`: `['planning', 'confirmed', 'in_progress']` → `['draft', 'planning', 'confirmed', 'in_progress', 'in_closeout']`
 
 ---
 
@@ -252,7 +250,7 @@ export default withPermission(EventFinancialDetails, 'financials', 'view');
 |---|---|
 | `events` | ✅ Schema-ready (`event_type`, `promoter`, `title` confirmed) |
 | `memberships` | ✅ Present |
-| `tours` | ✅ Present (`status` column added — `draft/active/completed/cancelled`) |
+| `tours` | ✅ Present (`status` column added — 7 values: `draft/planning/confirmed/in_progress/in_closeout/completed/cancelled`, default `draft`) |
 | `event_tour_links` | ✅ Schema-ready — FK cascade on `event_id`, `tour_id`, `account_id`; UNIQUE `(event_id, tour_id)`; RLS `account_isolation` policy |
 | `event_venue_details` | ✅ Present |
 | `team_assignments` | ✅ Present |
