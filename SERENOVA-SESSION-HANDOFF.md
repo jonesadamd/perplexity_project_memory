@@ -1,7 +1,7 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-09T12:56 EDT
+> Last Updated: 2026-06-10T11:30 EDT
 
 ---
 
@@ -142,7 +142,7 @@ These are the **old pre-Phase-2-Step-6 status values**. The canonical values are
 
 ---
 
-## Phase 3 Step 2 Pre-Work Audit — TourDetails.jsx + CreateTour.jsx (2026-06-09)
+## Phase 3 Step 2 Pre-Work Audit — TourDetails.jsx + CreateTour.jsx (2026-06-10)
 
 ### Files Read
 - `src/pages/TourDetails.jsx`
@@ -170,6 +170,63 @@ Neither `TourDetails.jsx` nor `CreateTour.jsx` are in scope for Step 2. Their pe
 | `hasPermission('financial_hub', ...)` wrong area name | `TourDetails.jsx` | Phase 9 rewrite |
 | Event linking via `tour.event_ids` array (not `event_tour_links`) | Both files | Phase 9 rewrite |
 | `events.tour_id` filter in `loadAvailableEvents` | `CreateTour.jsx` | Phase 9 rewrite |
+
+---
+
+## Booking Agency Architecture — Decision (2026-06-10)
+
+**Option C selected:** Booking Agency is a **separate product (Serenova Agency)** connecting to Serenova Hub via a public API. It is NOT built inside Serenova Hub.
+
+**What's already in Supabase (prerequisite DDL — applied 2026-06-10):**
+- `booking_agency` added to `account_type` enum ✅
+- `artist_assignments` table created ✅
+
+**`artist_assignments` schema:**
+```sql
+CREATE TABLE artist_assignments (
+  id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  artist_account_id   uuid NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+  member_user_id      uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  company_account_id  uuid NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+  assignment_type     text NOT NULL CHECK (assignment_type IN (
+                        'artist_management',
+                        'business_management',
+                        'booking_agency'
+                      )),
+  assigned_at         timestamptz DEFAULT now(),
+  assigned_by         uuid REFERENCES users(id),
+  UNIQUE (artist_account_id, member_user_id, assignment_type)
+);
+```
+
+**`artist_assignments` vs Phase 9 `companies`/`company_staff`/`company_artist_assignments` — NOT in conflict:**
+- `artist_assignments` → links **Serenova auth users** from a company account to a specific artist account (drives dropdowns + API auth)
+- `companies` / `company_staff` / `company_artist_assignments` → external company contact directory (Phase 9, replaces Base44 `ManagementCompany` / `BookingAgency` entities)
+
+**What is deferred to Phase 10 / Serenova Agency product:**
+- Full booking agency dashboard, contracting flow, offer pipeline
+- Promoter CRM, routing / availability views
+- Public API design, OAuth/token authorization scaffold
+- Serenova Agency codebase (separate repo)
+
+**`artist_admin_company` = Business Management Team account type** — no new account type needed. UI label is "Business Management"; `account_type` value stays `artist_admin_company`.
+
+---
+
+## Phase 5-M — Management & Multi-Account (Key Steps)
+
+> Prerequisite DDL complete: `artist_assignments` table + `booking_agency` account_type applied 2026-06-10.
+
+| Step | Description | Status |
+|---|---|---|
+| Pre-DDL | `artist_assignments` table + `booking_agency` enum value — migration applied ✅ | ✅ Done |
+| 1 | Management Dashboard roster view | ⬜ |
+| 2 | Company seat invite + termination flow | ⬜ |
+| 3 | Trailing access enforcement on `access_scoped_until` | ⬜ |
+| 4 | `ManagementTeam.jsx` — member list with assigned artists display per member | ⬜ |
+| 5 | `ManagementAdmin.jsx` — artist roster × team assignment matrix; assign/unassign UI writing to `artist_assignments` | ⬜ |
+| 6 | Dropdown filtering — wire `artist_assignments` query into company-type selectors; confirm general pickers exclude management/agency staff | ⬜ |
+| 7 | Management company pricing model (see `SERENOVA-PRICING-MODEL.md`) | ⬜ |
 
 ---
 
@@ -256,6 +313,7 @@ export default withPermission(EventFinancialDetails, 'financials', 'view');
 | `team_assignments` | ✅ Present |
 | `contracts` | ✅ Present |
 | `performance_ticket_links` | ✅ Present |
+| `artist_assignments` | ✅ Present — links Serenova auth users from company accounts to artist accounts; migration `artist_assignments_and_booking_agency_type` applied 2026-06-10 |
 | `band_groups` | ❌ **Not yet created — deferred to Phase 7** |
 
 ### Known Schema Gaps (Phase 9 work — no DDL until then)
@@ -269,6 +327,7 @@ export default withPermission(EventFinancialDetails, 'financials', 'view');
 - `event_user_assignments`
 - `event_venue_snapshots`
 - `booking_agencies`
+- `companies`, `company_staff`, `company_artist_assignments` (Phase 9 — external company contact directory)
 
 ---
 
@@ -281,6 +340,7 @@ export default withPermission(EventFinancialDetails, 'financials', 'view');
 - Entity grants are **upgrade-only** — never downgrade below role template floor
 - Financial Hub has 3 render tiers: `full` (edit+), `limited` (view), `none` (redirect)
 - **BandGroup** — `base44.entities.BandGroup` calls in `Events.jsx` are stubbed as `[]` until Phase 7 when `band_groups` table is created. Do not create the table early.
+- **`artist_assignments`** — assignment is a UX/display layer only. It does not grant or restrict permissions. Permissions remain governed by `memberships` + `role_templates` + `entity_access_grants`.
 
 ---
 
