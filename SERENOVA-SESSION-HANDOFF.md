@@ -1,7 +1,7 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-10T11:30 EDT
+> Last Updated: 2026-06-10T19:34 EDT
 
 ---
 
@@ -52,7 +52,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 
 **Phase 1 — Permission System & Auth Foundation — ✅ COMPLETE**
 **Phase 2 — Events & Tours — ✅ COMPLETE**
-**Phase 3 — Travel & Accommodations — 🔄 IN PROGRESS (Step 1 audit complete; Step 2 is next)**
+**Phase 3 — Travel & Accommodations — 🔄 IN PROGRESS (Step 2 in progress — tour filter fix done; permission gating remaining)**
 
 ### Phase 1 — All Steps Complete
 
@@ -85,8 +85,17 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 | Step | Description | Status |
 |---|---|---|
 | **1** | **Audit flight booking wizard (`CreateTravel → AddTravel → EditFlightBooking`)** | **✅ Complete** |
-| **2** | **Gate travel/accommodation writes; fix old tour status filter in AddTravel + EditFlightBooking** | **⬅ NEXT** |
+| **2** | **Gate travel/accommodation writes (PagePermissionGuard + canEdit checks on CreateTravel, AddTravel, EditFlightBooking); tour status filter fix** | **🔄 In Progress** |
 | 3 | Co-travel visibility for band/crew (own itinerary only, no confirmation numbers) | ⬜ |
+
+#### Phase 3 Step 2 — Progress Detail
+
+| Sub-task | Status |
+|---|---|
+| Tour status filter fix — `AddTravel.jsx` `loadTours()` | ✅ Done (2026-06-10T19:22 EDT) |
+| Tour status filter — `EditFlightBooking.jsx` | ✅ Already correct — no change needed |
+| `PagePermissionGuard area="travel" require="view"` on `CreateTravel`, `AddTravel`, `EditFlightBooking` | ⬜ Remaining |
+| `canEdit('travel')` guard before create/update/delete calls in all three files | ⬜ Remaining |
 
 ---
 
@@ -111,22 +120,19 @@ Key entities used:
 - `base44.entities.FlightBookingGroup` — PNR-level group (cost, allocation, links)
 - `base44.entities.Flight` — individual flight segments
 - `base44.entities.Event` — linked events (for context/expense)
-- `base44.entities.Tour` — linked tours (filter: `status: { $in: ['planning', 'confirmed', 'in_progress'] }` ← **uses old status values**)
+- `base44.entities.Tour` — linked tours (filter fixed in Step 2 — see below)
 - `base44.entities.Membership` — team member list for traveler selector
 - `base44.functions.invoke('getUsersByEmailsForAccount')` — enriches membership with display names
 - `base44.entities.FlightSearchResult` — used in AddTravel for flight lookup
 
-### Permission Issues (Phase 9 scope — defer)
+### Permission Issues
 - `EditFlightBooking` imports `useAppContext` correctly ✅
-- No permission gating at all on any travel page (Step 2 will fix this)
+- No permission gating at all on any travel page — **Step 2 remaining work**
 - No wrong-file permission imports (unlike `TourDetails.jsx` / `CreateTour.jsx`)
 
-### Status Values Bug — CONFIRMED
-`EditFlightBooking.jsx` and `AddTravel.jsx` both load tours with:
-```js
-base44.entities.Tour.filter({ status: { $in: ['planning', 'confirmed', 'in_progress'] } })
-```
-These are the **old pre-Phase-2-Step-6 status values**. The canonical values are now `draft/planning/confirmed/in_progress/in_closeout/completed/cancelled`. This filter will return **zero active-lifecycle tours** for any tour in `draft` or `in_closeout` status. **Must fix in Step 2:** Replace with `['draft', 'planning', 'confirmed', 'in_progress', 'in_closeout']`.
+### Tour Status Filter — RESOLVED ✅
+`AddTravel.jsx` `loadTours()` had old filter `['planning', 'confirmed', 'in_progress']` — **fixed 2026-06-10T19:22 EDT** to `['draft', 'planning', 'confirmed', 'in_progress', 'in_closeout']`.
+`EditFlightBooking.jsx` already had the correct 5-value filter — no change needed.
 
 ### AddTravel — Additional Flags
 - Uses `base44.entities.FlightSearchResult` — unknown if this has a Supabase equivalent; flag for Phase 9
@@ -135,10 +141,9 @@ These are the **old pre-Phase-2-Step-6 status values**. The canonical values are
 ### EditFlightBooking — Booking Status Values
 `EventFlightBooking.booking_status` dropdown: `planned / booked / checked_in / completed / cancelled` — these are **flight booking statuses** (not tour statuses) and are correct as-is.
 
-### What Step 2 Must Change
+### What Step 2 Still Needs (remaining)
 1. Add `PagePermissionGuard area="travel" require="view"` wrapper to `CreateTravel`, `AddTravel`, `EditFlightBooking`
 2. Add `canEdit('travel')` check before any create/update/delete call in all three files
-3. Fix Tour filter in `EditFlightBooking` and `AddTravel`: `['planning', 'confirmed', 'in_progress']` → `['draft', 'planning', 'confirmed', 'in_progress', 'in_closeout']`
 
 ---
 
@@ -305,7 +310,7 @@ export default withPermission(EventFinancialDetails, 'financials', 'view');
 
 | Table | Status |
 |---|---|
-| `events` | ✅ Schema-ready (`event_type`, `promoter`, `title` confirmed) |
+| `events` | ✅ Full schema confirmed live (23 columns, direct query 2026-06-10T19:22 EDT) — see schema below |
 | `memberships` | ✅ Present |
 | `tours` | ✅ Present (`status` column added — 7 values: `draft/planning/confirmed/in_progress/in_closeout/completed/cancelled`, default `draft`) |
 | `event_tour_links` | ✅ Schema-ready — FK cascade on `event_id`, `tour_id`, `account_id`; UNIQUE `(event_id, tour_id)`; RLS `account_isolation` policy |
@@ -315,6 +320,40 @@ export default withPermission(EventFinancialDetails, 'financials', 'view');
 | `performance_ticket_links` | ✅ Present |
 | `artist_assignments` | ✅ Present — links Serenova auth users from company accounts to artist accounts; migration `artist_assignments_and_booking_agency_type` applied 2026-06-10 |
 | `band_groups` | ❌ **Not yet created — deferred to Phase 7** |
+
+### `events` Table — Full Confirmed Schema (23 columns, queried 2026-06-10T19:22 EDT)
+
+| # | Column | Data Type | Nullable | Default |
+|---|---|---|---|---|
+| 1 | `id` | `uuid` | NO | `gen_random_uuid()` |
+| 2 | `account_id` | `uuid` | NO | — |
+| 3 | `tour_id` | `uuid` | YES | — |
+| 4 | `contract_id` | `uuid` | YES | — |
+| 5 | `title` | `text` | NO | — |
+| 6 | `status` | `event_status` enum | YES | `'inquiry'` |
+| 7 | `event_date` | `date` | YES | — |
+| 8 | `event_time` | `time` | YES | — |
+| 9 | `end_date` | `date` | YES | — |
+| 10 | `is_multi_day` | `boolean` | YES | `false` |
+| 11 | `door_time` | `time` | YES | — |
+| 12 | `set_length_minutes` | `integer` | YES | — |
+| 13 | `num_shows` | `integer` | YES | `1` |
+| 14 | `venue_name` | `text` | YES | — |
+| 15 | `venue_city` | `text` | YES | — |
+| 16 | `venue_country` | `text` | YES | `'US'` |
+| 17 | `notes` | `text` | YES | — |
+| 18 | `metadata` | `jsonb` | YES | `'{}'` |
+| 19 | `created_by` | `uuid` | YES | — |
+| 20 | `created_at` | `timestamptz` | YES | `now()` |
+| 21 | `updated_at` | `timestamptz` | YES | `now()` |
+| 22 | `event_type` | `text` | YES | — |
+| 23 | `promoter` | `text` | YES | — |
+
+**Key schema notes:**
+- `events.tour_id` IS a real Supabase column (nullable uuid) — not Base44-only
+- `events.timezone` does NOT exist — add via migration at Phase 9 (or earlier if Phase 3 requires it)
+- `events.name` does NOT exist — canonical display field is `title`
+- Travel wizard pickers need `id`, `title`, `event_date`, `venue_city` — all present ✅
 
 ### Known Schema Gaps (Phase 9 work — no DDL until then)
 - `events.status` enum missing `Prospect/Tentative` — Base44 uses this; Supabase has `inquiry` as closest match. Decision deferred to Phase 9.
