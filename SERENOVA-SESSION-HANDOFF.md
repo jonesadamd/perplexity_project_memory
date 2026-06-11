@@ -1,7 +1,7 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-11T09:18 EDT
+> Last Updated: 2026-06-11T09:31 EDT
 
 ---
 
@@ -52,12 +52,14 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 
 **Phase 1 — Permission System & Auth Foundation — ✅ COMPLETE**
 **Phase 2 — Events & Tours — ✅ COMPLETE**
-**Phase 3 — Travel & Accommodations — ✅ EFFECTIVELY CLOSED OUT (2026-06-11T09:18 EDT, commit `9511e38`): Steps 1–3 ✅, Step 2 follow-up ✅ (gating + `require` standardized), entity-grant query safe-fixed. Only the grant-based event-narrowing remains deferred. NEXT: Phase 4 (Contracts) — but clear the pre-Phase-4 urgent broken imports first (corrections #3 below).**
+**Phase 3 — Travel & Accommodations — ✅ EFFECTIVELY CLOSED OUT (2026-06-11T09:18 EDT, commit `9511e38`): Steps 1–3 ✅, Step 2 follow-up ✅ (gating + `require` standardized), entity-grant query safe-fixed. Only the grant-based event-narrowing remains deferred.**
+**Pre-Phase-4 broken imports — ✅ FIXED (2026-06-11T09:31 EDT, commit `4fc2f05`; correction #3 below).**
+**Phase 4 (Contracts) — ⬅ NEXT, CLEAR TO START.** Step 1 = audit `Contracts.jsx` / `CreateContract.jsx` / `EditContract.jsx`.**
 
 > ⚠️ **READ FIRST — corrections from the 2026-06-11 full-project verification:**
 > 1. **`CreateTravel.jsx` does not exist** — it was a phantom in prior audits. The real wizard entry page is **`Travel.jsx`**. All references below to `CreateTravel` should be read as `Travel.jsx`.
 > 2. **`PagePermissionGuard.jsx` canonical-import fix applied** (commit `3da5b1c`) — it previously imported the legacy `utils/PermissionContext`, whose provider is never mounted; all 26 guard-wrapped pages depended on a non-existent context.
-> 3. **Known broken imports, NOT yet fixed (urgent, pre-Phase-4):** `Contracts.jsx` + `FinancialHub.jsx` import non-existent `{ usePermissions }` from canonical context; `EditEvent.jsx` has a wrong named import of the guard and imports a non-existent `permissions/PermissionGate` path; `EventFinancialDetails.jsx` mixes legacy/canonical. Full list: decisions log 2026-06-11T08:11 EDT.
+> 3. **Broken imports — ✅ FIXED 2026-06-11T09:31 EDT (commit `4fc2f05`).** `Contracts.jsx`, `FinancialHub.jsx`, `EditEvent.jsx`, `EventFinancialDetails.jsx` now use canonical `usePermissionContext` + default `PagePermissionGuard`/`PermissionGate`; `hasPermission(area,level)` mapped to `canView`/`canEdit`; non-canonical `financial_hub`/`finance` → `financials`. `Contracts.jsx` loads cleanly → Phase 4 clear to start. **Remaining (Phase 9):** `EditEvent.jsx` `guest_list` tab (no canonical area / no panel) left gated-closed; `EditEvent` still heavily Base44; legacy `utils/permissionChecks.jsx` still broken. See decisions log 2026-06-11T09:31 EDT.
 > 4. **SECURITY:** `.env.local` is COMMITTED to the repo with `SUPABASE_SECRET_KEY`, Resend, and R2 secrets. Rotation + untracking pending owner action — see decisions log. Do not print its contents.
 > 5. **`CLAUDE.md` now exists at repo root** — Claude Code sessions auto-load it; keep it in sync with this handoff.
 > 6. A vanilla `vite build` fails on pre-existing `PrintEventItinerary.jsx` absolute import (`/src/entities/Event`) — Base44-plugin-dependent; fix required for off-Base44 migration.
