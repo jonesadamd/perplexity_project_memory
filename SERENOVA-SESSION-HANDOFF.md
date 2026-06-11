@@ -1,7 +1,7 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-10T19:34 EDT
+> Last Updated: 2026-06-11T08:15 EDT
 
 ---
 
@@ -52,7 +52,15 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 
 **Phase 1 — Permission System & Auth Foundation — ✅ COMPLETE**
 **Phase 2 — Events & Tours — ✅ COMPLETE**
-**Phase 3 — Travel & Accommodations — 🔄 IN PROGRESS (Step 2 in progress — tour filter fix done; permission gating remaining)**
+**Phase 3 — Travel & Accommodations — 🔄 IN PROGRESS (Step 2 ✅ COMPLETE 2026-06-11T08:11 EDT — Step 3 next)**
+
+> ⚠️ **READ FIRST — corrections from the 2026-06-11 full-project verification:**
+> 1. **`CreateTravel.jsx` does not exist** — it was a phantom in prior audits. The real wizard entry page is **`Travel.jsx`**. All references below to `CreateTravel` should be read as `Travel.jsx`.
+> 2. **`PagePermissionGuard.jsx` canonical-import fix applied** (commit `3da5b1c`) — it previously imported the legacy `utils/PermissionContext`, whose provider is never mounted; all 26 guard-wrapped pages depended on a non-existent context.
+> 3. **Known broken imports, NOT yet fixed (urgent, pre-Phase-4):** `Contracts.jsx` + `FinancialHub.jsx` import non-existent `{ usePermissions }` from canonical context; `EditEvent.jsx` has a wrong named import of the guard and imports a non-existent `permissions/PermissionGate` path; `EventFinancialDetails.jsx` mixes legacy/canonical. Full list: decisions log 2026-06-11T08:11 EDT.
+> 4. **SECURITY:** `.env.local` is COMMITTED to the repo with `SUPABASE_SECRET_KEY`, Resend, and R2 secrets. Rotation + untracking pending owner action — see decisions log. Do not print its contents.
+> 5. **`CLAUDE.md` now exists at repo root** — Claude Code sessions auto-load it; keep it in sync with this handoff.
+> 6. A vanilla `vite build` fails on pre-existing `PrintEventItinerary.jsx` absolute import (`/src/entities/Event`) — Base44-plugin-dependent; fix required for off-Base44 migration.
 
 ### Phase 1 — All Steps Complete
 
@@ -85,8 +93,9 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 | Step | Description | Status |
 |---|---|---|
 | **1** | **Audit flight booking wizard (`CreateTravel → AddTravel → EditFlightBooking`)** | **✅ Complete** |
-| **2** | **Gate travel/accommodation writes (PagePermissionGuard + canEdit checks on CreateTravel, AddTravel, EditFlightBooking); tour status filter fix** | **🔄 In Progress** |
-| 3 | Co-travel visibility for band/crew (own itinerary only, no confirmation numbers) | ⬜ |
+| **2** | **Gate travel writes — DONE 2026-06-11T08:11 EDT (commits `3da5b1c`, `78b49f1`, `1d529b6`): guard canonical-import fix; `Travel.jsx` broken-import fix (no page guard — preserves own-itinerary fallback); `AddTravel` + `EditFlightBooking` wrapped `area="travel" require="view"` with `canEdit('travel')` gates on all write handlers** | **✅ Complete** |
+| 2 follow-up | `ImportTravel.jsx` + `EditTravel.jsx` ungated (scope decision pending); standardize `require="view"` vs `"edit"` for Add/Edit pages at Phase 3 close-out | ⬜ |
+| **3** | **Co-travel visibility for band/crew (own itinerary only, no confirmation numbers) — build on `Travel.jsx` own-itinerary fallback + `entity_access_grants`** | **⬅ NEXT** |
 
 #### Phase 3 Step 2 — Progress Detail
 
@@ -94,8 +103,10 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 |---|---|
 | Tour status filter fix — `AddTravel.jsx` `loadTours()` | ✅ Done (2026-06-10T19:22 EDT) |
 | Tour status filter — `EditFlightBooking.jsx` | ✅ Already correct — no change needed |
-| `PagePermissionGuard area="travel" require="view"` on `CreateTravel`, `AddTravel`, `EditFlightBooking` | ⬜ Remaining |
-| `canEdit('travel')` guard before create/update/delete calls in all three files | ⬜ Remaining |
+| `PagePermissionGuard.jsx` canonical-import fix (prerequisite for all gating) | ✅ Done (2026-06-11T08:11 EDT) |
+| `Travel.jsx` — broken legacy import fixed; `canView('travel')`; no page guard (own-itinerary fallback preserved for Step 3) | ✅ Done (2026-06-11T08:11 EDT) |
+| `PagePermissionGuard area="travel" require="view"` on `AddTravel`, `EditFlightBooking` | ✅ Done (2026-06-11T08:11 EDT) |
+| `canEdit('travel')` gates — `handleSaveFlight` (AddTravel); `handleSave`/`handleDelete`/`saveTravelerEdits`/`removeTravelerFromGroup`/`separateTraveler` (EditFlightBooking) | ✅ Done (2026-06-11T08:11 EDT) |
 
 ---
 
