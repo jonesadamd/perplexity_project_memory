@@ -1,7 +1,7 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-11T15:52 EDT
+> Last Updated: 2026-06-11T16:10 EDT
 
 ---
 
@@ -58,6 +58,9 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 **Phase 5 (Financial Hub) — ✅ COMPLETE 2026-06-11 (Steps 1–3, permission gating):** audit (all Base44; gating via `canEdit` prop) → Step 2 gated 3 ungated-write Settings components (`CommissionSettings`/`TeamRateSettings`/`FinancialDefaults`, commit `db12474`) → Step 3 settlement-area gating in `EventFinancialDetails` (`canSettle = canEdit('settlement')`; `deal_memo` has no UI surface, commit `8c3590e`). **`docs/FINANCIALHUB-WORKING-DOC.md` = living source of truth** for the FinancialHub **v1 product build** (settlement engine, versioned rate library, invoicing, document attachments, status workflow, **per-artist/deal commission model**: gross/net/net-less-authorized + role comp + rate structures) — a separate large track coupled to Phase 0/F + Phase 9.
 **Phase 6 (Press/Riders/Setlists) — ✅ GATING COMPLETE 2026-06-11 (Steps 1–2, commit `22c7493`):** all Base44; `Riders` already gated; fixed `press_kit`→`press` bug (PressKit/PressKits); gated `SetListDialog` setlist writes; `SetLists` orphan wrapped on `setlist`. **NEW canonical area `repertoire`** (18th) added — `PERM_AREAS` + `role_templates.perm_repertoire` migration (seeded from `perm_setlist`); `Repertoire.jsx` (song library, already used `area="repertoire"`) now resolves. **Repertoire feature track** (owner vision): unify Songs + setlists + **usage tracking over time** — Supabase-native build, Phase 0/F-coupled. SystemHub Base44 template editor still needs a `repertoire` module (Phase 5-M step 12).
 **Phase 7 (BandGroups & Team) — ✅ GATING COMPLETE 2026-06-11 (Steps 1–2, commit `cb4b925`):** **BandGroup is live on Base44** (not stubbed — CLAUDE.md corrected). Fixed `Team.jsx` `require="manage"` no-op bug → `edit`; **surfaced `BandGroupsManager` on the Team page** for artist accounts (artist/admin/management create their own groups), writes gated `canEdit('team')`; `InviteUserForm` gated `canEdit('members')`. **Deferred:** Supabase `band_groups` table + BandGroup migration → Phase 0/F + 9; `team_assignments` → Phase 5-M. NOTE non-canonical levels (`manage` fixed, `members`'s `invite`) to reconcile later.
+**Phase 8 (Archive & Storage) — ✅ GATING COMPLETE 2026-06-11 (Steps 1–2, commit `42a4e4a`):** all Base44 (`Event`/`StorageFile`); `Archive` gated correctly (`archive`). Fixed non-canonical `area="storage"` bug by adding a **dedicated `storage` area** (19th — owner-chosen; `PERM_AREAS` + `role_templates.perm_storage` migration seeded from `perm_archive`); `Storage`/`StorageHub` already used `area="storage"` → now resolve; `StorageFileTable` delete gated. **Storage/Files feature track** (owner vision): expand StorageHub (uploads/search/**file↔event linkability incl. old events**/recording sessions); **event+version-scoped band-member file access** (setlists/scores for events they were on, version they were privy to) — ties to entity-grant/event-narrowing (Phase 3 Step 3 + 0/F) + Repertoire. `StorageQuotaEditor` → system-gate refinement.
+
+> **GATING PHASES DONE:** Phases 2–8 permission gating all complete. Canonical areas now **19** (added `repertoire`, `storage`). What remains is the big foundation + feature builds: **Phase 0/F** (Supabase auth+RLS — unblocks everything), **Phase 9** (Supabase migration), **Phase 5-M** (Mgmt templates), **Phase S** (security), and the product tracks (ContractHub, FinancialHub v1, Repertoire, Storage/Files).
 
 ---
 
