@@ -1,7 +1,7 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-11T09:04 EDT
+> Last Updated: 2026-06-11T09:18 EDT
 
 ---
 
@@ -52,7 +52,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 
 **Phase 1 — Permission System & Auth Foundation — ✅ COMPLETE**
 **Phase 2 — Events & Tours — ✅ COMPLETE**
-**Phase 3 — Travel & Accommodations — 🔄 IN PROGRESS (Step 3 ✅ COMPLETE 2026-06-11T08:54 EDT, commit `e095f33` — Step 3 follow-up [entity-grant narrowing] deferred next)**
+**Phase 3 — Travel & Accommodations — ✅ EFFECTIVELY CLOSED OUT (2026-06-11T09:18 EDT, commit `9511e38`): Steps 1–3 ✅, Step 2 follow-up ✅ (gating + `require` standardized), entity-grant query safe-fixed. Only the grant-based event-narrowing remains deferred. NEXT: Phase 4 (Contracts) — but clear the pre-Phase-4 urgent broken imports first (corrections #3 below).**
 
 > ⚠️ **READ FIRST — corrections from the 2026-06-11 full-project verification:**
 > 1. **`CreateTravel.jsx` does not exist** — it was a phantom in prior audits. The real wizard entry page is **`Travel.jsx`**. All references below to `CreateTravel` should be read as `Travel.jsx`.
@@ -61,7 +61,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 > 4. **SECURITY:** `.env.local` is COMMITTED to the repo with `SUPABASE_SECRET_KEY`, Resend, and R2 secrets. Rotation + untracking pending owner action — see decisions log. Do not print its contents.
 > 5. **`CLAUDE.md` now exists at repo root** — Claude Code sessions auto-load it; keep it in sync with this handoff.
 > 6. A vanilla `vite build` fails on pre-existing `PrintEventItinerary.jsx` absolute import (`/src/entities/Event`) — Base44-plugin-dependent; fix required for off-Base44 migration.
-> 7. **Entity-grant system bug (found Phase 3 Step 3, NOT fixed):** `usePermissions.js:219-225` queries `entity_access_grants` with `.select('area, grant, expires_at')`, but the live table's columns are `user_id, account_id, entity_type, entity_id, access_level, granted_by, expires_at` — `area`/`grant` do not exist, so canonical entity-scoped grant resolution has never worked. Table is empty with no population UI. The legacy `event_access_grants` table and `memberships.is_event_scoped` column (old narrowing mechanism) no longer exist. Must fix the column names before any entity-scoped narrowing is built on this. See decisions log 2026-06-11T08:54 EDT.
+> 7. **Entity-grant system — query SAFE-FIXED 2026-06-11T09:18 EDT (commit `9511e38`), still dormant.** `usePermissions.js` now queries the real columns (`access_level, entity_type`, account-scoped) and resolves grants via `ENTITY_TYPE_TO_AREA` (event→events, travel→travel, accommodation→accommodations, contract→contracts), upgrade-only. The `entity_access_grants` table is `user_id, account_id, entity_type, entity_id, access_level, granted_by, expires_at` — one access_level per entity, **no per-area column**. Table is still EMPTY with no population UI, so the path is dormant; grant-based event-narrowing in `Travel.jsx` stays deferred (`accessibleEventIds = null`). The legacy `event_access_grants` table / `memberships.is_event_scoped` column do not exist live. **STILL BROKEN (untouched, Phase 9 sweep):** legacy `utils/permissionChecks.jsx` `resolveUserLevel()` reads non-existent `entity_access_grants.area/level`, `memberships.is_owner/user_email/permission_template_id`, and a `role_template_areas` table. See decisions log 2026-06-11T09:18 EDT.
 
 ### Phase 1 — All Steps Complete
 
@@ -97,7 +97,9 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 | **2** | **Gate travel writes — DONE 2026-06-11T08:11 EDT (commits `3da5b1c`, `78b49f1`, `1d529b6`): guard canonical-import fix; `Travel.jsx` broken-import fix (no page guard — preserves own-itinerary fallback); `AddTravel` + `EditFlightBooking` wrapped `area="travel" require="view"` with `canEdit('travel')` gates on all write handlers** | **✅ Complete** |
 | 2 follow-up | `ImportTravel.jsx` + `EditTravel.jsx` ungated (scope decision pending); standardize `require="view"` vs `"edit"` for Add/Edit pages at Phase 3 close-out | ⬜ |
 | **3** | **Co-travel visibility — DONE 2026-06-11T08:54 EDT (commit `e095f33`): own-itinerary filter now applied to FLIGHTS in `Travel.jsx` (parallel to the pre-existing segment filter — flights previously had none, so band/crew saw every account flight); co-traveler names visible; confirmation numbers shown for the user's OWN booking only (flights + both segment legs), via a single `sanitizeConfirmation` helper** | **✅ Complete** |
-| 3 follow-up | Entity-scoped event narrowing **deferred** — `accessibleEventIds` stays `null`. Blocked on the `usePermissions.js` `entity_access_grants` column-name bug (see correction #7 above) + empty table / no population UI. Own sub-step once the hook is fixed. | ⬜ |
+| 2 follow-up | **DONE 2026-06-11T09:18 EDT (commit `9511e38`):** `ImportTravel`/`EditTravel` gated; `require` standardized **Direction A** — read pages `view`, write pages `edit`. `ImportTravel`/`EditTravel`/`AddTravel`/`EditFlightBooking` all `area="travel" require="edit"` (AddTravel + EditFlightBooking moved `view`→`edit`). Accommodation Add/Edit already `edit`; lists stay `view`. | ✅ Complete |
+| Infra fix | **DONE 2026-06-11T09:18 EDT:** `usePermissions.js` entity-grant query safe-fixed (schema-correct, dormant — correction #7). | ✅ Complete |
+| 3 follow-up | Entity-scoped event **narrowing** still deferred — `accessibleEventIds` stays `null`. Now blocked only on an undesigned grant model + empty table / no population UI (the column-name bug is fixed). Own sub-step once grants can actually be written. | ⬜ |
 
 #### Phase 3 Step 2 — Progress Detail
 
