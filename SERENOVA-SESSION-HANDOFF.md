@@ -1,7 +1,19 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-11T16:10 EDT
+> Last Updated: 2026-06-11T17:05 EDT
+
+---
+
+## 🔴 LATEST — Permission lockout hotfix + canonical-area cleanup (2026-06-11T17:05)
+
+Artist **owner** `ellephish@gmail.com` (Lisa Fischer account) was **locked out** (only Dashboard/Mobile Hub; `400 (memberships)` → `[usePermissions] resolution error`). Root-caused live + fixed. Commits `b5cdd52` (Tier 0), `3ec21c0` (Tier 1), `a3ef365` (Tier 2), `4960420` (docs). Build green; **no schema/data change**.
+
+- **Tier 0 — the unlock (`src/hooks/usePermissions.js`):** Supabase `memberships.user_id`/`account_id` are **`uuid`** but auth is Base44 (non-uuid ids) → query `400`ed and `throw memErr` aborted resolution to the catch **without setting `permissions`** → `can()`=`none` everywhere; Base44 fallback skipped. Fix: `isUuid()` guard skips the Supabase memberships + entity-grant queries for Base44 ids; **any** query error now falls through to the Base44 fallback (never throws); `role_templates` error degrades to no-access. **Owner bypass broadened** from `account_type==='system'` to **any `role_level==='super_admin'`** → account owners get `full` regardless of template (the live `(artist,super_admin)` template had repertoire/setlist/members=`none`).
+- **Tier 1 — dead gates:** `admin`/`schedule` aren't canonical areas (+ `manage` isn't a level) → deny-all. AccountSettings/ManagementAdmin→`settings`, AccountAdmin→`members`, DatabaseBackup→`settings`/`full`, Schedule→`events`; `RoleTemplate.js` import → `@/api/supabaseClient`. No `role_templates` migration.
+- **Tier 2 — nav keys:** canonicalized nav `permissionKey`s (`press_kit`→`press`, `venues`→`events`, `reports`→`financials`, Storage→`storage`, `account_admin`→`members`, `account_settings`→`settings`, Mgmt Admin→`settings`, Artist Roster→`team`). Same nav groups are ALSO filtered by `buildArtistCan` (legacy Base44 template keys) in the mgmt-viewing-artist context → added **`NAV_AREA_ALIASES`** so it resolves both legacy + canonical (no regression). `Dashboard.jsx` → canonical `usePermissionContext`/`PermissionGate`.
+- **Deferred (logged):** `companyAccess.jsx` `getDefaultPermissionsByRole` keeps legacy `financial_hub`/`press_kit` keys — it **mirrors the Base44 template `.permissions` shape** consumed as `[entity][action]`; canonicalize with the Phase 9 template removal. **Artist Roster→`team`** is a best-fit guess (owner to confirm). Artist **non-owner** template tuning (e.g. artist `admin` repertoire/setlist=`none`) deferred. Real fix for the uuid mismatch = **Phase 0/F**.
+- **⚠️ Verify on next Base44 open:** re-test as `ellephish` — full left-nav + pages render, no `400 (memberships)`; and as a band_member — repertoire/setlist editable, financials hidden (bypass didn't over-grant).
 
 ---
 
