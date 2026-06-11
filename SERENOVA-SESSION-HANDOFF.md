@@ -1,11 +1,33 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-11T17:05 EDT
+> Last Updated: 2026-06-11T19:10 EDT
 
 ---
 
-## 🔴 LATEST — Permission lockout hotfix + canonical-area cleanup (2026-06-11T17:05)
+## 🟢 LATEST — Feature-build session (2026-06-11 PM): MobileHub + guests + EPK/Staged scoping
+
+Owner direction locked (memory `serenova-build-strategy`): **keep building on Base44, clean up as we go, keep the permission bridge; defer Phase 0/F.** New rule: **every new module = a new canonical permission area** (a gate on a non-existent area = deny-all, the cause of the morning lockout). Base44↔repo: pull before editing, push = deploy ("open Base44 to deploy"), never edit the same file in the builder + locally at once.
+
+**Shipped this session (all pushed to `main`, build green each time):**
+- **MobileHub permission gating** (`5503cdf`) — was routed OUTSIDE Layout with NO gating. Split into outer (data + a local `AppContext` + `PermissionProvider` keyed to the active account) + inner view; tabs/home-widgets hide by area (events/travel/accommodations). Mgmt-user-on-linked-artist (no direct membership) → all tabs (no regression).
+- **MobileHub read enrichment** (`2bbff37`, `4e34b9b`) — travel folded into Today's Schedule; flight booking ref on cards; hotel check-in/out **times** added; venue **parking** + **Venue Contacts** moved to Venue tab, **Contacts = band/crew only**. *(Discovery: the flight/hotel drawers were already very rich.)*
+- **Setlist editing on mobile** (`f95cce4`) — reuses the real `SetListDialog`, gated `setlist` edit.
+- **NEW canonical area `guest_list` (20th)** (`9b50f81`) — migration `role_templates_add_perm_guest_list` (owner/admin=full, manager/tour_manager=edit, **band_member=`own`**, else none). CLAUDE.md 19→20 areas.
+- **Guest-list bug + model fix** (`5dd5573`) — root cause: guest lists keyed by `performance_date` ALONE → same-day shows shared one list. Now keyed by **date+time** (legacy date-only matched + upgraded) + comp-limit model (over `total_comps` → auto **"Requested"** needing admin/artist confirm; `own` = members request only). **Wired** the (previously orphaned) `GuestListTab` into **EditEvent's guest_list tab** (`7750078`) with a guest-scoped save. ⚠️ **Discovery: `EditEvent.jsx` is a migration STUB** (name/venue/promoter only); rich event editing may warrant its own rebuild track. Owner wants guest editing later as an **EventDetails button+popup** (deferred).
+- **Mobile Band & Crew contacts fixed** (`70a9487`, `5da613d`) — names showed as email-prefix + no phone because `roster_members` store only emails. Now **enriches from User + Membership** (via `getUsersByEmailsForAccount` + `Membership.filter`, same join as PersonnelTab) → real name via `getDisplayName` (KnownAs > First Last) + **phone + email**.
+
+**Scoped (docs only — not built):**
+- **EPK** (`docs/EPK-WORKING-DOC.md`, `773adec`) — public shareable webpage; tokenized sharing EXTENDS existing band-view `ShareableLink` tokens (owner correction — not new auth); artist-set access modes (open/one-time/email-gated 7-day); scoped/curated sends; multiple/grouped EPKs; quotes (groups + 3 defaults); open/geo/email tracking.
+- **Staged Access** (`docs/STAGED-ACCESS-WORKING-DOC.md`, `e217a6b`) — passwordless **magic-link** → staged session → **MobileHub-only**, view/own only, never financials/admin. Email=identity (swaps MobileHub's identity source). **Crew=staged-only** (same-email port later); **band members=staged + free-account upsell**. **Unblocks the deferred band-member mobile writes** (guest/expense requests). Shares an **email-token primitive with EPK**. Decoupled from Phase 0/F. Phases A–E in the doc.
+
+**Queued next (in `docs/MOBILEHUB-WORKING-DOC.md` + the scoping docs):** mobile **band-member guest-request flow** + **expense submission** (Group 2c/2d — depend on Staged Access for non-account identity); guest editing → **EventDetails popup**; view-only/token-page contact scoping (name-only); **Staged Access Phase A** (email-token primitive); EPK build. Also still open: FinancialHub **closeout** (status-field unify + wire the Lock button + seed `settlement`) — audited, ~80% built.
+
+**Working docs are the source of truth:** `MOBILEHUB-WORKING-DOC.md`, `EPK-WORKING-DOC.md`, `STAGED-ACCESS-WORKING-DOC.md`, `FINANCIALHUB-WORKING-DOC.md`. Canonical areas now **20**.
+
+---
+
+## 🔴 Permission lockout hotfix + canonical-area cleanup (2026-06-11T17:05)
 
 Artist **owner** `ellephish@gmail.com` (Lisa Fischer account) was **locked out** (only Dashboard/Mobile Hub; `400 (memberships)` → `[usePermissions] resolution error`). Root-caused live + fixed. Commits `b5cdd52` (Tier 0), `3ec21c0` (Tier 1), `a3ef365` (Tier 2), `4960420` (docs). Build green; **no schema/data change**.
 
