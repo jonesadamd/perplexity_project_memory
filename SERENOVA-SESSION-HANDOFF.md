@@ -1,7 +1,7 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-11T14:34 EDT
+> Last Updated: 2026-06-11T15:27 EDT
 
 ---
 
@@ -55,6 +55,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 **Phase 3 — Travel & Accommodations — ✅ EFFECTIVELY CLOSED OUT (2026-06-11T09:18 EDT, commit `9511e38`): Steps 1–3 ✅, Step 2 follow-up ✅ (gating + `require` standardized), entity-grant query safe-fixed. Only the grant-based event-narrowing remains deferred.**
 **Pre-Phase-4 broken imports — ✅ FIXED (2026-06-11T09:31 EDT, commit `4fc2f05`; correction #3 below).**
 **Phase 4 (Contract Management) — 🔄 IN PROGRESS (2026-06-11T11:07 EDT, commits `62c88a8`→`5aedb1a`).** Step 1 audit found `CreateContract`/`EditContract` were **phantom** (never built) + a 3-schema divergence + that the **Supabase data layer isn't writable** (no Supabase auth session; `auth.users`/`public.users` empty; `contracts`/`events`/`tours`/`entity_access_grants` RLS-on/zero-policies = deny-all; `usePermissions.js` imports `useCurrentUser` from a non-existent `@/api/entities`). **Decision:** build on **Base44 behind a seam** (`src/api/contracts.js`), lean core + sync scaffolding. **Built:** extended `Contract.jsonc`; seam; `CreateContract`/`EditContract`/`ImportContract` (shell) pages; fixed `Contracts.jsx` list; registered routes. **Step 7 ✅ DONE (commit `04d6383`)** — Base44 contract↔tour linking (Linked Event auto-derives tour from `events.tour_id`; Linked Tour picker; list shows tour label). Supabase `event_tour_links` → Phase 9. **Phase 4 core (Steps 1–7) COMPLETE; ContractHub/AgencyHub depth deferred.**
+**Phase 5 (Financial Hub) — ✅ COMPLETE 2026-06-11 (Steps 1–3, permission gating):** audit (all Base44; gating via `canEdit` prop) → Step 2 gated 3 ungated-write Settings components (`CommissionSettings`/`TeamRateSettings`/`FinancialDefaults`, commit `db12474`) → Step 3 settlement-area gating in `EventFinancialDetails` (`canSettle = canEdit('settlement')`; `deal_memo` has no UI surface, commit `8c3590e`). **`docs/FINANCIALHUB-WORKING-DOC.md` = living source of truth** for the FinancialHub **v1 product build** (settlement engine, versioned rate library, invoicing, document attachments, status workflow, **per-artist/deal commission model**: gross/net/net-less-authorized + role comp + rate structures) — a separate large track coupled to Phase 0/F + Phase 9.
 
 ---
 
