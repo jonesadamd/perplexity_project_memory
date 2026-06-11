@@ -1,7 +1,7 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-11T11:07 EDT
+> Last Updated: 2026-06-11T14:34 EDT
 
 ---
 
@@ -54,7 +54,23 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 **Phase 2 — Events & Tours — ✅ COMPLETE**
 **Phase 3 — Travel & Accommodations — ✅ EFFECTIVELY CLOSED OUT (2026-06-11T09:18 EDT, commit `9511e38`): Steps 1–3 ✅, Step 2 follow-up ✅ (gating + `require` standardized), entity-grant query safe-fixed. Only the grant-based event-narrowing remains deferred.**
 **Pre-Phase-4 broken imports — ✅ FIXED (2026-06-11T09:31 EDT, commit `4fc2f05`; correction #3 below).**
-**Phase 4 (Contract Management) — 🔄 IN PROGRESS (2026-06-11T11:07 EDT, commits `62c88a8`→`5aedb1a`).** Step 1 audit found `CreateContract`/`EditContract` were **phantom** (never built) + a 3-schema divergence + that the **Supabase data layer isn't writable** (no Supabase auth session; `auth.users`/`public.users` empty; `contracts`/`events`/`tours`/`entity_access_grants` RLS-on/zero-policies = deny-all; `usePermissions.js` imports `useCurrentUser` from a non-existent `@/api/entities`). **Decision:** build on **Base44 behind a seam** (`src/api/contracts.js`), lean core + sync scaffolding. **Built:** extended `Contract.jsonc`; seam; `CreateContract`/`EditContract`/`ImportContract` (shell) pages; fixed `Contracts.jsx` list; registered routes. **NEXT: Step 7** — link contracts to `event_tour_links`. Deeper ContractHub/AgencyHub sync deferred.
+**Phase 4 (Contract Management) — 🔄 IN PROGRESS (2026-06-11T11:07 EDT, commits `62c88a8`→`5aedb1a`).** Step 1 audit found `CreateContract`/`EditContract` were **phantom** (never built) + a 3-schema divergence + that the **Supabase data layer isn't writable** (no Supabase auth session; `auth.users`/`public.users` empty; `contracts`/`events`/`tours`/`entity_access_grants` RLS-on/zero-policies = deny-all; `usePermissions.js` imports `useCurrentUser` from a non-existent `@/api/entities`). **Decision:** build on **Base44 behind a seam** (`src/api/contracts.js`), lean core + sync scaffolding. **Built:** extended `Contract.jsonc`; seam; `CreateContract`/`EditContract`/`ImportContract` (shell) pages; fixed `Contracts.jsx` list; registered routes. **Step 7 IN PROGRESS** — see PM-session note below (event_tour_links is non-functional/unused; doing Base44 contract↔tour linking instead, Supabase event_tour_links → Phase 9).
+
+---
+
+## ⚡ 2026-06-11 PM SESSION — major events after 11:07 (read this — lots changed)
+
+> Full detail in `docs/SERENOVA-DECISIONS-LOG.md` (v2.28) and `docs/SERENOVA-BUILD-PHASES.md` (v2.17). Repo HEAD `638ec0c`.
+
+1. **App was crash-looping → now renders.** Fixed a chain of import/runtime crashes (commits `00649c4`, `f1da600`, `5bc5720`): `PrintEventItinerary`→`base44.entities`; `Membership.js` shadow → `membershipConstants.js` + a `Membership.js` re-export; `usePermissions`/`usePermissionContext` **compat shims** for 13 legacy files; **`useCurrentUser`** local hook (was importing a phantom `@/api/entities` → ProxyObject crash); membership-query **PGRST201** ambiguous-embed fix.
+2. **CI gate LIVE + green** (`.github/workflows/ci.yml`, commit `49e7e63`): `npm ci` + `BASE44_LEGACY_SDK_IMPORTS=true npx vite build` on push/PR. The legacy flag is required because ~60 files still use `@/entities/*` (Phase 9 migration). Standalone `vite build` now passes.
+3. **Permission system — Base44-sourced fallback BRIDGE** (commit `f731926`): Supabase `memberships`/`users`/`accounts` are **EMPTY** (only `role_templates`=28). So `usePermissions` now, when no Supabase membership, derives `(account_type, role_level, custom_permissions)` from the **Base44** membership (AppContext) + a `BASE44_ROLE_TO_LEVEL` map, and resolves via Supabase `role_templates`. **Migration applied:** `role_templates_public_read` RLS policy (was deny-all; reference data, read-only). Tour manager etc. now get real per-role access. BRIDGE — remove at Phase 0/F.
+4. **`.env.local` security** — owner added `VITE_SUPABASE_*` to Base44 platform; rotation + untracking **deferred to Phase S (Security Hardening)** (secrets newly created). Not untracked (would break the build).
+5. **Artist-Management permissions spec adopted** — owner doc renamed `docs/SERENOVA-ARTIST-MGMT-ACCOUNT-USER-PERMISSIONS.md` = **source of truth** (7 templates, 9 roles, company modules + artist-access elements). Gap analysis → **Phase 5-M steps 3, 8–12** (template content, company-seat→artist resolver, event-scoping by assignment, trailing read-only bug, two-template-system reconciliation, SystemHub admin access). NOT built — scheduled.
+6. **Shim & Bridge Cleanup Register** (build phases) tracks all 10 temporary bridges from today with removal conditions (Phase 0/F / Phase 9).
+7. **NEW phases in roadmap:** **Phase 0/F** (Supabase Auth session + RLS foundation — pre-Phase-9 prerequisite) and **Phase S** (Security Hardening).
+
+> **Permission reality (important):** the app runs on Base44 for auth + data; Supabase has only `role_templates` populated + RLS policies mostly deny-all. The canonical Supabase permission system works ONLY via the Base44 bridge until Phase 0/F migrates users/accounts/memberships into Supabase.
 > ⚠️ **NEW pre-Phase-9 prerequisite — "Supabase Auth session + RLS foundation"** (build phases "Phase 0/F"): bridge Base44 auth → a Supabase session (`auth.uid()` resolves), author per-table RLS policies, fix the `@/api/entities` import, and migrate the ~11 users (all in Base44; Supabase users tables empty → export, create `auth.users`+`public.users`, link `auth_user_id`, password-reset/Google on first login). Phase 9 silently assumed this. Contract pages all go through `src/api/contracts.js` — the one file that swaps to Supabase when this lands.
 
 > ⚠️ **READ FIRST — corrections from the 2026-06-11 full-project verification:**
