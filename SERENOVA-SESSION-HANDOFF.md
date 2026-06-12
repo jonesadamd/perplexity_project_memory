@@ -1,11 +1,25 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-12T11:30 EDT
+> Last Updated: 2026-06-12T16:30 EDT
 
 ---
 
-## 🟢 LATEST — 2026-06-12: MobileHub polish + two live auth/perm fixes
+## 🟢 LATEST — 2026-06-12 PM: MobileHub features + brand + auth/perm fixes
+
+**Two live auth/perm fixes (decisions log 2026-06-12T11:30):** (1) **auth gate** (`3603e20`, `App.jsx`) — logged-out users now `<Navigate to="/login">` (was missing → protected routes/AccountSelection hung); logout handlers → `/login`. (2) **account-owner full access** (`3698c0e`, `usePermissions.js`) — artist owner resolved to ALL-none (role `artist` unmapped); added an **owner bypass** (email === account `owner_user_email`/`artist_user_email` → full) + `artist`→`super_admin`. Caveat: if an owner still gets none, the account record's owner/artist email isn't set (Base44 data fix).
+
+**MobileHub feature pass (all pushed):**
+- **Add to Home Screen / PWA** (`c569ac5`): `public/manifest.json` + brand icons, `useInstallPrompt` hook, menu item (Android one-tap / iOS instructions / hidden once installed). **LIVE-ONLY** on `app.serenovahub.com` (not the Base44 iframe) — confirmed working by owner.
+- **Hotel popup inside event detail** (`c569ac5`); **mobile setlist editor** (`5fe83cf`, `MobileSetListEditor` — inline, line-type icons, ↑/↓ reorder, repertoire picker; replaces web SetListDialog on mobile).
+- **Fixes** (`72315f2`): stray "0" in hotel rooming was `{room.rate && …}` rendering falsy 0 → guarded `>0`; flight passenger confirmation moved to a right-aligned badge.
+- **Day-sheet home** (`f1264bd`): "Tonight's hotel" card at the bottom (under event+schedule, per owner's hotel-placement note). **Day-sheet redesign is the NEXT thing to continue** (owner paused 2026-06-12 PM). Future: "Mine vs All", Now/Next hero, pull-to-refresh.
+
+**Brand (`59ec504` icons / `e60a28e` re-skin):** real Serenova icon set app-wide (favicons, PWA, apple-touch, Layout header mark). MobileHub "accent + chrome" re-skin: header→**teal `#284854`**, bg→**cream `#faf8f4`**, borders→**sage `#b8b8aa`**, avatar→**tan**, nav-active→teal; functional colors kept. Palette + tan-on-light rule in memory `serenova-brand-palette`. **⚠️ OPEN:** owner unsure on the teal header — offered **charcoal `#232c27`** (darker, on-brand) as a one-line swap to try next. Body text still neutral slate (could → charcoal). Palette is **MobileHub-only** (not the web app yet).
+
+---
+
+## 🟢 2026-06-12 AM: MobileHub polish + two live auth/perm fixes
 
 **MobileHub travel-UX + visuals polish** (commits `fb0c7d0`/`6610273`/`b41594f`): bolder card borders + darker page bg; event-view Flights/Ground cards now slim + clickable → `MobileTravelDetailDrawer` (with **Recommended Airport Arrival** 2h/3h); home schedule + cards show **traveller** (First L) + **booking ref**, scoped to travel editors (`canEdit('travel')`) + the individual traveller (own booking). See `docs/MOBILEHUB-WORKING-DOC.md` "Polish pass".
 
