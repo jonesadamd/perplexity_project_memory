@@ -1,11 +1,22 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-11T19:10 EDT
+> Last Updated: 2026-06-12T11:30 EDT
 
 ---
 
-## 🟢 LATEST — Feature-build session (2026-06-11 PM): MobileHub + guests + EPK/Staged scoping
+## 🟢 LATEST — 2026-06-12: MobileHub polish + two live auth/perm fixes
+
+**MobileHub travel-UX + visuals polish** (commits `fb0c7d0`/`6610273`/`b41594f`): bolder card borders + darker page bg; event-view Flights/Ground cards now slim + clickable → `MobileTravelDetailDrawer` (with **Recommended Airport Arrival** 2h/3h); home schedule + cards show **traveller** (First L) + **booking ref**, scoped to travel editors (`canEdit('travel')`) + the individual traveller (own booking). See `docs/MOBILEHUB-WORKING-DOC.md` "Polish pass".
+
+**Two live auth/permission fixes (Lisa Fischer debugging) — decisions log 2026-06-12T11:30:**
+- **Auth gate** (`3603e20`, `src/App.jsx` + logout handlers): logged-out users now redirect to `/login`. Was missing — `AuthenticatedApp` only redirected on an explicit `authError`; a no-token session (`isAuthenticated=false`, no error) rendered protected routes / hung on AccountSelection "loading", and logout didn't reach login. Logout handlers → `/login`.
+- **Account-owner full access** (`3698c0e`, `usePermissions.js`): artist owner resolved to ALL-none because her membership role `artist` wasn't in `BASE44_ROLE_TO_LEVEL` (→ no template → none). Added an **account-owner bypass** (email === account `owner_user_email`, or `artist_user_email` for artist accounts → full, even with no membership) + mapped role **`artist`→`super_admin`**. **Caveat:** if an owner still gets none, the account's `owner_user_email`/`artist_user_email` isn't their email AND role≠`artist` (Base44 data fix).
+- Google-vs-email provider is **undeterminable from our side** (Base44-internal; `User` entity has no provider field; Supabase auth empty) → Base44 admin Users panel.
+
+---
+
+## 🟢 Feature-build session (2026-06-11 PM): MobileHub + guests + EPK/Staged scoping
 
 Owner direction locked (memory `serenova-build-strategy`): **keep building on Base44, clean up as we go, keep the permission bridge; defer Phase 0/F.** New rule: **every new module = a new canonical permission area** (a gate on a non-existent area = deny-all, the cause of the morning lockout). Base44↔repo: pull before editing, push = deploy ("open Base44 to deploy"), never edit the same file in the builder + locally at once.
 
