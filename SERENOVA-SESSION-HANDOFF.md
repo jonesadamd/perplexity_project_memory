@@ -1,11 +1,114 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-12T16:30 EDT
+> Last Updated: 2026-06-17T03:30 EDT
 
 ---
 
-## 🟢 LATEST — 2026-06-12 PM: MobileHub features + brand + auth/perm fixes
+## 🟢 LATEST — 2026-06-16/17: Event wizard, Team/Settings rebuild, role model + Phase 5-M
+
+> Long session. All pushed to `main`, build green each time (`BASE44_LEGACY_SDK_IMPORTS=true npx vite build`).
+> Latest commit `7e4e948`. Full detail in `docs/SERENOVA-DECISIONS-LOG.md` (v2.67) +
+> `docs/SERENOVA-BUILD-PHASES.md` (v2.39) + `docs/SERENOVA-ARTIST-MGMT-ACCOUNT-USER-PERMISSIONS.md`.
+
+**⚠️ CRITICAL GOTCHA (cost real time):** Base44 **"Synced" in the feed ≠ deployed.** A push
+only syncs git; the served bundle rebuilds **only when the owner fully reopens the Base44
+project**. Symptoms of stale build: incognito shows no change, inspected DOM matches old code.
+After any push, tell the owner to **reopen the project**, then hard-reload. (Memory `base44-repo-sync` updated.)
+
+### Events — Create/Import "wizard everywhere" (Phase A + B)
+- **EditEvent was a gutted stub** (silently reduced 427→237 lines on 2026-06-05 under a
+  permission commit; the 7 tab components survived orphaned). **Restored** the tabbed editor
+  (`EditEvent.jsx`): Event/Financial/Personnel/Schedule/Guest List/Advance/Action Items.
+- **`src/components/events/EventWizard.jsx`** (NEW) — 4-step **Deal Info → Performances →
+  Provisions → Contacts** for both manual create + PDF import. `CreateEvent.jsx` hosts it;
+  `ImportEvent.jsx` passes the uploaded contract. Billing-derived event name (strips share %),
+  VenueHub venue picker, **Management & Booking** group (Artist Mgmt + Tour Manager + Agency +
+  typeable Agent + Band/Lineup picker → roster), **Buyouts** (category/amount/note),
+  **Exclusivity** (before/after radius, mi/km toggle), Money & Terms, contract saved to
+  `contract_files` + status logic (attach → confirmed; one party → Executed, both → Complete).
+  Performances: Date / Set Time / **Duration (min)** / **Doors (optional, blank)**.
+- **`extractEventFromPDF`** schema expanded (agency/agent/is_agent_deal, billing, multi-perf +
+  duration, provisions, event_contacts, deal_notes, exclusivity). Extraction quality is
+  AI-dependent per contract.
+- **Event.jsonc additive fields:** `booking_agent_name`, `is_agent_deal`, `exclusivity{}`,
+  `day_of_show_contact_ids[]`, `roster_members[].is_lead`, `performances[].doors_time`.
+
+### Venue contacts unified + bugs fixed
+- **Single source of truth = `Venue.contacts[]`** (each now has a stable **`id`**). Events
+  **link by id** (`Event.day_of_show_contact_ids`, **live reference**). `DayOfContactsCard`
+  rewritten to link model; `VenueDashboard` reads embedded contacts; wizard contacts step
+  links/creates venue contacts. New `src/components/venues/venueContactUtils.js`.
+- **"137 contacts (auto-synced from AMC)" bug fixed** — `auto_populated` wasn't a persisted
+  field, so the AMC team got re-appended every load; now dedupe by email + field added.
+
+### Team + Settings rebuilt; EditUserDialog fixed
+- **Team.jsx restored + v2:** tabs **Admin / Band / Crew / Groups**; click a member →
+  `EditUserDialog` (staged=full edit; verified=account-scoped only, email always locked;
+  `User.update` gated to self → fixed the "not authorized" save). Band-group **integrity
+  flags** (red ⚠ for non-member / non-canonical instrument). Canonical instruments =
+  `src/constants/rolesAndInstruments.js`. **Admin tab grouped by linked company** (Owner →
+  per-AMC groups → Account Team). Personnel: names from first/last, instrument shows, lead→band.
+- **Settings consolidation:** `src/pages/Settings.jsx` merges Account Settings + Account Admin
+  (General/Print/Representation/Permissions/Billing); old pages route to it; nav = Profile ·
+  Settings · Team. Fixed "No account selected" (used `Account.filter`, not `.get` by record id)
+  + added `Account.print_settings`.
+- **Bottom-left user area = clickable menu** (My Profile / Account Settings / All Accounts /
+  System Hub / Log Out).
+
+### Role / ownership model — FINALIZED (spec: `SERENOVA-ARTIST-MGMT-ACCOUNT-USER-PERMISSIONS.md`)
+- **Artist = Owner always** (`Account.owner_user_email`/`artist_user_email`), even if a mgmt
+  company set up the account. **Management company = full Admin via the `LinkedAccount`** (Admin/
+  Owner seat → `artist_admin`), NOT a member "Owner" role. **Display/functional role ≠ access**:
+  a mgmt person shows by their assigned functional role (e.g. Tour Manager) but accesses per seat.
+- **Account claiming:** Artist always (+ BMC fallback); **Artist precedence**.
+- **BMC** = financial write (deposit/balance/monies, invoices/payments, settlement notes, post-
+  closeout with logging) + view (band/crew, contracts, riders, calendar, financials, receipts);
+  no control. **Booking Agency** = its own **Booking Agency Hub** (no artist-account access;
+  own events only; **Routing View** like the Kurland sheet). **One owner per account; bands have
+  multiple admins.** `act_type` (solo/duo/trio/band) is the sub-type (fixed a mislabel).
+
+### Phase 5-M progress (steps in build phases)
+- ✅ 13 (authoritative ownership labels), 14 (functional-role display), 15 (Representation lists
+  mgmt users — via auto-sync), 18 (context-aware switcher: artist=own accounts; mgmt=Return to
+  Management + assigned artists), **10 (company-seat→artist access resolver — ADDITIVE)**,
+  **14b (seat-role escalation in the resolver)**.
+- **Resolver (`usePermissions.js`):** in the "no direct membership → zero access" branch, for an
+  artist account, grants access via an active `LinkedAccount` to a mgmt company the user is
+  seated in (scoped by `ManagerArtistAssignment` if `is_event_scoped`); seat role → artist
+  role_level (`SEAT_TO_ARTIST_LEVEL`). STRICTLY ADDITIVE (direct-membership users + owners
+  resolve earlier; can only grant) + fail-safe. Uses **Base44 entities** (Supabase memberships
+  empty); `role_templates` maps level (artist levels: super_admin/admin/finance/tour_manager/
+  band_member/crew/viewer).
+
+### Routing / caching fixes
+- **User-switch cache:** Layout sessionStorage cache was user-agnostic → "act as" kept the prior
+  user; now verifies `auth.me().email` vs cached and clears+reloads on mismatch. (Reverted an
+  over-correction that forced `/`→Entry and bounced to Onboarding/AccountSelection mid-switch.)
+- **Management user → ManagementDashboard** guard in `Dashboard.jsx`; blue company box links home;
+  fixed the "Select an account" **splash flash** (gate loader on `contextLoading`).
+
+### Link previews (OG)
+- `index.html` had NO Open Graph tags → iMessage showed the big square icon. Added OG/Twitter +
+  wide `lockup-on-dark.png` banner; `src/utils/pageMeta.js` sets per-page title (SharedEventView →
+  event name). Crawler dynamic-title is best-effort (Base44 prerender); server share endpoint = follow-up.
+
+### 🔜 NEXT / OPEN
+1. **Phase 5-M step 13 cleanup (the main open item):** remove the **stray direct `owner`
+   memberships** for `adam@originalartists.com` + `oa@originalartists.com` in Lisa's account
+   (`764957794471`) so their access flows via the link (now safe: step 10+14b give admin via the
+   Original Artists link). **Blocked:** `scripts/base44.mjs` is GET-only → do via the Team UI
+   (remove member) or a write path. **Then VERIFY** the link-only path (no link-only user exists
+   yet — both mgmt users have direct memberships, so step 10/14b is shipped but unverified live).
+2. New phases logged, not started: **Phase FC (Event Closeout & expanded Expenses)**,
+   **Booking Agency Hub + Routing View**, **BMC Hub**, **Account Administration & Billing Core**,
+   default-account ("star") routing. Plus prior tracks (EPK, Staged Access, Repertoire, day-sheet).
+3. Watch items: ~25 Base44 entities still use broken `user_condition.role` RLS (Venue +
+   AccountBilling fixed) — audit if "saves but doesn't stick." Extraction prompt tuning per contract.
+
+---
+
+## 🟢 2026-06-12 PM: MobileHub features + brand + auth/perm fixes
 
 **Two live auth/perm fixes (decisions log 2026-06-12T11:30):** (1) **auth gate** (`3603e20`, `App.jsx`) — logged-out users now `<Navigate to="/login">` (was missing → protected routes/AccountSelection hung); logout handlers → `/login`. (2) **account-owner full access** (`3698c0e`, `usePermissions.js`) — artist owner resolved to ALL-none (role `artist` unmapped); added an **owner bypass** (email === account `owner_user_email`/`artist_user_email` → full) + `artist`→`super_admin`. Caveat: if an owner still gets none, the account record's owner/artist email isn't set (Base44 data fix).
 
