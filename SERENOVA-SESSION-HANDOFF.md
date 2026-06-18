@@ -1,7 +1,26 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-18T16:35 EDT
+> Last Updated: 2026-06-18T17:45 EDT
+
+---
+
+## 🟡 2026-06-18: Phase SA B3 BUILT (build-green, ⚠️ live verify pending)
+First-login confirm card. Changed files (pushed): `src/components/mobile/StagedConfirmCard.jsx` (NEW),
+`base44/functions/saveStagedProfile/entry.ts` (NEW), `base44/functions/getStagedMobileData/entry.ts`
+(now returns `profile{first_name,last_name,phone_mobile,confirmed}`), `base44/entities/Membership.jsonc`
+(+`phone_mobile`, +`staged_profile_confirmed_at`), `src/api/stagedSession.js` (+`saveStagedProfile`),
+`src/pages/MobileHub.jsx` (captures `profile`, renders the card when `!confirmed`).
+- **Flow:** first staged login → card (name + mobile #, pre-filled) → Save → `saveStagedProfile` writes
+  to ALL the identity's memberships (`pending_profile_data` for display + top-level `phone_mobile` for
+  C2's SMS lookup) + stamps `staged_profile_confirmed_at` → MobileHub. Re-shows until actually saved
+  (persistent flag, not session count). Phone harvest = the C2 SMS prerequisite.
+- **⚠️ Verify live:** deploy (Membership got new fields — additive, but confirm they provision); first
+  login shows card, Save persists, second login skips it, phone lands on the membership row
+  (`node scripts/base44.mjs Membership '{"user_email":"jones_adamd@me.com"}'` → check `phone_mobile` +
+  `staged_profile_confirmed_at`). NOTE: `jones_adamd@me.com` already has a session → may read as
+  already-confirmed=false (no flag yet) so the card SHOULD show on next login.
+- **Next:** B4 (My Profile + 🔒 data-inventory gate), C2 (SMS — can now use harvested `phone_mobile`).
 
 ---
 
