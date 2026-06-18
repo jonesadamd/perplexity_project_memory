@@ -1,11 +1,90 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-17T03:30 EDT
+> Last Updated: 2026-06-18T03:30 EDT
 
 ---
 
-## 🟢 LATEST — 2026-06-16/17: Event wizard, Team/Settings rebuild, role model + Phase 5-M
+## 🟢 LATEST — 2026-06-17 (night): Phase 5-M step 13 + Phase SA (Staged Passwordless Login) BUILT & VERIFIED
+
+> Long session, all pushed to `main` (latest `6a774a6`), build green each time
+> (`BASE44_LEGACY_SDK_IMPORTS=true npx vite build`). Repo docs current: build phases **v2.44**,
+> decisions log **v2.72**, plus `docs/STAGED-ACCESS-WORKING-DOC.md`.
+
+### ⚠️ DEPLOY GOTCHA got WORSE this session — read before testing anything
+Base44 **"Synced" ≠ deployed**, and this session **reopen AND Publish both repeatedly failed to
+pull pushed commits into Base44's working copy** (commit showed as Synced; served bundle hash never
+changed; new functions/entities not live). **What reliably forced a deploy:** open any file in
+**Base44's own code editor, add a space, Save** → it resyncs the working copy + rebuilds (expect a
+"Loading your app" pause). Also: Base44's 2-way sync auto-commits back to GitHub, so `git pull
+--rebase` before each push (hit one trivial conflict, resolved). Memory `base44-repo-sync` updated.
+
+### Phase 5-M step 13 — DONE (commit `2c99608`)
+Removed the two stray direct memberships in Lisa's artist acct `764957794471`
+(`adam@originalartists.com` owner + `oa@originalartists.com` tour_manager) so mgmt access flows via
+the **Original Artists LinkedAccount** (both resolve to `admin` via seat→level; verified). New
+guarded write tool **`scripts/base44-write.mjs`** (DELETE-only, allowlisted, dry-run default).
+**Team.jsx fix:** the Admin tab now **synthesizes link-only manager cards** (active LinkedAccount →
+company seats → ManagerArtistAssignment when event-scoped) so the AMC group shows without a direct
+membership. ⚠️ Live UI re-verify pending (Team Admin tab shows Original Artists group again).
+
+### Phase SA — Staged Passwordless Login (NEW track) — A0 + B1 + B2 ✅ VERIFIED LIVE
+**Goal:** band/crew reach **MobileHub** with no password — enter email → **6-digit code** (Twilio
+Verify) → in-app → staged session keyed to their existing `staged`/`active` membership. **Decided:
+codes not magic-links** (PWA-safe), **Twilio Verify for both email + SMS**, **email-first**.
+- **Twilio is set up & PAID** (owner). Secrets in Base44: `TWILIO_API_KEY_SID`,
+  `TWILIO_API_KEY_SECRET`, `TWILIO_VERIFY_SERVICE_SID` (Verify-restricted key: verification +
+  verification-check Create only). Verify **Email** channel runs on **SendGrid** (domain
+  `serenovahub.com` authenticated). **Twilio Verify is EXEMPT from A2P 10DLC** for OTP — SMS needs
+  NO carrier registration, just the paid account. (Earlier "10DLC" worry was wrong.)
+- **A0 — Admin Twilio test panel** (SystemHub → Cost & Usage → "Test function"): system-admin
+  pop-up that fires a test email/SMS code (bypasses membership check). ✅ both channels send+verify.
+  Backend `sendTwilioVerifyTest` + dialog in `CostUsageAdmin.jsx`.
+- **B1 — login/session/auth gate** ✅: `src/api/stagedSession.js` (token in localStorage + seam),
+  `src/pages/StagedLogin.jsx` (email→code screen), `App.jsx` gate confines staged → `/MobileHub`
+  (additive; only runs for logged-out users → no lockout), MobileHub resolves staged identity,
+  logout clears the token.
+- **B2 — data path + hard-cap** ✅: service-role **`getStagedMobileData`** returns the staged user's
+  events/travel/accom/tours/flights (mobile-safe; NO financials) — staged users can't do client
+  `base44.entities` reads (no Base44 auth). **Hard-cap in `MobileHubView`:** staged = view-only,
+  areas limited to events/travel/accom/setlist/repertoire, `canEdit=false`, REGARDLESS of role
+  (tested: `jones_adamd@me.com` is an admin but the staged view must be view-only — ⚠️ eyeball not
+  yet done). 
+- **🔑 ROOT-CAUSE FIX:** the new `StagedSession` entity **wasn't persisting service-role writes**
+  (0 rows despite ok → `invalid_session` 401 → "No account available"). Same-RLS
+  `CompanyAccessCache` had rows → it was the freshly-added entity not provisioning during the rough
+  deploys, NOT RLS. **Session token now lives on the proven `ShareableLink` entity**
+  (`link_type:'staged_session'`, email in `entity_id`/`created_by_email`, `created_date`→30d TTL).
+  `verifyStagedCode`/`validateStagedSession`/`getStagedMobileData` all use it. `StagedSession.jsonc`
+  left unused (Phase 9 cleanup). Verified: a `staged_session` ShareableLink row persists; MobileHub
+  loads events for the staged user.
+
+### 🔜 NEXT (Phase SA, in priority order)
+1. **B2.1 — staged event-detail sub-data:** in the MobileHub event **detail**, contacts show
+   **"Unknown User"** (names need User/Membership enrichment — `getStagedMobileData` already returns
+   memberships-with-names; wire the contacts component to use them), **Set List** empty, **Venue
+   contacts** empty — all because the detail components still do client `base44.entities` reads.
+   Extend the service-role path (roster enrichment + venues + setlists/songs) + wire the detail UI.
+2. **Eyeball the hard-cap** as `jones_adamd@me.com` staged: confirm view-only / no edit / no financials.
+3. **B3 — first-login confirm card** (required-once; capture **mobile #** for SMS login).
+4. **Email deliverability (daytime task):** codes land in **iCloud/me.com SPAM** (new sending
+   domain, no reputation, rapid repeat sends). Fix: confirm SendGrid domain auth fully Verified +
+   add **DMARC** + reputation warmup. NOT a code bug — Twilio shows "Code sent via EMAIL".
+   **Don't re-hammer `jones_adamd@me.com`** (rate-limited/burned); use a fresh non-iCloud test email.
+5. **C2 — SMS channel:** enable `channel:'sms'` + add phone→membership lookup + phone capture. No 10DLC.
+6. **M — SystemHub Twilio/SendGrid cost card:** LIVE actuals via **Twilio Usage Records API** (owner:
+   "if it can pull, then it is true and live"); needs an added Twilio Usage-read credential.
+
+### Tools / data notes
+- `scripts/base44.mjs <Entity> '<queryJSON>'` = GET-only Base44 reads (api_key bypasses RLS).
+- `scripts/base44-write.mjs` = guarded DELETE-only (allowlisted ids).
+- Staged session check: `node scripts/base44.mjs ShareableLink '{"link_type":"staged_session"}'`.
+- `jones_adamd@me.com` = active **admin** membership in Lisa's acct `764957794471` (the staged test
+  identity — admin on purpose, to test the hard-cap).
+
+---
+
+## 🟢 2026-06-16/17: Event wizard, Team/Settings rebuild, role model + Phase 5-M
 
 > Long session. All pushed to `main`, build green each time (`BASE44_LEGACY_SDK_IMPORTS=true npx vite build`).
 > Latest commit `7e4e948`. Full detail in `docs/SERENOVA-DECISIONS-LOG.md` (v2.67) +
