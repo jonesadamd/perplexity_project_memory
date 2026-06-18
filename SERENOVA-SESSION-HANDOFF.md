@@ -1,7 +1,7 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-18T03:30 EDT
+> Last Updated: 2026-06-18T11:45 EDT
 
 ---
 
@@ -59,13 +59,25 @@ codes not magic-links** (PWA-safe), **Twilio Verify for both email + SMS**, **em
   left unused (Phase 9 cleanup). Verified: a `staged_session` ShareableLink row persists; MobileHub
   loads events for the staged user.
 
+### 🟡 2026-06-18: B2.1 BUILT (build-green, ⚠️ NOT yet live-verified)
+Staged event-detail sub-data now flows through the service role. Changed files (not yet pushed/deployed):
+- `base44/functions/getStagedMobileData/entry.ts` — also returns `setLists`, `venues`,
+  `venueSnapshots`, and `memberProfiles` (`{email→{user,membership}}` roster name/contact map scoped
+  to the account's roster emails; mobile-safe, still NO financials).
+- `src/pages/MobileHub.jsx` — captures those into a `stagedExtras` state (initial load + artist
+  switch) and threads `staged`+`stagedExtras` into `MobileEventDetail`.
+- `src/components/mobile/MobileEventDetail.jsx` — in staged mode derives setlists/venue/snapshots/
+  contacts from `stagedExtras` instead of client `base44.entities` reads. **Hard-cap leak fixed:** it
+  called `usePermissionContext().canEdit` directly, so a staged admin would've gotten setlist Add/Edit
+  + all booking refs — now `canEditSetlist`/`canSeeAllRefs` forced `false` when staged.
+- **Out of scope, logged:** `MobileShareDialog` (event detail's Share button) may still client-read
+  when opened by a staged user — evaluate whether Share should show for staged at all.
+
 ### 🔜 NEXT (Phase SA, in priority order)
-1. **B2.1 — staged event-detail sub-data:** in the MobileHub event **detail**, contacts show
-   **"Unknown User"** (names need User/Membership enrichment — `getStagedMobileData` already returns
-   memberships-with-names; wire the contacts component to use them), **Set List** empty, **Venue
-   contacts** empty — all because the detail components still do client `base44.entities` reads.
-   Extend the service-role path (roster enrichment + venues + setlists/songs) + wire the detail UI.
-2. **Eyeball the hard-cap** as `jones_adamd@me.com` staged: confirm view-only / no edit / no financials.
+1. **Verify B2.1 live** — deploy + sign in as `jones_adamd@me.com` staged; confirm in event detail:
+   contact **names** resolve (no "Unknown User"), **Set List** shows, **Venue** info/contacts populate,
+   and everything is **view-only** (no setlist Add/Edit buttons, no all-booking refs).
+2. **Eyeball the broader hard-cap** as `jones_adamd@me.com` staged: confirm view-only / no edit / no financials.
 3. **B3 — first-login confirm card** (required-once; capture **mobile #** for SMS login).
 4. **Email deliverability (daytime task):** codes land in **iCloud/me.com SPAM** (new sending
    domain, no reputation, rapid repeat sends). Fix: confirm SendGrid domain auth fully Verified +
