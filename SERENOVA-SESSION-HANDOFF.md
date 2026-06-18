@@ -5,6 +5,15 @@
 
 ---
 
+## ✅ 2026-06-18: Phase SA B2.1 VERIFIED LIVE
+Tested as `jones_adamd@me.com` staged: contact **names resolve**, **Set List** + **Venue contacts**
+visible, **no financials**, **no edit** anywhere. "Switch to Web View" correctly bounces back to
+MobileHub (auth gate confines staged → `/MobileHub`; hard-cap holds at the routing layer too). B2.1
+closed. **Logged-not-fixed (minor):** "Switch to Web View" is a no-op for staged (could hide it);
+`MobileShareDialog` may still client-read when opened. **Next Phase SA:** B3 (first-login confirm card
+→ capture mobile #), email deliverability (codes → iCloud spam — daytime, fresh non-iCloud test addr),
+C2 (SMS channel), M (Twilio cost card).
+
 ## 🟢 2026-06-18 PM: Versioning system (per-hub) + deploy canary BUILT (build-green)
 Owner wanted a real versioning system + every major hub versioned independently + all versioning
 logged in a DB. Built (decisions log v2.75):
