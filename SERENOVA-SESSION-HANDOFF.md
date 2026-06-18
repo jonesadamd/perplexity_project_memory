@@ -1,7 +1,28 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-18T11:45 EDT
+> Last Updated: 2026-06-18T16:35 EDT
+
+---
+
+## 🟢 2026-06-18 PM: Versioning system (per-hub) + deploy canary BUILT (build-green)
+Owner wanted a real versioning system + every major hub versioned independently + all versioning
+logged in a DB. Built (decisions log v2.75):
+- **`src/version.js`** = source of truth (CODE constant — travels with the bundle, so a changed number
+  on screen PROVES a deploy; bumping it = the small change that forces a Base44 rebuild). Registry:
+  Serenova `0.6.0506` (main AMH) · System `1.0.0009` · Venue `0.5.0018` · Contract `0.4.0010` ·
+  Financial `0.3.0007` · Storage `0.2.0003`. Format `v{major}.{minor}.{build4}`. **Bump the relevant
+  hub here each deploy.**
+- **`src/components/VersionStamp.jsx`** renders `v…` per hub. Shown: all password-auth screens (via
+  `AuthLayout`), `StagedLogin`, **Layout bottom-left above username**, **MobileHub hamburger menu**
+  (all = Serenova version); each hub page header shows its own (SystemHub, Contracts, Venues,
+  FinancialHub, Storage).
+- **DB audit log (best-effort, never the displayed value):** new `AppVersion` entity +
+  `recordAppVersion` service-role fn (create-if-missing per hub+version), fire-and-forget from
+  `App.jsx` on mount. ⚠️ **`AppVersion` entity must provision on Base44** (watch for the same
+  non-provisioning issue `StagedSession` hit — display works regardless).
+- **Use this as the deploy canary:** after a deploy, check the login screen shows the bumped number.
+  Build green; all six version strings verified present in the built bundle.
 
 ---
 
