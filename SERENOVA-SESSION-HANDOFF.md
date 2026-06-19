@@ -1,9 +1,25 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-19T00:40 EDT
+> Last Updated: 2026-06-19T01:20 EDT
 
 ---
+
+## 🟡 2026-06-19: Staged session hygiene (build-green, verify pending)
+A tester had 9 active sessions: every login mints one + logout only cleared the local token (server
+link stayed active). Fixed:
+- **Revoke on logout** server-side: new `base44/functions/endStagedSession/entry.ts` + `endStagedSession()`
+  in `stagedSession.js`; MobileHub logout calls it for staged users.
+- **5-session LRU cap**: `verifyStagedCode` deactivates oldest active beyond the 5 most recent (keeps
+  multi-device, bounds sprawl). Existing piles self-trim on next login.
+- **Device labels**: `deviceLabel()` (UA → "iPhone · Safari") sent to `verifyStagedCode`, stored in new
+  `ShareableLink.device_label` (+ `staged_session` added to the link_type enum). Browsers can't give
+  exact model; custom names deferred.
+- **Collapsed sessions UI** in `UserDetailPanel` ("N active — click to expand" → device list).
+- Serenova `0.6.0513`→**`0.6.0514`**, System `1.0.0016`→**`1.0.0017`**. Build green.
+- **NEXT (confirmed):** Overview — add **Staged Users** KPI card (Total + Active%; **Active = within 12
+  months**) + move Failed Validations/Permission Issues into Platform Health. **Deferred:** separate
+  top-level **Analytics** hub.
 
 ## 🟡 2026-06-19: SystemHub user/account drill-in (build-green, verify pending)
 SystemHub could find but not OPEN users (header search/Support/Users all dead-ended; account detail in
