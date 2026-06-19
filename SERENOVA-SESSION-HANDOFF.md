@@ -1,7 +1,26 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-18T19:00 EDT
+> Last Updated: 2026-06-18T20:15 EDT
+
+---
+
+## 🟡 2026-06-18: Confirm-card fixes from live test (build-green, re-verify pending)
+Phone lib now installed on Base44 (npm install done; resolves). Fixed from live test:
+1. **Saved `3108904603` with no +1** — field was pre-filled a non-E.164 value → globe/no country →
+   emitted raw digits. Fix: `StagedConfirmCard` only pre-fills phone if already E.164.
+2. **Save allowed incomplete number** — now phone optional but validated via `isPossiblePhoneNumber`;
+   "Save & continue" disabled until name set AND phone empty-or-valid. (Decision: optional, not
+   hard-required — don't lock out a no-mobile band member.)
+3. **No flag / cramped selector** — added `phoneNumberField.css` (wider boxed selector, bigger flag);
+   `international` shows the dial code in the input.
+4. **"Hey, jones_adamd"** → staged identity adopts confirmed first/last name; greeting now
+   **"Hey {FirstName}"** (no leading comma).
+- Serenova `0.6.0509`→**`0.6.0510`**. Build green.
+- **Data:** cleared `jones_adamd` stale User.phone_mobile + membership flag/phones → clean re-test
+  (one-off API PUT; guarded write script unchanged).
+- **Re-verify:** card shows US flag by default, +1 prefixes the number, can't save a country-less
+  number, MobileHub greets "Hey {FirstName}".
 
 ---
 
