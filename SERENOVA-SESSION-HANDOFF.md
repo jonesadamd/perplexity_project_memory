@@ -8,9 +8,18 @@
 ## 🟢 CURRENT STATE — 2026-06-19 PM (read this first; supersedes the morning brief below)
 
 > **Phase SA C part 1 — band-member staged GUEST REQUESTS ✅ SHIPPED & VERIFIED LIVE.** Serenova now
-> **0.6.0522**. Latest `main` commit `e64a075`; build green via
-> `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs: decisions log **v2.96**,
-> build phases **v2.57**, plus `STAGED-ACCESS-WORKING-DOC.md` + `MOBILEHUB-WORKING-DOC.md`.
+> **0.6.0523**. Latest `main` commit `8c93d8f`; build green via
+> `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs: decisions log **v2.97**,
+> build phases **v2.58**, plus `STAGED-ACCESS-WORKING-DOC.md` + `MOBILEHUB-WORKING-DOC.md`.
+
+> **🔒 ALSO FIXED THIS SESSION (0.6.0523, verified live) — MobileHub roster-scoping.** Band/crew
+> (`band_member`/`crew_member`/`roadie_member`) were seeing the artist's ENTIRE event calendar + all
+> travel + all hotels. Now scoped to events where their email is in `roster_members` (+ tied
+> travel/hotels + their own travel bookings); owner/admin/manager/tour_manager/finance still see all.
+> **`getStagedMobileData` is the hard boundary** (staged band/crew have no API access); logged-in path
+> scoped at the source via a `scopeRef`. **Caveats:** roster accuracy is now load-bearing (no roster
+> entry → that show is hidden); logged-in scoping is UX-level only (Event RLS still allows API reads →
+> hard lock is **Phase 0/F**); the **web Events/Dashboard has the same gap** — offered, owner to decide.
 
 **What shipped this session (guest requests, the first half of Phase SA C):**
 - **Flow:** a staged band member requests a guest from MobileHub → it lands in `event.guest_lists` as
