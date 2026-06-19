@@ -1,7 +1,24 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-18T17:45 EDT
+> Last Updated: 2026-06-18T18:30 EDT
+
+---
+
+## 🟡 2026-06-18: Mobile view-routing fix + Band/Crew login button (build-green, live verify pending)
+Owner: "PWA on Home Screen always opens Desktop View on mobile." Two bugs fixed:
+1. `preferDesktop` flag never expired (one "Switch to Web View" tap pinned the device to desktop
+   forever); 2. the mobile→MobileHub redirect was only on Dashboard (mgmt users on ManagementDashboard
+   never redirected).
+- **New `src/lib/deviceView.js`** — `isMobileDevice`/`preferDesktopActive`/`setPreferDesktopView`
+  (1-hour TTL via `preferDesktopUntil`)/`clearPreferDesktopView`. **Owner chose 1h.**
+- **Redirect centralized in `Layout.jsx`** (covers all desktop pages incl. ManagementDashboard);
+  removed the Dashboard-only copy. Deploying immediately un-sticks already-pinned devices.
+- **`MobileHamburgerMenu`** Switch-to-Web-View → 1h preference; logout clears it.
+- **`Login.jsx`** new "Band & Crew Sign In" button → `/StagedLogin` (closes discoverability gap).
+- Serenova version bumped `0.6.0507`→**`0.6.0508`**. Build green.
+- **⚠️ Verify:** mobile login lands on MobileHub; Switch to Web View holds desktop ~1h then reverts;
+  Band/Crew button reaches StagedLogin; login screen shows v0.6.0508.
 
 ---
 
