@@ -1,7 +1,25 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-18T20:45 EDT
+> Last Updated: 2026-06-18T21:30 EDT
+
+---
+
+## 🟡 2026-06-18: Phase SA C2 BUILT — SMS-preferred staged login (build-green, verify pending)
+Owner: at login, send the code by SMS if a phone is on file (fixes iCloud email-spam), email fallback.
+SMS unblocked (Verify 10DLC-exempt, A0 proved it, numbers now E.164).
+- **`requestStagedCode`** channel `auto` (default) → SMS if valid E.164 mobile on membership, else
+  email; returns `{channel, hint}` (masked last-4). SMS-fail auto-falls-back to email.
+  Anti-enumeration: no-access == access-without-phone response (only "phone on file" distinguishable —
+  owner accepted, masked-hint chosen).
+- **`verifyStagedCode`** re-resolves verify `To` per channel server-side (client never sends phone).
+- **`StagedLogin`**: "Code sent to your phone ending in ••••4603" + channel toggle (email/text);
+  re-sends on switch; verify passes channel. `stagedSession.requestStagedCode` default → `auto`.
+- Serenova `0.6.0511`→**`0.6.0512`**. Build green.
+- **⚠️ Verify:** `jones_adamd` (now `+13108904603`) should get the code by **SMS** with masked hint;
+  "email instead" toggle works; both channels verify + sign in. Watch SMS deliverability/cost (M card).
+- **Next:** M (Twilio cost card — needs Usage-read credential), D (band-member upsell/port), B4 (My
+  Profile + data-inventory gate). Phone field can be adopted by the other ~8 plain-text phone inputs.
 
 ---
 
