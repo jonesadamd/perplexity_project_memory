@@ -1,7 +1,17 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-18T20:15 EDT
+> Last Updated: 2026-06-18T20:45 EDT
+
+---
+
+## 🟡 2026-06-18: Phone field fixed dial-code prefix + reset-not-showing diagnosis
+- `PhoneNumberField` now `countryCallingCodeEditable={false}` → fixed `+1`/`+44` prefix in the one
+  box, change country via the flag (owner's "(+1 ____)" ask). UK trunk-0 dropping is automatic
+  (libphonenumber-js). Serenova `0.6.0510`→**`0.6.0511`**, build green.
+- **Confirm-card "didn't pop" for jones_adamd = NOT data:** DB flag verified `null` (reset held). A
+  warm PWA keeps React state → no re-fetch; **cold reopen / logout-login** shows the card. 8 stale
+  `staged_session` links accumulating (Phase 9 cleanup).
 
 ---
 
