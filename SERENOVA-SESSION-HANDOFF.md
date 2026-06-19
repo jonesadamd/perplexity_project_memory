@@ -1,7 +1,23 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-18T22:00 EDT
+> Last Updated: 2026-06-18T22:45 EDT
+
+---
+
+## 🟡 2026-06-18: Phase SA M BUILT — SystemHub live Twilio cost card (secrets added → verify after deploy)
+New `base44/functions/getTwilioUsage/entry.ts` (system-admin gated) pulls the **Twilio Usage Records
+API** (Today/ThisMonth/AllTime, real billed `price` per category). New live card in
+`src/components/admin/CostUsageAdmin.jsx` (SystemHub → Cost & Usage): spend tiles + this-month
+category table + Refresh; graceful not_configured/forbidden/error states. System Hub `1.0.0009`→
+**`1.0.0011`**. Build green.
+- **Owner ADDED the secrets 2026-06-18:** `TWILIO_ACCOUNT_SID` + `TWILIO_USAGE_KEY_SID` +
+  `TWILIO_USAGE_KEY_SECRET` (a Standard API key). Function also auto-discovers the account SID from
+  the key (`/Accounts.json`) if the SID secret is absent — so the key pair alone is enough.
+- **⚠️ Verify spelling** = exactly `TWILIO_…` (T-W-I-L-I-O), not "TWILLO". After deploy: SystemHub →
+  Cost & Usage → Twilio card → Refresh should show live Today/Month/AllTime spend + categories.
+- Build note: local `npx vite build` transiently grabbed vite@8.0.16 and failed (entry resolution);
+  `./node_modules/.bin/vite build` is green — environment hiccup, not code. CI uses the project vite.
 
 ---
 
