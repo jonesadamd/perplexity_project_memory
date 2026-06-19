@@ -1,11 +1,59 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-19T02:45 EDT
+> Last Updated: 2026-06-19T16:10 EDT
 
 ---
 
-## 🟢 CURRENT STATE — 2026-06-19 (clean morning brief; read this first)
+## 🟢 CURRENT STATE — 2026-06-19 PM (read this first; supersedes the morning brief below)
+
+> **Phase SA C part 1 — band-member staged GUEST REQUESTS ✅ SHIPPED & VERIFIED LIVE.** Serenova now
+> **0.6.0522**. Latest `main` commit `e64a075`; build green via
+> `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs: decisions log **v2.96**,
+> build phases **v2.57**, plus `STAGED-ACCESS-WORKING-DOC.md` + `MOBILEHUB-WORKING-DOC.md`.
+
+**What shipped this session (guest requests, the first half of Phase SA C):**
+- **Flow:** a staged band member requests a guest from MobileHub → it lands in `event.guest_lists` as
+  `status:'Requested'` (does NOT consume a comp until approved) → an admin/owner/manager **Approves or
+  Denies** on the **EventDetails Guest List card** (new `GuestListCard`) or in the **EditEvent guest
+  tab** (`GuestListTab`) → the requester is notified on **3 channels**: **email** (`Core.SendEmail`),
+  a dismissible **MobileHub home banner**, and the web review surfaces. **VERIFIED LIVE end-to-end**
+  (`mj.oriole20@gmail.com` band member: email received + banner shown + Confirmed + comp count moved).
+- **Mobile Guests section is now role-aware:** logged-in **owner/admin/manager → BOTH "Add guest"**
+  (direct, Pending, client `Event.update`) **and "Request"** (Requested, needs approval); **band
+  members → "Request a guest"** only (staged via `submitStagedGuestRequest` service fn; logged-in via
+  client write); **staged sessions stay view-only** (hard-cap). Per-show-time picker when multi-show.
+- **New service fns:** `submitStagedGuestRequest` (token→band_member gate), `decideGuestRequest`
+  (admin/owner/mgmt-seat auth → Confirmed/Denied + stamp + email), `dismissStagedNotice`. ⚠️ **These 3
+  must provision on Base44** (watch the same non-provisioning gotcha `StagedSession` hit).
+- **Model:** added a **`Denied`** status; `usedSlots` excludes Requested AND Denied (neither consumes a
+  comp). `Event.jsonc` brought honest (additive: `performance_time`, status enum, request/decision
+  fields). **No new entity, no migration** (`guest_lists` is JSON on `Event`).
+- **Gating model:** REQUEST = account membership role `band_member`; ADD = logged-in
+  `canEdit('guest_list')`; staged = view-only. The event-roster **band/crew label** (Add Personnel
+  role-type) is per-event and independent of both account role AND guest gating (so an admin showing as
+  "crew" on a roster is expected, not a bug).
+
+**🔜 NEXT (owner-queued, in order):**
+1. **PWA Web Push** track — real lock-screen notifications (service worker + VAPID + `PushSubscription`
+   entity + opt-in UX + send fn); the decide fn then gains a 3rd channel. iOS needs the PWA installed
+   to Home Screen + permission grant; live-only on `app.serenovahub.com`.
+2. **Phase SA C part 2 — EXPENSES** via a **separate `StagedRequests` holding queue** (owner's design:
+   nothing financial enters an account until approved; service-role receipt quarantine + promote-on-
+   approval — keeps the staged hard-cap fully closed on financials).
+
+**Watch-items (logged):** approval email carries a SendGrid/Base44 auto **unsubscribe** footer (odd on
+a transactional notice — revisit when push lands); logged-in (non-staged) band-member requests use a
+client write (fine); the optional "roster auto-suggests band/crew from account role" idea (out of scope).
+
+**Reminders unchanged:** Base44 **"Synced" ≠ deployed** → editor add-space-Save trick → canary
+`v0.6.0522`; `git pull --rebase` before each push; build with `./node_modules/.bin/vite build`; bump
+`src/version.js` every deploy; commit author **Adam Jones <aj@adamdcjones.com>** + Claude co-author
+trailer; confirm the file list before any push.
+
+---
+
+## 🟢 CURRENT STATE — 2026-06-19 (clean morning brief; superseded by the PM brief above)
 
 > **2026-06-19 AM updates:** Login screens unified + rebranded (dark teal/charcoal bg + white card,
 > square mark, "Serenova Hub" title, tan Band&Crew button, darker input/button borders). **ARCHITECTURE
