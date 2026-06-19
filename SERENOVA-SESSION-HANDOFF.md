@@ -1,9 +1,21 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-19T01:20 EDT
+> Last Updated: 2026-06-19T01:55 EDT
 
 ---
+
+## 🟡 2026-06-19: SystemHub Overview redesign (build-green, verify pending)
+- Hero KPIs trimmed to headline numbers + new **Staged Users** card (Total + Active%; **Active = within
+  12 months**). New `systemHubStats` fields `stagedUsersTotal`/`stagedUsersActive` (aggregated from
+  staged_session links by email).
+- **Permission Issues + Failed Validations moved out of the hero badges into Platform Health** (with
+  detail counts) — `HubOverview.jsx`.
+- **Analytics** = non-clickable "Analytics · Soon" chip in the SystemHub header top-right (placeholder
+  for a future top-level hub; deferred/stubbed, not built).
+- System Hub `1.0.0017`→**`1.0.0018`**. Build green.
+- **Verify:** Staged Users card shows real total/active%; Failed Validations + Permission Issues now
+  under Platform Health; Analytics chip non-interactive.
 
 ## 🟡 2026-06-19: Staged session hygiene (build-green, verify pending)
 A tester had 9 active sessions: every login mints one + logout only cleared the local token (server
