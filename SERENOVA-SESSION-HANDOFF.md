@@ -1,7 +1,54 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-19T02:30 EDT
+> Last Updated: 2026-06-19T02:45 EDT
+
+---
+
+## 🟢 CURRENT STATE — 2026-06-19 (clean morning brief; read this first)
+
+**Next focus (owner): continue MobileHub.** The natural next build is **Phase SA C — band-member
+staged writes** (guest requests + expense requests submitted from MobileHub via the staged session),
+which the now-live staged identity unblocks. See `docs/MOBILEHUB-WORKING-DOC.md` (deferred Group 2c/2d)
++ `docs/STAGED-ACCESS-WORKING-DOC.md` (step C).
+
+**Where we are — all built & pushed to `main` (latest commit `8b394ab` handoff / `b1640a7` code), build
+green via `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`:**
+- **Phase SA (Staged passwordless access) — COMPLETE & VERIFIED LIVE:** A0 (Twilio test) · B1 (login/
+  session/auth-gate) · B2 + **B2.1** (staged MobileHub data incl. event-detail contacts/setlist/venue) ·
+  **B3** (first-login confirm card: name + **E.164** mobile via `react-phone-number-input`) · **C2**
+  (SMS-preferred login: SMS-if-on-file + email fallback, masked hint) · **M** (SystemHub live Twilio
+  cost card). Session token lives on `ShareableLink` (`link_type:'staged_session'`). **Rolling 30-day
+  idle TTL**, **revoke-on-logout**, **5-session LRU cap**, **device labels**.
+- **Per-hub versioning system** (`src/version.js` — the deploy canary; bump the affected hub each
+  deploy). Current: Serenova **0.6.0514** · System **1.0.0019** · Venue 0.5.0018 · Contract 0.4.0010 ·
+  Financial 0.3.0007 · Storage 0.2.0003. DB audit log = `AppVersion` (+ `recordAppVersion`).
+- **Mobile routing fix** (1h `preferDesktop` TTL, centralized in Layout) + **"Band & Crew Sign In"**
+  button on Login → `/StagedLogin`.
+- **SystemHub user/account drill-in:** `UserDetailPanel` (profile + accounts/roles + staged sessions w/
+  Force-logout) via `getUserContext`; Users tab → **All Users** (anyone) + **System Users**
+  (admin-only); master-detail layout; header search + Support user cards open detail.
+- **SystemHub Overview redesign:** hero KPIs trimmed + **Staged Users** card (Active big / Total below;
+  Total = `status:'staged'` memberships ∪ session-havers = ~18; Active = used within 12mo). Failed
+  Validations + Permission Issues moved to Platform Health. **Analytics** = non-clickable "Soon" item in
+  the top `HubSwitcher` (future ONE global, filterable hub). `User.was_staged` groundwork added.
+
+**⚠️ Pending LIVE verify (needs a Base44 rebuild — editor-save trick; then hard-reload):** canary =
+login footer `v0.6.0514` / System Hub `v1.0.0019`. Spot-check: staged login by SMS+email; confirm card
+E.164; logout revokes session; SystemHub user drill-in + Staged Users count; Twilio cost card live.
+
+**Backlog / deferred (logged):** Phase SA **B4** (staged My Profile + 🔒 data-inventory gate) · **D**
+(band upsell→full account port; sets `was_staged`) · build the **Analytics** hub · Platform Health rows
+→ clickable own-pages · email deliverability (codes→iCloud spam: SendGrid domain auth/DMARC/warmup) ·
+custom device naming for sessions · adopt `PhoneNumberField` on the other ~8 phone inputs ·
+`MobileShareDialog` staged client-reads + "Switch to Web View" no-op for staged (minor) · Phase 9
+cleanup (stale entities/legacy imports). Full roadmap: `docs/SERENOVA-BUILD-PHASES.md`.
+
+**Critical reminders:** Base44 **"Synced" ≠ deployed** → force via editor add-space-Save; `git pull
+--rebase` before each push (Base44 2-way-syncs). Build with `./node_modules/.bin/vite build` (plain
+`npx vite build` may grab the wrong vite). **Bump `src/version.js` (affected hub) every deploy.** Commit
+author **Adam Jones <aj@adamdcjones.com>** + the Claude co-author trailer. **Confirm the file list
+before any push.** Docs: decisions log **v2.90**, build phases, working docs.
 
 ---
 
