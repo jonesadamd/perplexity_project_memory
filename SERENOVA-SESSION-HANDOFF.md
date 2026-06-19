@@ -7,6 +7,15 @@
 
 ## 🟢 CURRENT STATE — 2026-06-19 (clean morning brief; read this first)
 
+> **2026-06-19 AM updates:** Login screens unified + rebranded (dark teal/charcoal bg + white card,
+> square mark, "Serenova Hub" title, tan Band&Crew button, darker input/button borders). **ARCHITECTURE
+> DECISION (decisions log v2.93):** keep `src/pages` flat (Base44 reserves/auto-discovers it — do NOT
+> reorg into per-hub folders); components stay in domain subfolders; **per-hub branding via the new
+> `src/config/hubThemes.js` registry** (pairs with `version.js`); migration lever = `src/api/*` seams.
+> **Known Base44 limitation:** a cold hit to `/login` shows Base44's hosted auth (reserved path) — leave
+> it; expected to disappear at migration off Base44. Serenova now **0.6.0518**.
+
+
 **Next focus (owner): continue MobileHub.** The natural next build is **Phase SA C — band-member
 staged writes** (guest requests + expense requests submitted from MobileHub via the staged session),
 which the now-live staged identity unblocks. See `docs/MOBILEHUB-WORKING-DOC.md` (deferred Group 2c/2d)
