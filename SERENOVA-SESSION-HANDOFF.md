@@ -1,9 +1,22 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-18T23:15 EDT
+> Last Updated: 2026-06-18T23:55 EDT
 
 ---
+
+## 🟡 2026-06-18: Staged session rolling TTL + admin session controls (build-green, verify pending)
+- **Rolling 30-day idle TTL** (was fixed-30-from-login): TTL now measured vs `updated_date`;
+  `validateStagedSession` touches the link on a valid check (throttled ≤1×/day) so the window rolls
+  with use → active band/crew never re-verify, only 30-days-unused expires. All 3 TTL checks
+  (`validateStagedSession`/`getStagedMobileData`/`saveStagedProfile`) use `updated_date||created_date`.
+- **Admin controls:** new `base44/functions/adminStagedSessions/entry.ts` (system-admin: list / revoke
+  one email / revoke_all) + "Staged login sessions" card in `CostUsageAdmin` (SystemHub → Cost & Usage):
+  look up sessions, **Force log out**, **Revoke ALL** (confirm) for post-build forced re-verify.
+- Serenova `0.6.0512`→**`0.6.0513`**, System `1.0.0013`→**`1.0.0014`**. Build green.
+- **⚠️ Verify after deploy:** the rolling touch relies on Base44 auto-bumping `updated_date` on
+  `.update()` — confirm a session's `updated_date` advances on app open (and stays valid past 30 days
+  of active use). Admin: force-logout `jones_adamd` → next open should require re-verify.
 
 ## ✅ 2026-06-18: Phase SA M VERIFIED LIVE + double-count fix
 SystemHub Twilio cost card live (owner added secrets; the only snag was a TWILLO→TWILIO typo on the
