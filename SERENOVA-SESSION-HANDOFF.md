@@ -1,7 +1,20 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-18T18:30 EDT
+> Last Updated: 2026-06-18T19:00 EDT
+
+---
+
+## 🟡 2026-06-18: Staged confirm-card phone → E.164 + country dropdown (build-green, verify pending)
+B3 follow-up: owner entered `3108904603` (no +1); Twilio SMS (C2) needs E.164. Added
+`react-phone-number-input` (`^3.4.17`) → new `src/components/ui/PhoneNumberField.jsx` (flag/country
+dropdown, outputs E.164, **defaults to device locale region** = home country, not geolocation — a
+touring artist abroad still has their home +1). Wired into `StagedConfirmCard`; `saveStagedProfile`
+strips formatting as a backstop. Serenova `0.6.0508`→**`0.6.0509`**. Build green (lib + CSS bundled).
+- **⚠️ `jones_adamd`'s saved `3108904603`** needs re-saving via the card/profile → `+13108904603`
+  before C2 SMS testing (or normalize it).
+- The other ~8 plain-text phone inputs in the app (MyInformationForm, EditUserDialog, team modals…)
+  can adopt `PhoneNumberField` later for consistency — logged, not done.
 
 ---
 
