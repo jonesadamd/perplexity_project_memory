@@ -1,9 +1,22 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-19T01:55 EDT
+> Last Updated: 2026-06-19T02:30 EDT
 
 ---
+
+## 🟡 2026-06-19: Staged Users metric fix + Analytics → global hub placeholder (build-green)
+- **Staged count fix** (`systemHubStats`): Total = distinct staged-setup identities (Membership
+  `status:'staged'`, 19 in DB) ∪ session-havers; Active = those with a session used within 12mo. Card
+  now ~1 active / ~20 total (was wrongly "1"). **Card emphasis flipped:** big = Active Staged, total below.
+- **`User.was_staged`** field added (groundwork) — set during Phase SA D port for staged→full-user
+  conversion analytics. Inert until D.
+- **Analytics = ONE global hub** (recommended, owner-aligned): non-clickable "Analytics · Soon" added to
+  the top-level `HubSwitcher` (sibling to System Hub/Venues/Storage); header chip removed. Cross-hub,
+  filterable — not per-hub.
+- System Hub `1.0.0018`→**`1.0.0019`**. Build green.
+- **Deferred (owner):** Platform Health rows → clickable own-pages (later phase); build the Analytics hub;
+  Phase SA D port sets `was_staged`; full staged analytics (lifetime/active/converted) lives in Analytics.
 
 ## 🟡 2026-06-19: SystemHub Overview redesign (build-green, verify pending)
 - Hero KPIs trimmed to headline numbers + new **Staged Users** card (Total + Active%; **Active = within
