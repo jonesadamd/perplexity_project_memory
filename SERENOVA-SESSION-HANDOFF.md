@@ -1,9 +1,24 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-18T23:55 EDT
+> Last Updated: 2026-06-19T00:40 EDT
 
 ---
+
+## 🟡 2026-06-19: SystemHub user/account drill-in (build-green, verify pending)
+SystemHub could find but not OPEN users (header search/Support/Users all dead-ended; account detail in
+Support already worked). Built:
+- **`getUserContext`** fn (email → user + all memberships/accounts + staged sessions; system-role gated).
+- **`UserDetailPanel`** (`src/components/systemhub/`) — profile + accounts/roles + staged sessions w/
+  Force-logout (reuses `adminStagedSessions`). **`AllUsersAdmin`** — all-users search → detail.
+- **Users tab → sub-tabs (owner call):** **All Users** (anyone) + **System Users** (`SystemUsersManager`,
+  **system_admin only**, not support).
+- **Wired:** header search → user routes to Users›All Users (preselected), account routes to Support
+  (new `initialAccount` prop) — both open the detail; Support user cards now clickable → UserDetailPanel.
+- System Hub `1.0.0014`→**`1.0.0015`**. Build green (`./node_modules/.bin/vite build`).
+- **Deferred (owner idea):** support-flow "transfer support / add system user to a support issue".
+- **⚠️ Verify:** search a band/crew user (e.g. `jones_adamd`) → detail shows accounts/roles + staged
+  sessions + Force-logout; non-admin shouldn't see the System Users sub-tab; header-search clicks open detail.
 
 ## 🟡 2026-06-18: Staged session rolling TTL + admin session controls (build-green, verify pending)
 - **Rolling 30-day idle TTL** (was fixed-30-from-login): TTL now measured vs `updated_date`;
