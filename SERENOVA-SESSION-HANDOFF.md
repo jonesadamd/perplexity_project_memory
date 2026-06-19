@@ -1,7 +1,21 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-18T22:45 EDT
+> Last Updated: 2026-06-18T23:15 EDT
+
+---
+
+## ✅ 2026-06-18: Phase SA M VERIFIED LIVE + double-count fix
+SystemHub Twilio cost card live (owner added secrets; the only snag was a TWILLO→TWILIO typo on the
+account-SID secret name). **Accuracy fix:** `getTwilioUsage.summarize()` now takes the total from
+Twilio's authoritative **`totalprice`** record + builds a **leaf-only** breakdown (rollup denylist:
+`totalprice`/`account-security`/`authy-phone-verifications`/`pv`); returns `{totalCents, leafSumCents,
+categories}`. Card adds an "Other (tax/unitemized)" reconciliation row + Total row + estimate caveat.
+Month now = **$0.85**, matches the Twilio console (was over-counted ~4× by flat-summing the tree).
+System Hub `1.0.0012`→**`1.0.0013`**. **Phase SA roadmap A0/B1/B2/B2.1/B3/C2/M ALL ✅.** Remaining: B4
+(My Profile + data-inventory gate), D (upsell/port).
+- Build with `./node_modules/.bin/vite build` (plain `npx vite build` transiently grabbed vite@8 and
+  failed on entry resolution — env hiccup; CI uses project vite).
 
 ---
 
