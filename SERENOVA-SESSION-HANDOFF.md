@@ -21,7 +21,7 @@ staged writes** (guest requests + expense requests submitted from MobileHub via 
 which the now-live staged identity unblocks. See `docs/MOBILEHUB-WORKING-DOC.md` (deferred Group 2c/2d)
 + `docs/STAGED-ACCESS-WORKING-DOC.md` (step C).
 
-**Where we are — all built & pushed to `main` (latest commit `8b394ab` handoff / `b1640a7` code), build
+**Where we are — all built & pushed to `main` (latest commit `8b166c2` code / `befe37a` handoff), build
 green via `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`:**
 - **Phase SA (Staged passwordless access) — COMPLETE & VERIFIED LIVE:** A0 (Twilio test) · B1 (login/
   session/auth-gate) · B2 + **B2.1** (staged MobileHub data incl. event-detail contacts/setlist/venue) ·
@@ -30,7 +30,7 @@ green via `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`:**
   cost card). Session token lives on `ShareableLink` (`link_type:'staged_session'`). **Rolling 30-day
   idle TTL**, **revoke-on-logout**, **5-session LRU cap**, **device labels**.
 - **Per-hub versioning system** (`src/version.js` — the deploy canary; bump the affected hub each
-  deploy). Current: Serenova **0.6.0514** · System **1.0.0019** · Venue 0.5.0018 · Contract 0.4.0010 ·
+  deploy). Current: Serenova **0.6.0518** · System **1.0.0019** · Venue 0.5.0018 · Contract 0.4.0010 ·
   Financial 0.3.0007 · Storage 0.2.0003. DB audit log = `AppVersion` (+ `recordAppVersion`).
 - **Mobile routing fix** (1h `preferDesktop` TTL, centralized in Layout) + **"Band & Crew Sign In"**
   button on Login → `/StagedLogin`.
