@@ -1,7 +1,16 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-18T21:30 EDT
+> Last Updated: 2026-06-18T22:00 EDT
+
+---
+
+## ✅ 2026-06-18: Phase SA C2 (+ B3) VERIFIED LIVE — SMS-preferred staged login works
+Owner "working great": `jones_adamd@me.com` (mobile `+13108904603`) gets the code by **SMS** with the
+masked hint, the email-instead toggle works, both channels sign in. Fixes codes-→-iCloud-spam.
+**Phase SA email/SMS code login fully live: A0, B1, B2, B2.1, B3, C2 all ✅.**
+**Remaining Phase SA:** B4 (My Profile + data-inventory security gate), D (band-member upsell/port),
+M (SystemHub Twilio cost card — needs a Twilio Usage-read credential; SMS-default raises spend).
 
 ---
 
