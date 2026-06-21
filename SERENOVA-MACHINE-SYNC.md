@@ -38,7 +38,7 @@
 | What | Value |
 |---|---|
 | Code repo `main` HEAD | (TM picker + multi-TM) — "Tour Manager picker: searchable, multi-select, linked-mgmt fix" |
-| Serenova version | **0.6.0531** |
+| Serenova version | **0.6.0532** |
 | Memory repo HEAD | (this commit) |
 | Build | green |
 | Pending live-verify | **TM picker + multi-TM** at `v0.6.0531` (deploy → `Event.tour_manager_user_emails[]` provisions → linked-mgmt people [Adam] selectable, labeled by artist-functional role [Tour Manager], named from User entity; multi-TM; request notifies all TMs) · **Push Group 2** at `v0.6.0529` · **B4.1** at `v0.6.0525` (Push Group 1 ✅ verified) |
