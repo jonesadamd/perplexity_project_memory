@@ -37,11 +37,11 @@
 
 | What | Value |
 |---|---|
-| Code repo `main` HEAD | (Travel save fix) — "AddTravel: fix TravelForm wiring so ground/train/car saves" |
-| Serenova version | **0.6.0535** |
+| Code repo `main` HEAD | `4f451a9` — "Flight times: render in each airport's local zone + DST 3-letter label" |
+| Serenova version | **0.6.0536** |
 | Memory repo HEAD | (this commit) |
 | Build | green |
-| Pending live-verify | **Mobile guest approve/deny** at `v0.6.0533` (next deploy) · **B4.1** at `v0.6.0525`. (Travel 403 + save fixes = ✅ owner-confirmed working.) |
+| Pending live-verify | **Flight times (airport-local + DST tz)** at `v0.6.0536` (`flightTime.js` helper; TravelList/MobileDrawer[fork] + TravelCard/PreviewDialog/LinkDialog[this pass]; TravelSummaryCard + print/dashboard/EventSchedule = follow-up) · **Mobile guest approve/deny** at `v0.6.0533` · **B4.1** at `v0.6.0525`. |
 
 ## 🟢 Active work (claim before building; clear when done)
 
