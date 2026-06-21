@@ -38,7 +38,7 @@
 | What | Value |
 |---|---|
 | Code repo `main` HEAD | (TM picker + multi-TM) — "Tour Manager picker: searchable, multi-select, linked-mgmt fix" |
-| Serenova version | **0.6.0532** |
+| Serenova version | **0.6.0533** |
 | Memory repo HEAD | (this commit) |
 | Build | green |
 | Pending live-verify | **TM picker + multi-TM** at `v0.6.0531` (deploy → `Event.tour_manager_user_emails[]` provisions → linked-mgmt people [Adam] selectable, labeled by artist-functional role [Tour Manager], named from User entity; multi-TM; request notifies all TMs) · **Push Group 2** at `v0.6.0529` · **B4.1** at `v0.6.0525` (Push Group 1 ✅ verified) |
@@ -54,7 +54,9 @@
 | laptop | Push+Travel-alerts **Group 1** (PWA Web Push delivery) | **✅ VERIFIED LIVE** (2026-06-21) | `0.6.0527`. Staged band/crew member enabled + got the self-test push end-to-end. Covers logged-in AND staged (identity via session token). `npm:web-push` works under Base44 Deno — risk cleared. |
 | laptop | Push+Travel-alerts **Group 2** (guest push: decision + request approver-notify) | **BUILT — verify pending** (2026-06-21) | `0.6.0529`. `decideGuestRequest` pushes the requester on decision; `submitStagedGuestRequest` notifies the approver(s) on a NEW request — **event Tour Manager only, fallback artist/owner + AMC confirm-role members** (owner rule). Email + push + `Notification` row. No new secret (VAPID reused). ⚠️ deploy → 2 fns + entity provision. Follow-up: logged-in (non-staged) request path is a client write → no server notify (staged is dominant). **`dispatchNotification` dispatcher + prefs deferred to Group 3**. |
 | laptop | **Tour Manager picker** (searchable/grouped multi-select + linked-mgmt members fix + multi-TM data model) | **BUILT — verify pending** (2026-06-21) | `0.6.0531` (post-test fixes: linked role = artist-functional role "Tour Manager" not Owner/Admin; names enriched from User entity → "Adam Jones (TM)" not "adam"). Pre-existing bug: TM dropdowns listed direct artist-account members only → linked AMC/BMC people (Adam@Original Artists) unselectable. New `loadEventTeamCandidates` + `TourManagerPicker` (Command+Popover); additive `Event.tour_manager_user_emails[]` (singular = back-compat mirror); wired EventWizard/BasicInfoTab/ManagementAgentsCard; `submitStagedGuestRequest` notifies all TMs. ⚠️ deploy (entity field + fn provision) + retest dropdown/notify. |
-| _(unclaimed)_ | Push+Travel-alerts **Group 3** (GH-Actions cron + flight delay/gate alerts + on-entry lookup; builds `dispatchNotification`) | next | needs `NOTIFY_INTERNAL_SECRET` + a secret-gated `asServiceRole` entry; tiered cadence; idempotent alert dispatch |
+| laptop | **Mobile guest approve/deny** (TM/Admin on MobileHub) | **BUILT — verify pending** (2026-06-21) | `0.6.0533`. Inline Approve/Deny on `Requested` guests in `MobileEventDetail`, gated `canManageGuests` (`!staged && canEdit('guest_list')`); routes via `decideGuestRequest`. Makes the guest push actionable on the phone. |
+| _(unclaimed)_ | **EventDetails (web) redesign + inline Guest List mgmt** (owner-queued, NOT expenses) | **next** | cleaner view/flow + add/edit guests + set comps + approve/deny inline (today EventDetails `GuestListCard` is approve/deny-only; full `GuestListTab` is coupled to EditEvent state → extract). Recon done; plan to follow. |
+| _(unclaimed)_ | Push+Travel-alerts **Group 3** (GH-Actions cron + flight delay/gate alerts + on-entry lookup; builds `dispatchNotification`) | later | needs `NOTIFY_INTERNAL_SECRET` + a secret-gated `asServiceRole` entry; tiered cadence; idempotent alert dispatch |
 
 > When you pick up a task: put your machine name in the row, set Status to "in progress",
 > commit+push this file, THEN start. When done, set "done <date>" and update the pointers table.

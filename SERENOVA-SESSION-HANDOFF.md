@@ -106,6 +106,13 @@ provision** on Base44 (watch the non-provisioning gotcha).
   **names enriched from the User entity** (`getUsersByEmailsForAccount`, known_as > first+last) → "Adam
   Jones (TM)" not "adam". ⚠️ deploy (new entity field + fns provision) → retest: dropdown lists Adam
   (Tour Manager, full name), multi-select works, request notifies all TMs.
+  **📱 Mobile guest approve/deny (`0.6.0533`, build-green):** logged-in TM/Admin on MobileHub can now
+  **Approve/Deny** `Requested` guests inline in `MobileEventDetail` (gated `canManageGuests` =
+  `!staged && canEdit('guest_list')`; via `decideGuestRequest`) — makes the guest push actionable on
+  the phone. **NEXT (owner-queued, NOT expenses): EventDetails (web) redesign** — cleaner view/flow +
+  INLINE guest management (add/edit/comps/approve-deny) so you don't open EditEvent. Recon done
+  (`GuestListCard` = approve/deny-only; `GuestListTab` = full manager but coupled to EditEvent state →
+  extract). Plan to follow.
 
 **Decisions/scope locked recently:** web band/crew full-view = **DEFERRED** (band stay MobileHub-only;
 not granting web access yet — keep the scoping pattern ready). Travel docs in staged = **full view**
