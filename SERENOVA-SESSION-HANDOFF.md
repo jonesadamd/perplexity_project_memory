@@ -1,11 +1,74 @@
 # Serenova Hub — Session Handoff
 > Quick-load context for any new AI session working on this project.
 > **Always read this first. Then read the repo docs before touching any code.**
-> Last Updated: 2026-06-19T16:10 EDT
+> **Two-machine setup (desktop + laptop) share this memory repo via git — read
+> `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
+> Last Updated: 2026-06-21T11:30 EDT
 
 ---
 
-## 🟢 CURRENT STATE — 2026-06-19 PM (read this first; supersedes the morning brief below)
+## 🟢 CURRENT STATE — 2026-06-21 (read this first; supersedes everything below)
+
+> **Serenova `0.6.0525`** · latest `main` commit **`ae2d36c`** · build green via
+> `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs in-repo: decisions log
+> **v2.97**, build phases **v2.58**, `STAGED-ACCESS-WORKING-DOC.md`, `MOBILEHUB-WORKING-DOC.md`.
+> (Decisions log / build-phases version refs trail slightly — the doc *content* is current to the
+> work below; bump them on the next doc pass.)
+
+**Done & verified live this stretch (all pushed to `main`):**
+1. **Phase SA C part 1 — band-member staged GUEST REQUESTS ✅ VERIFIED LIVE** (`0.6.0519`→`0521`).
+   Staged band member requests a guest from MobileHub → admin Approves/Denies on the EventDetails
+   **`GuestListCard`** (new) or the EditEvent **`GuestListTab`** → requester notified on **3 channels**
+   (email via `Core.SendEmail` + dismissible MobileHub **home banner** + web surfaces). Guests live in
+   `event.guest_lists` as `Requested` (no comp until approved); added a **`Denied`** status; `usedSlots`
+   excludes Requested+Denied. Owner/admin/manager on mobile get **both Add + Request**; band = Request
+   only; staged = view-only. Service fns: `submitStagedGuestRequest`, `decideGuestRequest`,
+   `dismissStagedNotice`.
+2. **🔒 MobileHub roster-scoping ✅ VERIFIED LIVE** (`0.6.0523`). Band/crew were seeing the artist's
+   ENTIRE calendar + all travel/hotels; now scoped to events where their email is in `roster_members`
+   (+ tied travel/hotels + own travel bookings). `getStagedMobileData` is the **hard boundary** (staged
+   band/crew have no API access); logged-in path scoped via a `scopeRef`. Roles scoped:
+   `band_member`/`crew_member`/`roadie_member`. **Caveat:** roster accuracy is now load-bearing.
+3. **Phase SA B4.1 — staged "My Profile" 🟡 SHIPPED, live-verify in progress** (`0.6.0524`→`0525`).
+   Reached from the MobileHub hamburger (staged only). Tabs **About You / Address / Travel**. Edits
+   LOW fields (name, known-as, mobile, office phone, **instrument + tour-role dropdowns** w/ "Other",
+   DOB, home address) + **travel docs shown IN FULL** to the member's own code-verified session
+   (passport/KTN/redress — owner decision 2026-06-20; **reversed the earlier masked plan**). **NO
+   payment/bank/SSN path at all** (hard-excluded by a server whitelist — that's the security gate).
+   `saveStagedProfile` rewritten (whitelist + `deepMerge` travel_info, preserves visas/loyalty);
+   `getStagedMobileData.profile` returns the broader fields. `Membership.pending_profile_data` gained
+   `known_as`+`date_of_birth` (additive). Polished from live test: safe-area top padding (menu X +
+   back buttons were under the iOS status bar), date-input width fix, greeting refresh on save.
+
+**⚠️ Pending LIVE verify (needs a Base44 rebuild — editor add-space-Save trick → hard reload; canary
+`v0.6.0525`):** B4.1 — open My Profile as a staged band member (`mj.oriole20@gmail.com`), edit Low
+fields + dropdowns + full travel docs → Save → reopen, all persisted; sensitive fields absent; menu/back
+tap targets clear the notch. The **3 guest fns + `saveStagedProfile`/`getStagedMobileData` changes must
+provision** on Base44 (watch the non-provisioning gotcha).
+
+**🔜 NEXT (owner-queued, in order):**
+- **B4.2 — Verify-gated phone + email change** (the natural next step; owner flagged that changing the
+  SMS-login phone must require a code). Email change = code-to-new-email → backend re-keys all the
+  identity's Membership records old→new. Phone change = Verify code to the new number (SMS is live, C2).
+- **Phase SA C part 2 — EXPENSES** via a separate **`StagedRequests` holding queue** (owner's design:
+  nothing financial enters an account until approved; service-role receipt quarantine + promote-on-
+  approval — keeps the staged hard-cap fully closed on financials).
+- **Push notifications + Travel/Transportation alerts** track. **Reconnaissance done:** the flight infra
+  is ~80% there — **FlightAware AeroAPI** (two cost-tiered keys), a **`LiveFlightData` entity with a
+  full alert model** (delay/gate/terminal/cancellation, severity, acknowledge flow),
+  `refreshLiveDataForUpcomingFlights`, a `route_type` domestic/intl field, the 2h/3h arrival logic, and
+  an extensible `UserPreference` entity. **Gaps:** the push delivery pipeline (service worker + VAPID +
+  PushSubscription entity + opt-in), a **scheduler/cron**, and the **daily-summary generator**. Owner
+  wants: flight alerts = **delays + gate changes only**; a **morning-of/prior-day travel summary** with
+  check-in rec (2h domestic / 3h intl). A planning doc for this track is still to be written.
+
+**Decisions/scope locked recently:** web band/crew full-view = **DEFERRED** (band stay MobileHub-only;
+not granting web access yet — keep the scoping pattern ready). Travel docs in staged = **full view**
+(verified-session, owner-accepted). Email approval carries a SendGrid auto-unsubscribe footer (watch-item).
+
+---
+
+## 🟢 CURRENT STATE — 2026-06-19 PM (historical — superseded by the 2026-06-21 brief above)
 
 > **Phase SA C part 1 — band-member staged GUEST REQUESTS ✅ SHIPPED & VERIFIED LIVE.** Serenova now
 > **0.6.0523**. Latest `main` commit `8c93d8f`; build green via
