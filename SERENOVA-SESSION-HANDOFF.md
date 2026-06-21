@@ -20,10 +20,18 @@
 > live; Group 2 + TM picker + mobile approve/deny owner-confirmed (mobile approve/deny `0.6.0533` to
 > re-verify on next deploy). Detail in the dated blocks below.
 >
-> **🎯 NEW FOCUS (owner, 2026-06-21, in order): (1) FIX — adding GROUND TRANSPORTATION on the Travel
-> page isn't working** (in progress; owner describing the symptom). **(2) EventDetails (web) view
-> cleanup/redesign** + inline guest mgmt (recon done). **Expenses still parked. Push Group 3 (flight
-> alerts) = later.** See `SERENOVA-MACHINE-SYNC.md` Active-work table.
+> **✅ Travel ground-transport fix DONE 2026-06-21 (owner-confirmed "works and saves," `0.6.0535`):**
+> two root causes — (1) link-only mgmt user (`adam@originalartists.com` via Original Artists) 403'd
+> `getUsersByEmailsForAccount` → fatal red-error page (broadened that fn's access + made Travel
+> enrichment non-fatal; also clears the TM-picker/Team enrichment caveat for link-only mgmt users);
+> (2) `AddTravel` mis-wired `TravelForm` (React `ref` to a non-forwardRef fn → `?.save()` silent no-op)
+> → fixed to `formRef`/`accountId`/`onSave`/`requestSubmit()`.
+>
+> **🎯 CURRENT FOCUS (owner, 2026-06-21): EventDetails (web) view cleanup/redesign + INLINE Guest List
+> mgmt** (in progress — gathering design direction). Cleaner view/flow; today `GuestListCard` is
+> approve/deny-only and the full `GuestListTab` is coupled to EditEvent → extract. Recon done
+> (EventDetails.jsx ~827 lines, right-rail stack of ~8 cards). **Expenses still parked. Push Group 3
+> (flight alerts) = later.** See `SERENOVA-MACHINE-SYNC.md` Active-work table.
 
 **Done & verified live this stretch (all pushed to `main`):**
 1. **Phase SA C part 1 — band-member staged GUEST REQUESTS ✅ VERIFIED LIVE** (`0.6.0519`→`0521`).
