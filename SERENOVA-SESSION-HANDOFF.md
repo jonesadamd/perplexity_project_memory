@@ -74,10 +74,11 @@ provision** on Base44 (watch the non-provisioning gotcha).
   throws. **`0.6.0527` brought STAGED band/crew push forward into v1** (live test: the MobileHub menu
   is a staged session — the primary audience; `savePushSubscription`/`sendPushToSubscriptions` resolve
   identity from the staged session token, client passes `getStagedToken()`, menu gate relaxed to all).
-  VAPID env fully wired (`VITE_VAPID_PUBLIC_KEY` committed). ⚠️ Re-deploy → the 2 updated fns must
-  re-provision → retest as the same staged band member. **Next = Group 2** (channel-agnostic
-  `Notification` spine + `dispatchNotification`; re-point `decideGuestRequest` through it so the guest
-  notice gains the push channel).
+  VAPID env fully wired (`VITE_VAPID_PUBLIC_KEY` committed). **✅ VERIFIED LIVE 2026-06-21** — a staged
+  band/crew member on an installed PWA enabled notifications + received the self-test push end-to-end;
+  `npm:web-push` runs fine under Base44's Deno (runtime risk cleared). **Push Group 1 DONE
+  (`0.6.0527`). Next = Group 2** (channel-agnostic `Notification` spine + `dispatchNotification`;
+  re-point `decideGuestRequest` through it so the guest-request notice gains the push channel).
 
 **Decisions/scope locked recently:** web band/crew full-view = **DEFERRED** (band stay MobileHub-only;
 not granting web access yet — keep the scoping pattern ready). Travel docs in staged = **full view**
