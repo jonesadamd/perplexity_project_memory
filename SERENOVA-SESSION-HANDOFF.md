@@ -60,7 +60,13 @@ provision** on Base44 (watch the non-provisioning gotcha).
   an extensible `UserPreference` entity. **Gaps:** the push delivery pipeline (service worker + VAPID +
   PushSubscription entity + opt-in), a **scheduler/cron**, and the **daily-summary generator**. Owner
   wants: flight alerts = **delays + gate changes only**; a **morning-of/prior-day travel summary** with
-  check-in rec (2h domestic / 3h intl). A planning doc for this track is still to be written.
+  check-in rec (2h domestic / 3h intl). ✅ **PLANNING DOC NOW WRITTEN** (laptop, 2026-06-21):
+  `docs/PUSH-TRAVEL-ALERTS-WORKING-DOC.md` — 5 build groups + audit-grounded foundation. Owner
+  decisions locked: alerts = delays+gate only; **day-of** summary; **on-entry live lookup** at
+  flight-record time; **scheduler = GitHub Actions cron** (confirmed no native Base44 scheduler);
+  tiered refresh cadence (T‑24h→T‑6h ~2h, T‑6h→landing ~15m). Decisions-log v2.98, build-phases v2.59.
+  **Next = Group 1** (push delivery: `sw.js` + `PushSubscription` entity + VAPID + send fn). Nothing
+  built yet.
 
 **Decisions/scope locked recently:** web band/crew full-view = **DEFERRED** (band stay MobileHub-only;
 not granting web access yet — keep the scoping pattern ready). Travel docs in staged = **full view**

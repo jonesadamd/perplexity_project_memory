@@ -48,9 +48,10 @@
 | Machine | Task | Status | Notes |
 |---|---|---|---|
 | desktop | Handoff + sync-doc refresh | done 2026-06-21 | this update |
+| laptop | Push + Travel-alerts planning doc | **done 2026-06-21** | `docs/PUSH-TRAVEL-ALERTS-WORKING-DOC.md` created; owner decisions locked (alerts=delays+gate only; day-of summary; on-entry lookup; **scheduler=GH Actions cron**, no native Base44 scheduler; tiered cadence). Build-phases→2.59, decisions-log→2.98. Planning only, nothing built. |
 | _(unclaimed)_ | B4.2 — Verify-gated phone/email change | next | re-key Memberships on email change; Verify code on phone change |
-| _(unclaimed)_ | Push + Travel-alerts planning doc | next | research already done (in handoff); just needs writing |
 | _(unclaimed)_ | Phase SA C part 2 — Expenses (`StagedRequests`) | queued | holding queue + receipt quarantine |
+| _(unclaimed)_ | Push+Travel-alerts **Group 1** (push delivery: sw.js + PushSubscription + VAPID + send fn) | queued | first build group from the new planning doc |
 
 > When you pick up a task: put your machine name in the row, set Status to "in progress",
 > commit+push this file, THEN start. When done, set "done <date>" and update the pointers table.
