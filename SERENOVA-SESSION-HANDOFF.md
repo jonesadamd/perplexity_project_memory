@@ -100,8 +100,12 @@ provision** on Base44 (watch the non-provisioning gotcha).
   "Tour & production"; search = everyone). Additive `Event.tour_manager_user_emails[]` (canonical;
   singular `tour_manager_user_email` mirrors `emails[0]` for back-compat; all readers use
   array-with-singular-fallback). Wired into EventWizard/BasicInfoTab/ManagementAgentsCard;
-  `submitStagedGuestRequest` notifies ALL event TMs. ⚠️ deploy (new entity field + fns provision) →
-  retest: dropdown lists Adam, multi-select works, request notifies all TMs.
+  `submitStagedGuestRequest` notifies ALL event TMs. **Post-test fixes (`0.6.0531`):** linked people
+  now show their **artist-functional role** ("Tour Manager", from `LinkedAccount.artist_account_permission_template_id`
+  via `Team.jsx` PRETTY_ROLE) not their company membership role (was "Owner"/"Admin"); candidate
+  **names enriched from the User entity** (`getUsersByEmailsForAccount`, known_as > first+last) → "Adam
+  Jones (TM)" not "adam". ⚠️ deploy (new entity field + fns provision) → retest: dropdown lists Adam
+  (Tour Manager, full name), multi-select works, request notifies all TMs.
 
 **Decisions/scope locked recently:** web band/crew full-view = **DEFERRED** (band stay MobileHub-only;
 not granting web access yet — keep the scoping pattern ready). Travel docs in staged = **full view**
