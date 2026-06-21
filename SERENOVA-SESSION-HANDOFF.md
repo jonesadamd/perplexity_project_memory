@@ -3,16 +3,16 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-21T11:30 EDT
+> Last Updated: 2026-06-21T18:40 EDT
 
 ---
 
 ## 🟢 CURRENT STATE — 2026-06-21 (read this first; supersedes everything below)
 
-> **Serenova `0.6.0533`** · latest `main` commit **`cdc4221`** · build green via
+> **Serenova `0.6.0545`** · latest `main` commit **`6b9c294`** · build green via
 > `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs in-repo: decisions log
-> **v2.105**, build phases **v2.63**, `PUSH-TRAVEL-ALERTS-WORKING-DOC.md`, `STAGED-ACCESS-WORKING-DOC.md`,
-> `MOBILEHUB-WORKING-DOC.md`.
+> **v2.115**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
+> `PUSH-TRAVEL-ALERTS-WORKING-DOC.md`, `STAGED-ACCESS-WORKING-DOC.md`, `MOBILEHUB-WORKING-DOC.md`.
 >
 > **✅ CLOSED 2026-06-21 (owner-confirmed working): Guest notifications + Tour Manager picker + mobile
 > approve/deny** (`0.6.0527`→`0.6.0533`). Full guest flow works end-to-end: request → notify TM(s)/AMC
@@ -27,11 +27,23 @@
 > (2) `AddTravel` mis-wired `TravelForm` (React `ref` to a non-forwardRef fn → `?.save()` silent no-op)
 > → fixed to `formRef`/`accountId`/`onSave`/`requestSubmit()`.
 >
-> **🎯 CURRENT FOCUS (owner, 2026-06-21): EventDetails (web) view cleanup/redesign + INLINE Guest List
-> mgmt** (in progress — gathering design direction). Cleaner view/flow; today `GuestListCard` is
-> approve/deny-only and the full `GuestListTab` is coupled to EditEvent → extract. Recon done
-> (EventDetails.jsx ~827 lines, right-rail stack of ~8 cards). **Expenses still parked. Push Group 3
-> (flight alerts) = later.** See `SERENOVA-MACHINE-SYNC.md` Active-work table.
+> **🎯 CURRENT FOCUS (owner, 2026-06-21): EventDetails (web) redesign — ACTIVELY BUILDING, staged.**
+> Source of truth = `docs/EVENTDETAILS-REDESIGN-WORKING-DOC.md`. Page-scoped brand-teal restyle (the
+> rest of the app rebrands later "as we update"). Done so far: **Stage 1** 4-tab scaffold
+> (Overview · People · Travel · Financials, `0.6.0541`) + polish (slim teal header, Quick Actions above
+> tabs/gated/collapsible, `0.6.0542`); **header "Option 3"** (`0.6.0544`, owner-picked — Back in header,
+> action buttons top-right, smaller iconless title, date RANGE across performances, quiet status
+> dot+label); **Stage 5 Venue card** (`0.6.0545`) — `VenueDetailsCard` rebuilt venue-focused: dropped
+> the duplicated event title; venue name + Database badge + capacity, address, **small keyless Google
+> Maps embed** (`maps?q=…&output=embed`, **no API key / no per-view cost**; owner has a Google Places
+> key but keyless is free+fine — upgrade path is enabling **Maps Embed API** for the official
+> `maps/embed/v1/place` endpoint if it ever flakes), Open-in-Maps, **venue contacts / parking / house
+> backline** from the `Venue` entity; the **hotel moved OUT to the Travel tab** (`AccommodationCard`
+> under `TravelCard`, interim flat list). **STILL OPEN:** Stage 2 (extract EditEvent `GuestListTab` →
+> self-contained `GuestManagerDialog`), Stage 3 (wire "Manage guests" on the Overview Guest List card),
+> Stage 4 (**hotel-grouped** accommodation display on Travel — spec in the redesign doc); cleanup:
+> remove unused `getStatusBadge`/`getContractBadge` from `EventDetails.jsx`. **Expenses still parked.
+> Push Group 3 (flight alerts) = later.** See `SERENOVA-MACHINE-SYNC.md` Active-work table.
 
 **Done & verified live this stretch (all pushed to `main`):**
 1. **Phase SA C part 1 — band-member staged GUEST REQUESTS ✅ VERIFIED LIVE** (`0.6.0519`→`0521`).
