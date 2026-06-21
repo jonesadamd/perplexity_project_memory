@@ -91,6 +91,17 @@ provision** on Base44 (watch the non-provisioning gotcha).
   request path is a client `Event.update` → no server notify (staged is the dominant band/crew path).
   **Next = Group 3** (GH-Actions cron + flight delay/gate alerts + on-entry lookup; builds the
   dispatcher with `NOTIFY_INTERNAL_SECRET`, consolidating the 3 inline web-push sites).
+  **🧭 ALSO (`0.6.0530`): Tour Manager picker rebuilt + multi-TM.** Pre-existing bug (NOT push work,
+  from `922785f` 2026-06-16): TM dropdowns listed direct artist-account members only → linked
+  management-company people (Adam @ Original Artists) couldn't be selected as TM (hence the missing
+  notification). Fix: new `src/utils/eventTeamCandidates.js` (artist team + all active linked AMC/BMC/
+  booking members, deduped, tagged onEvent/relevant) + new searchable/grouped **multi-select**
+  `src/components/events/TourManagerPicker.jsx` (Command+Popover; quick list "On this event" →
+  "Tour & production"; search = everyone). Additive `Event.tour_manager_user_emails[]` (canonical;
+  singular `tour_manager_user_email` mirrors `emails[0]` for back-compat; all readers use
+  array-with-singular-fallback). Wired into EventWizard/BasicInfoTab/ManagementAgentsCard;
+  `submitStagedGuestRequest` notifies ALL event TMs. ⚠️ deploy (new entity field + fns provision) →
+  retest: dropdown lists Adam, multi-select works, request notifies all TMs.
 
 **Decisions/scope locked recently:** web band/crew full-view = **DEFERRED** (band stay MobileHub-only;
 not granting web access yet — keep the scoping pattern ready). Travel docs in staged = **full view**
