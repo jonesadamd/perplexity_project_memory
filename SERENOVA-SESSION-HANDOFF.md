@@ -65,8 +65,14 @@ provision** on Base44 (watch the non-provisioning gotcha).
   decisions locked: alerts = delays+gate only; **day-of** summary; **on-entry live lookup** at
   flight-record time; **scheduler = GitHub Actions cron** (confirmed no native Base44 scheduler);
   tiered refresh cadence (T‑24h→T‑6h ~2h, T‑6h→landing ~15m). Decisions-log v2.98, build-phases v2.59.
-  **Next = Group 1** (push delivery: `sw.js` + `PushSubscription` entity + VAPID + send fn). Nothing
-  built yet.
+  **Group 1 (push delivery) ✅ BUILT 2026-06-21** (Serenova `0.6.0526`, build-green, ⚠️ live-verify
+  pending): new `PushSubscription` entity + `savePushSubscription`/`sendPushToSubscriptions`
+  (`npm:web-push`+VAPID) + push-only `public/sw.js` + `src/lib/push.js` + "Enable notifications" in
+  MobileHamburgerMenu (logged-in only; staged=v1.1). Owner added the 3 VAPID Base44 secrets; **still
+  needs `VITE_VAPID_PUBLIC_KEY` in client env (.env.local)** + deploy (save-trick; new entity+2 fns
+  must provision) + iPhone test. Runtime risk: `npm:web-push` under Deno → swap to Deno-native if it
+  throws. **Next = Group 2** (channel-agnostic `Notification` spine + `dispatchNotification`;
+  re-point `decideGuestRequest` through it so the guest notice gains the push channel).
 
 **Decisions/scope locked recently:** web band/crew full-view = **DEFERRED** (band stay MobileHub-only;
 not granting web access yet — keep the scoping pattern ready). Travel docs in staged = **full view**

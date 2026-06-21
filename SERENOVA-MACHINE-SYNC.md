@@ -37,11 +37,11 @@
 
 | What | Value |
 |---|---|
-| Code repo `main` HEAD | `ae2d36c` — "B4.1 polish from live test…" |
-| Serenova version | **0.6.0525** |
+| Code repo `main` HEAD | (Push Group 1 commit) — "Push Group 1: web push delivery" |
+| Serenova version | **0.6.0526** |
 | Memory repo HEAD | (this commit) |
 | Build | green |
-| Pending live-verify | **B4.1** at `v0.6.0525` (deploy via save-trick first) |
+| Pending live-verify | **Push Group 1** at `v0.6.0526` (needs `VITE_VAPID_PUBLIC_KEY` client env + deploy via save-trick; new entity+2 fns must provision) · also **B4.1** at `v0.6.0525` |
 
 ## 🟢 Active work (claim before building; clear when done)
 
@@ -51,7 +51,7 @@
 | laptop | Push + Travel-alerts planning doc | **done 2026-06-21** | `docs/PUSH-TRAVEL-ALERTS-WORKING-DOC.md` created; owner decisions locked (alerts=delays+gate only; day-of summary; on-entry lookup; **scheduler=GH Actions cron**, no native Base44 scheduler; tiered cadence). Build-phases→2.59, decisions-log→2.98. Planning only, nothing built. |
 | _(unclaimed)_ | B4.2 — Verify-gated phone/email change | next | re-key Memberships on email change; Verify code on phone change |
 | _(unclaimed)_ | Phase SA C part 2 — Expenses (`StagedRequests`) | queued | holding queue + receipt quarantine |
-| laptop | Push+Travel-alerts **Group 1** (push delivery: sw.js + PushSubscription + VAPID + send fn) | **in progress** (2026-06-21) | dedicated `PushSubscription` entity + logged-in-first; VAPID via env/secrets (owner generates keypair) |
+| laptop | Push+Travel-alerts **Group 1** (push delivery: sw.js + PushSubscription + VAPID + send fn) | **BUILT — verify pending** (2026-06-21) | `0.6.0526` build-green. Owner added 3 VAPID Base44 secrets; ⚠️ **still needs `VITE_VAPID_PUBLIC_KEY` in client env** + deploy + device test. Runtime risk: `npm:web-push` on Deno. Next = **Group 2** (Notification spine + re-point guest notice through push). |
 
 > When you pick up a task: put your machine name in the row, set Status to "in progress",
 > commit+push this file, THEN start. When done, set "done <date>" and update the pointers table.
