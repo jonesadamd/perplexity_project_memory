@@ -38,7 +38,7 @@
 | What | Value |
 |---|---|
 | Code repo `main` HEAD | `4f451a9` — "Flight times: render in each airport's local zone + DST 3-letter label" |
-| Serenova version | **0.6.0536** |
+| Serenova version | **0.6.0537** |
 | Memory repo HEAD | (this commit) |
 | Build | green |
 | Pending live-verify | **Flight times (airport-local + DST tz)** at `v0.6.0536` (`flightTime.js` helper; TravelList/MobileDrawer[fork] + TravelCard/PreviewDialog/LinkDialog[this pass]; TravelSummaryCard + print/dashboard/EventSchedule = follow-up) · **Mobile guest approve/deny** at `v0.6.0533` · **B4.1** at `v0.6.0525`. |
