@@ -41,7 +41,7 @@
 | Serenova version | **0.6.0538** |
 | Memory repo HEAD | (this commit) |
 | Build | green |
-| Pending live-verify | **Flight times (airport-local + DST tz)** at `v0.6.0536` (`flightTime.js` helper; TravelList/MobileDrawer[fork] + TravelCard/PreviewDialog/LinkDialog[this pass]; TravelSummaryCard + print/dashboard/EventSchedule = follow-up) · **Mobile guest approve/deny** at `v0.6.0533` · **B4.1** at `v0.6.0525`. |
+| Pending live-verify | **Mobile guest approve/deny** at `v0.6.0533` · **B4.1** at `v0.6.0525`. (✅ Flight times airport-local + **static IATA→IANA map, zero API cost** owner-confirmed live: "11:30 AM EDT → 2:50 PM PDT". Route-search/manual paths still UTC + display IATA-fallback = follow-ups. The AddTravel empty-dropdown was a Base44 **preview-only** 429 throttle — fine on live; if 429s ever hit live, memoize `getUsersByEmailsForAccount` + add retry/backoff.) |
 
 ## 🟢 Active work (claim before building; clear when done)
 
