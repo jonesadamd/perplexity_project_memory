@@ -76,9 +76,16 @@ provision** on Base44 (watch the non-provisioning gotcha).
   identity from the staged session token, client passes `getStagedToken()`, menu gate relaxed to all).
   VAPID env fully wired (`VITE_VAPID_PUBLIC_KEY` committed). **✅ VERIFIED LIVE 2026-06-21** — a staged
   band/crew member on an installed PWA enabled notifications + received the self-test push end-to-end;
-  `npm:web-push` runs fine under Base44's Deno (runtime risk cleared). **Push Group 1 DONE
-  (`0.6.0527`). Next = Group 2** (channel-agnostic `Notification` spine + `dispatchNotification`;
-  re-point `decideGuestRequest` through it so the guest-request notice gains the push channel).
+  `npm:web-push` runs fine under Base44's Deno (runtime risk cleared). **Push Group 1 DONE (`0.6.0527`).**
+  **Push Group 2 🔄 BUILT (`0.6.0528`, verify pending):** `decideGuestRequest` now pushes the requester
+  on approve/deny (inline web-push, reuses Group 1 VAPID + `PushSubscription`, best-effort) + records a
+  new `Notification` entity row → the guest notice now goes out on **3 channels** (email + banner +
+  push). **No new secret** (VAPID reused). ⚠️ deploy → new `Notification` entity + updated
+  `decideGuestRequest` must provision → test as: staged band member requests guest → admin approves →
+  requester gets a push. **`dispatchNotification` multi-channel dispatcher + prefs panel intentionally
+  deferred to Group 3** (a send-to-anyone dispatcher needs the same secret-gated entry the cron does).
+  **Next = Group 3** (GH-Actions cron + flight delay/gate alerts + on-entry lookup; builds the
+  dispatcher with `NOTIFY_INTERNAL_SECRET`).
 
 **Decisions/scope locked recently:** web band/crew full-view = **DEFERRED** (band stay MobileHub-only;
 not granting web access yet — keep the scoping pattern ready). Travel docs in staged = **full view**
