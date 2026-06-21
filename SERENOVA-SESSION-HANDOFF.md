@@ -84,8 +84,13 @@ provision** on Base44 (watch the non-provisioning gotcha).
   `decideGuestRequest` must provision → test as: staged band member requests guest → admin approves →
   requester gets a push. **`dispatchNotification` multi-channel dispatcher + prefs panel intentionally
   deferred to Group 3** (a send-to-anyone dispatcher needs the same secret-gated entry the cron does).
+  **Also (`0.6.0529`): approver-notify on REQUEST** — `submitStagedGuestRequest` now notifies the
+  approver(s) when a guest is requested (was silent): **event-assigned Tour Manager only, fallback to
+  artist/owner + AMC confirm-role members** (owner rule); email + push + `Notification` row; requester
+  never self-notified. Reuses Group 1 VAPID (no new secret). Follow-up: the logged-in (non-staged)
+  request path is a client `Event.update` → no server notify (staged is the dominant band/crew path).
   **Next = Group 3** (GH-Actions cron + flight delay/gate alerts + on-entry lookup; builds the
-  dispatcher with `NOTIFY_INTERNAL_SECRET`).
+  dispatcher with `NOTIFY_INTERNAL_SECRET`, consolidating the 3 inline web-push sites).
 
 **Decisions/scope locked recently:** web band/crew full-view = **DEFERRED** (band stay MobileHub-only;
 not granting web access yet — keep the scoping pattern ready). Travel docs in staged = **full view**

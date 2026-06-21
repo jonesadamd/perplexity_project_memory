@@ -37,11 +37,11 @@
 
 | What | Value |
 |---|---|
-| Code repo `main` HEAD | (Push Group 2 commit) — "Push Group 2: guest-decision push" |
-| Serenova version | **0.6.0528** |
+| Code repo `main` HEAD | (Push Group 2 + approver-notify) — "Push Group 2: approver notify on request" |
+| Serenova version | **0.6.0529** |
 | Memory repo HEAD | (this commit) |
 | Build | green |
-| Pending live-verify | **Push Group 2** at `v0.6.0528` (deploy → new `Notification` entity + updated `decideGuestRequest` provision → guest approve/deny pushes the requester) · also **B4.1** at `v0.6.0525` (Push Group 1 ✅ verified) |
+| Pending live-verify | **Push Group 2** at `v0.6.0529` (deploy → `Notification` entity + updated `decideGuestRequest` + `submitStagedGuestRequest` provision → approve/deny pushes requester; new request notifies the event TM / fallback artist+AMC) · also **B4.1** at `v0.6.0525` (Push Group 1 ✅ verified) |
 
 ## 🟢 Active work (claim before building; clear when done)
 
@@ -52,7 +52,7 @@
 | _(unclaimed)_ | B4.2 — Verify-gated phone/email change | next | re-key Memberships on email change; Verify code on phone change |
 | _(unclaimed)_ | Phase SA C part 2 — Expenses (`StagedRequests`) | queued | holding queue + receipt quarantine |
 | laptop | Push+Travel-alerts **Group 1** (PWA Web Push delivery) | **✅ VERIFIED LIVE** (2026-06-21) | `0.6.0527`. Staged band/crew member enabled + got the self-test push end-to-end. Covers logged-in AND staged (identity via session token). `npm:web-push` works under Base44 Deno — risk cleared. |
-| laptop | Push+Travel-alerts **Group 2** (guest-decision push + `Notification` spine entity) | **BUILT — verify pending** (2026-06-21) | `0.6.0528`. `decideGuestRequest` now pushes the requester (3 channels) + records a `Notification` row. No new secret (VAPID reused). ⚠️ deploy → entity + fn provision → guest approve/deny pushes. **`dispatchNotification` dispatcher + prefs panel deferred to Group 3** (shares the cron's secret-gated entry). |
+| laptop | Push+Travel-alerts **Group 2** (guest push: decision + request approver-notify) | **BUILT — verify pending** (2026-06-21) | `0.6.0529`. `decideGuestRequest` pushes the requester on decision; `submitStagedGuestRequest` notifies the approver(s) on a NEW request — **event Tour Manager only, fallback artist/owner + AMC confirm-role members** (owner rule). Email + push + `Notification` row. No new secret (VAPID reused). ⚠️ deploy → 2 fns + entity provision. Follow-up: logged-in (non-staged) request path is a client write → no server notify (staged is dominant). **`dispatchNotification` dispatcher + prefs deferred to Group 3**. |
 | _(unclaimed)_ | Push+Travel-alerts **Group 3** (GH-Actions cron + flight delay/gate alerts + on-entry lookup; builds `dispatchNotification`) | next | needs `NOTIFY_INTERNAL_SECRET` + a secret-gated `asServiceRole` entry; tiered cadence; idempotent alert dispatch |
 
 > When you pick up a task: put your machine name in the row, set Status to "in progress",
