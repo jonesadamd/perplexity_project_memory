@@ -37,26 +37,22 @@
 
 | What | Value |
 |---|---|
-| Code repo `main` HEAD | (TM picker + multi-TM) — "Tour Manager picker: searchable, multi-select, linked-mgmt fix" |
+| Code repo `main` HEAD | `cdc4221` — "Mobile: TM/Admin approve/deny for guest requests on MobileHub" |
 | Serenova version | **0.6.0533** |
 | Memory repo HEAD | (this commit) |
 | Build | green |
-| Pending live-verify | **TM picker + multi-TM** at `v0.6.0531` (deploy → `Event.tour_manager_user_emails[]` provisions → linked-mgmt people [Adam] selectable, labeled by artist-functional role [Tour Manager], named from User entity; multi-TM; request notifies all TMs) · **Push Group 2** at `v0.6.0529` · **B4.1** at `v0.6.0525` (Push Group 1 ✅ verified) |
+| Pending live-verify | **Mobile guest approve/deny** at `v0.6.0533` (next deploy) · **B4.1** at `v0.6.0525`. (Guest notifications + TM picker = owner-confirmed working.) |
 
 ## 🟢 Active work (claim before building; clear when done)
 
 | Machine | Task | Status | Notes |
 |---|---|---|---|
-| desktop | Handoff + sync-doc refresh | done 2026-06-21 | this update |
-| laptop | Push + Travel-alerts planning doc | **done 2026-06-21** | `docs/PUSH-TRAVEL-ALERTS-WORKING-DOC.md` created; owner decisions locked (alerts=delays+gate only; day-of summary; on-entry lookup; **scheduler=GH Actions cron**, no native Base44 scheduler; tiered cadence). Build-phases→2.59, decisions-log→2.98. Planning only, nothing built. |
-| _(unclaimed)_ | B4.2 — Verify-gated phone/email change | next | re-key Memberships on email change; Verify code on phone change |
-| _(unclaimed)_ | Phase SA C part 2 — Expenses (`StagedRequests`) | queued | holding queue + receipt quarantine |
-| laptop | Push+Travel-alerts **Group 1** (PWA Web Push delivery) | **✅ VERIFIED LIVE** (2026-06-21) | `0.6.0527`. Staged band/crew member enabled + got the self-test push end-to-end. Covers logged-in AND staged (identity via session token). `npm:web-push` works under Base44 Deno — risk cleared. |
-| laptop | Push+Travel-alerts **Group 2** (guest push: decision + request approver-notify) | **BUILT — verify pending** (2026-06-21) | `0.6.0529`. `decideGuestRequest` pushes the requester on decision; `submitStagedGuestRequest` notifies the approver(s) on a NEW request — **event Tour Manager only, fallback artist/owner + AMC confirm-role members** (owner rule). Email + push + `Notification` row. No new secret (VAPID reused). ⚠️ deploy → 2 fns + entity provision. Follow-up: logged-in (non-staged) request path is a client write → no server notify (staged is dominant). **`dispatchNotification` dispatcher + prefs deferred to Group 3**. |
-| laptop | **Tour Manager picker** (searchable/grouped multi-select + linked-mgmt members fix + multi-TM data model) | **BUILT — verify pending** (2026-06-21) | `0.6.0531` (post-test fixes: linked role = artist-functional role "Tour Manager" not Owner/Admin; names enriched from User entity → "Adam Jones (TM)" not "adam"). Pre-existing bug: TM dropdowns listed direct artist-account members only → linked AMC/BMC people (Adam@Original Artists) unselectable. New `loadEventTeamCandidates` + `TourManagerPicker` (Command+Popover); additive `Event.tour_manager_user_emails[]` (singular = back-compat mirror); wired EventWizard/BasicInfoTab/ManagementAgentsCard; `submitStagedGuestRequest` notifies all TMs. ⚠️ deploy (entity field + fn provision) + retest dropdown/notify. |
-| laptop | **Mobile guest approve/deny** (TM/Admin on MobileHub) | **BUILT — verify pending** (2026-06-21) | `0.6.0533`. Inline Approve/Deny on `Requested` guests in `MobileEventDetail`, gated `canManageGuests` (`!staged && canEdit('guest_list')`); routes via `decideGuestRequest`. Makes the guest push actionable on the phone. |
-| _(unclaimed)_ | **EventDetails (web) redesign + inline Guest List mgmt** (owner-queued, NOT expenses) | **next** | cleaner view/flow + add/edit guests + set comps + approve/deny inline (today EventDetails `GuestListCard` is approve/deny-only; full `GuestListTab` is coupled to EditEvent state → extract). Recon done; plan to follow. |
+| laptop | **Guest notifications + TM picker + mobile approve/deny** (Push Groups 1–2 + approver-notify + searchable multi-TM picker + linked-mgmt fix + mobile TM/Admin approve/deny) | **✅ DONE — owner-confirmed working 2026-06-21** | `0.6.0527`→`0.6.0533`. Full guest flow: request → notify TM(s)/AMC (email+push+`Notification`) → approve/deny on **web + mobile** → requester notified (email+push+banner). `TourManagerPicker` (searchable, multi-select, linked AMC/BMC people, artist-functional roles + User-entity names). `npm:web-push` proven on Deno. Mobile approve/deny (`0.6.0533`) verify on next deploy. **Push Group 3 (flight alerts) is separate — see below.** Docs: working doc + decisions-log v2.105, build-phases v2.63. |
+| laptop | **Travel page — adding ground transportation issue** (FIX) | **in progress** (2026-06-21) | owner reported adding ground transportation isn't working; owner to describe the exact symptom → fix. |
+| _(unclaimed)_ | **EventDetails (web) view cleanup/redesign** + inline Guest List mgmt | **next** (after travel) | cleaner view/flow; today `GuestListCard` is approve/deny-only, full `GuestListTab` coupled to EditEvent state → extract into a self-contained component. Recon done (EventDetails.jsx ~827 lines, right-rail card stack). |
 | _(unclaimed)_ | Push+Travel-alerts **Group 3** (GH-Actions cron + flight delay/gate alerts + on-entry lookup; builds `dispatchNotification`) | later | needs `NOTIFY_INTERNAL_SECRET` + a secret-gated `asServiceRole` entry; tiered cadence; idempotent alert dispatch |
+| _(unclaimed)_ | B4.2 — Verify-gated phone/email change | backlog | re-key Memberships on email change; Verify code on phone change |
+| _(unclaimed)_ | Phase SA C part 2 — Expenses (`StagedRequests`) | backlog (owner: not yet) | holding queue + receipt quarantine |
 
 > When you pick up a task: put your machine name in the row, set Status to "in progress",
 > commit+push this file, THEN start. When done, set "done <date>" and update the pointers table.

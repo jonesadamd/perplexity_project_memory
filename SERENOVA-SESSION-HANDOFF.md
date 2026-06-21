@@ -9,11 +9,21 @@
 
 ## 🟢 CURRENT STATE — 2026-06-21 (read this first; supersedes everything below)
 
-> **Serenova `0.6.0525`** · latest `main` commit **`ae2d36c`** · build green via
+> **Serenova `0.6.0533`** · latest `main` commit **`cdc4221`** · build green via
 > `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs in-repo: decisions log
-> **v2.97**, build phases **v2.58**, `STAGED-ACCESS-WORKING-DOC.md`, `MOBILEHUB-WORKING-DOC.md`.
-> (Decisions log / build-phases version refs trail slightly — the doc *content* is current to the
-> work below; bump them on the next doc pass.)
+> **v2.105**, build phases **v2.63**, `PUSH-TRAVEL-ALERTS-WORKING-DOC.md`, `STAGED-ACCESS-WORKING-DOC.md`,
+> `MOBILEHUB-WORKING-DOC.md`.
+>
+> **✅ CLOSED 2026-06-21 (owner-confirmed working): Guest notifications + Tour Manager picker + mobile
+> approve/deny** (`0.6.0527`→`0.6.0533`). Full guest flow works end-to-end: request → notify TM(s)/AMC
+> → approve/deny on web **and** mobile → requester notified (email+push+banner). Push Group 1 verified
+> live; Group 2 + TM picker + mobile approve/deny owner-confirmed (mobile approve/deny `0.6.0533` to
+> re-verify on next deploy). Detail in the dated blocks below.
+>
+> **🎯 NEW FOCUS (owner, 2026-06-21, in order): (1) FIX — adding GROUND TRANSPORTATION on the Travel
+> page isn't working** (in progress; owner describing the symptom). **(2) EventDetails (web) view
+> cleanup/redesign** + inline guest mgmt (recon done). **Expenses still parked. Push Group 3 (flight
+> alerts) = later.** See `SERENOVA-MACHINE-SYNC.md` Active-work table.
 
 **Done & verified live this stretch (all pushed to `main`):**
 1. **Phase SA C part 1 — band-member staged GUEST REQUESTS ✅ VERIFIED LIVE** (`0.6.0519`→`0521`).
