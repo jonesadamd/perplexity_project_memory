@@ -3,11 +3,47 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-22T03:10 EDT
+> Last Updated: 2026-06-22T17:00 EDT
 
 ---
 
-## 🟢 CURRENT STATE — 2026-06-22 (read this first; supersedes everything below)
+## 🟢 CURRENT STATE — 2026-06-22 PM (read this first; supersedes everything below)
+
+> **Serenova `0.6.0575`** · latest `main` commit **`d537c5a`** · build green via
+> `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs: decisions log **v2.139**,
+> EventDetails working doc (**redesign COMPLETE**), `SERENOVA-MACHINE-SYNC.md`, and **`LAPTOP-SESSION-NEXT.md`**.
+
+**👉 NEXT (owner priority, for the laptop tonight/tomorrow) — see `LAPTOP-SESSION-NEXT.md`:**
+1. **MobileHub home nudge** — "Add to Home Screen" if not a PWA, "Enable notifications" if a PWA without
+   push; dismissible, reappear ~every 3 days. (Reuse `useInstallPrompt` + `src/lib/push.js` + the
+   hamburger handlers; new `MobileHomeNudge` at top of the Home tab.)
+2. **Live flight updates in MobileHub** — delay/gate/status on the mobile flight drawer; **Lisa flies
+   2026-06-23 and has the PWA**, so it's demoable. Reuse web `LiveFlightTracker.jsx` +
+   `getUserUpcomingFlightsWithLiveData`/`fetchLiveFlightData` (`AEROAPI_KEY_LIVE`, day-of window) →
+   status block in `MobileTravelDetailDrawer`. On-demand-on-open for the demo; precursor to Push Group 3.
+
+**Done this desktop session (2026-06-22, `0.6.0570`→`0.6.0575`, all pushed + mostly verified live):**
+- **EventDetails redesign — COMPLETE.** #10 **Set List popup** (`0.6.0570`); #10 follow-ups
+  (`0.6.0571`): **Contacts popup overflow fix**, set-list **default name** "{venue} - {Month Year}",
+  **delete set list**, + **`role_templates.perm_setlist`='full' for artist admin/TM** (live Supabase —
+  was `none`, so admin/TM couldn't add; band_member stays `edit`). **#7c** (`0.6.0572`/`0573`):
+  all-hotels driving list + **hotel→airport leg** (`getVenueRouteInfo` + new `Accommodation.route_to_airport`
+  field) — **deployed + VERIFIED LIVE**.
+- **MobileHub improvements:** **venue route + drive/airport times** on the mobile event-detail Venue tab
+  ("Getting There" block, reuses the deployed `getVenueRouteInfo`; works staged + logged-in) (`0.6.0574`);
+  **venue-contacts source fix** (`0.6.0575`) — mobile read the legacy `venue_snapshot.day_of_contacts`,
+  now reads `venue.contacts[]` (the redesign's source) + handles multi-role `roles[]`.
+- **Authorship:** added proprietary **`LICENSE`** + **`SIGNATURE.md`** (overt RUSHMERE/KABINGA markers —
+  display-only, NEVER in security/randomness code) + a CLAUDE.md "Authorship" pointer. No markers in code yet.
+- **B4.2 (Verify-gated phone/email change) — ON HOLD** (owner paused on the email re-key risk); full
+  plan preserved in the decisions log + machine-sync.
+
+**Deploy note:** everything above is live-pushable with a **plain rebuild** (canary `v0.6.0575`) — the
+only backend deploys this session (#7c Part B fn + field, setlist perm) are already done/applied.
+
+---
+
+## 🟢 CURRENT STATE — 2026-06-22 (historical — superseded by the PM brief above)
 
 > **Serenova `0.6.0569`** · latest `main` commit **`84d5a59`** · build green via
 > `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs in-repo: decisions log
