@@ -3,15 +3,15 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-21T22:10 EDT
+> Last Updated: 2026-06-21T22:45 EDT
 
 ---
 
 ## 🟢 CURRENT STATE — 2026-06-21 (read this first; supersedes everything below)
 
-> **Serenova `0.6.0556`** · latest `main` commit **`01aff93`** · build green via
+> **Serenova `0.6.0558`** · latest `main` commit **`c3842a9`** · build green via
 > `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs in-repo: decisions log
-> **v2.124**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
+> **v2.126**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
 > `PUSH-TRAVEL-ALERTS-WORKING-DOC.md`, `STAGED-ACCESS-WORKING-DOC.md`, `MOBILEHUB-WORKING-DOC.md`.
 >
 > **#7 ROUTE MAP — current shape:** walk/drive times verified live earlier (`getVenueRouteInfo`).
@@ -28,9 +28,13 @@
 > the tab bar (`TourManagerQuickAccess`) — lead TM name always visible, click → Dialog w/ click-to-
 > call/email + (privileged) `TourManagerPicker` to change; **multi-TM + "Make lead" ⭐** sets index 0
 > (`0.6.0555`). **#11 done (`0.6.0556`):** `ManagementAgentsCard` (Management & Representation) moved to
-> top of the **People** tab. **STILL OPEN:** #6 Full Venue Info cleanup, #9 accommodation summary on
-> Overview, #10 Set/Guest popups, #13 itinerary full-width, #7c (all-hotels/airport); Stage 2/3
-> (`GuestManagerDialog`), Stage 4 (hotel-grouped accommodations).
+> top of the **People** tab. **#13 done (`0.6.0557`):** itinerary (`EventSchedule`) full-width on the
+> Overview (Venue → Action Items → full-width Itinerary → 3 reference cards). **Itinerary polish
+> (`0.6.0558`):** tighter row density + **dedupe duplicate hotel check-in/out rows** (same hotel + same
+> time → one line, by `sourceType|title|displayTime`). **STILL OPEN:** #6 Full Venue Info cleanup, #9
+> accommodation summary on Overview, #10 Set/Guest popups, #7c (all-hotels/airport); Stage 2/3
+> (`GuestManagerDialog`), Stage 4 (hotel-grouped accommodations). **Overview-v2 layout is essentially
+> complete** — remaining is guest-mgmt popups + accommodation/venue-dialog depth.
 > **⏳ OUTSTANDING OWNER DEPLOY (`0.6.0550` batch):** (1) Geocoding API ✅ enabled; (2) **redeploy
 > `getVenueRouteInfo`**; (3) **re-sync `Accommodation`** (new `route_to_venue` coord fields); (4) **sync
 > `Event`** (`primary_accommodation_id`). Until done: map shows venue pin only / dropdown won't persist.
