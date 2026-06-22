@@ -3,16 +3,22 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-21T18:40 EDT
+> Last Updated: 2026-06-21T19:35 EDT
 
 ---
 
 ## 🟢 CURRENT STATE — 2026-06-21 (read this first; supersedes everything below)
 
-> **Serenova `0.6.0545`** · latest `main` commit **`6b9c294`** · build green via
+> **Serenova `0.6.0547`** · latest `main` commit **`f38b80c`** · build green via
 > `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs in-repo: decisions log
-> **v2.115**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
+> **v2.117**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
 > `PUSH-TRAVEL-ALERTS-WORKING-DOC.md`, `STAGED-ACCESS-WORKING-DOC.md`, `MOBILEHUB-WORKING-DOC.md`.
+>
+> **⏳ OUTSTANDING OWNER ACTION (#7b deploy):** the **`getVenueRouteInfo`** Base44 function +
+> the new **`Accommodation.route_to_venue`** field are CODE-DONE/pushed but **need deploying in Base44**
+> (new fn must provision; sync the entity). Until then the venue↔hotel **map route line shows** but the
+> **🚶/🚗 time numbers stay hidden** (fn invoke fails softly). Key `GOOGLE_PLACES_API_KEY` is in secrets,
+> unrestricted.
 >
 > **✅ CLOSED 2026-06-21 (owner-confirmed working): Guest notifications + Tour Manager picker + mobile
 > approve/deny** (`0.6.0527`→`0.6.0533`). Full guest flow works end-to-end: request → notify TM(s)/AMC
@@ -39,11 +45,19 @@
 > key but keyless is free+fine — upgrade path is enabling **Maps Embed API** for the official
 > `maps/embed/v1/place` endpoint if it ever flakes), Open-in-Maps, **venue contacts / parking / house
 > backline** from the `Venue` entity; the **hotel moved OUT to the Travel tab** (`AccommodationCard`
-> under `TravelCard`, interim flat list). **STILL OPEN:** Stage 2 (extract EditEvent `GuestListTab` →
-> self-contained `GuestManagerDialog`), Stage 3 (wire "Manage guests" on the Overview Guest List card),
-> Stage 4 (**hotel-grouped** accommodation display on Travel — spec in the redesign doc); cleanup:
-> remove unused `getStatusBadge`/`getContractBadge` from `EventDetails.jsx`. **Expenses still parked.
-> Push Group 3 (flight alerts) = later.** See `SERENOVA-MACHINE-SYNC.md` Active-work table.
+> under `TravelCard`, interim flat list); **#7 venue↔hotel ROUTE map** — **7a** (`0.6.0546`) keyless
+> route on the venue card + primary-hotel pick (artist's hotel → longest stay → most occupants,
+> `src/utils/primaryAccommodation.js`); **7b** (`0.6.0547`, code-done, ⏳ needs Base44 deploy — see
+> OUTSTANDING above) `getVenueRouteInfo` fn (Distance Matrix walk+drive, caches `route_to_venue`) +
+> 🚶/🚗/distance readout. **STILL OPEN (next, owner-prioritized stages 6–14 in the redesign doc):**
+> the bulk of the Overview-v2 brainstorm — #6 Full Venue Info dialog cleanup, #8 Advance/Tech quick
+> contacts, #9 accommodation summary on Overview (decided Overview+Travel), #10 Set/Guest popup buttons,
+> #11 Management/Representation → People, #12 **persistent Tour Manager quick-access** in the tab bar,
+> #13 itinerary full-width, #14 **Financials → "Data Room"** + Linked Files inside; **#7c** (all hotels
+> on map / >1-hotel driving-only + hotel→airport) deferred. Plus Stage 2/3 (`GuestManagerDialog`),
+> Stage 4 (hotel-grouped accommodations on Travel), and cleanup of unused
+> `getStatusBadge`/`getContractBadge` in `EventDetails.jsx`. **Expenses still parked. Push Group 3
+> (flight alerts) = later.** See `SERENOVA-MACHINE-SYNC.md` Active-work table.
 
 **Done & verified live this stretch (all pushed to `main`):**
 1. **Phase SA C part 1 — band-member staged GUEST REQUESTS ✅ VERIFIED LIVE** (`0.6.0519`→`0521`).
