@@ -3,25 +3,28 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-21T20:30 EDT
+> Last Updated: 2026-06-21T20:55 EDT
 
 ---
 
 ## 🟢 CURRENT STATE — 2026-06-21 (read this first; supersedes everything below)
 
-> **Serenova `0.6.0548`** · latest `main` commit **`473813f`** · build green via
+> **Serenova `0.6.0550`** · latest `main` commit **`9f95ea6`** · build green via
 > `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs in-repo: decisions log
-> **v2.119**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
+> **v2.120**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
 > `PUSH-TRAVEL-ALERTS-WORKING-DOC.md`, `STAGED-ACCESS-WORKING-DOC.md`, `MOBILEHUB-WORKING-DOC.md`.
 >
-> **✅ #7 ROUTE FEATURE VERIFIED LIVE** (`getVenueRouteInfo` deployed; walk/drive times showed on the
-> Venue card). **Map decision (live test):** the keyless DIRECTIONS embed zoomed to the whole world for
-> a hotel it couldn't geocode by name → reverted to **venue-pin map + distance/walk/drive readout +
-> "Directions in Maps" deep-link** (no drawn route embed). Added a **manual primary-hotel dropdown**
-> (`Event.primary_accommodation_id`, admin/artist, >1 hotel) over the auto-pick.
-> **⏳ OUTSTANDING OWNER ACTION:** sync the **`Event`** entity in Base44 so the new
-> **`primary_accommodation_id`** field persists (additive; same flow as the route deploy). Key
-> `GOOGLE_PLACES_API_KEY` in secrets, unrestricted.
+> **#7 ROUTE MAP — current shape:** walk/drive times verified live earlier (`getVenueRouteInfo`).
+> Keyless DIRECTIONS embed world-zoomed on an ungeocodable hotel → moved to a **COORDINATE route**:
+> `getVenueRouteInfo` now also **geocodes** hotel+venue (Geocoding API, owner-enabled) and caches
+> `origin_lat/lng`+`dest_lat/lng` on `Accommodation.route_to_venue`; `VenueDetailsCard` draws
+> `maps?saddr=lat,lng&daddr=lat,lng&output=embed` → **both venue+hotel pins + route**, never world-zooms,
+> **falls back to venue pin** until coords arrive/if geocoding fails. **Manual primary-hotel dropdown**
+> (`Event.primary_accommodation_id`, admin/artist, >1 hotel) overrides the auto-pick (artist→longest→most).
+> **⏳ OUTSTANDING OWNER DEPLOY (`0.6.0550` batch):** (1) Geocoding API ✅ enabled; (2) **redeploy
+> `getVenueRouteInfo`**; (3) **re-sync `Accommodation`** (new `route_to_venue` coord fields); (4) **sync
+> `Event`** (`primary_accommodation_id`). Until done: map shows venue pin only / dropdown won't persist.
+> Key `GOOGLE_PLACES_API_KEY` in secrets, unrestricted.
 >
 > **✅ CLOSED 2026-06-21 (owner-confirmed working): Guest notifications + Tour Manager picker + mobile
 > approve/deny** (`0.6.0527`→`0.6.0533`). Full guest flow works end-to-end: request → notify TM(s)/AMC
