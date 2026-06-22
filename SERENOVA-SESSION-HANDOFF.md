@@ -3,15 +3,15 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-21T22:45 EDT
+> Last Updated: 2026-06-21T23:05 EDT
 
 ---
 
 ## 🟢 CURRENT STATE — 2026-06-21 (read this first; supersedes everything below)
 
-> **Serenova `0.6.0558`** · latest `main` commit **`c3842a9`** · build green via
+> **Serenova `0.6.0559`** · latest `main` commit **`d66572f`** · build green via
 > `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs in-repo: decisions log
-> **v2.126**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
+> **v2.127**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
 > `PUSH-TRAVEL-ALERTS-WORKING-DOC.md`, `STAGED-ACCESS-WORKING-DOC.md`, `MOBILEHUB-WORKING-DOC.md`.
 >
 > **#7 ROUTE MAP — current shape:** walk/drive times verified live earlier (`getVenueRouteInfo`).
@@ -31,7 +31,8 @@
 > top of the **People** tab. **#13 done (`0.6.0557`):** itinerary (`EventSchedule`) full-width on the
 > Overview (Venue → Action Items → full-width Itinerary → 3 reference cards). **Itinerary polish
 > (`0.6.0558`):** tighter row density + **dedupe duplicate hotel check-in/out rows** (same hotel + same
-> time → one line, by `sourceType|title|displayTime`). **STILL OPEN:** #6 Full Venue Info cleanup, #9
+> time → one line). Ground travel now shows NO tz label (was wrongly EDT for Seattle pickups) — only
+> recognised airports get a tz; address-derived ground tz = DEFERRED feature (`0.6.0559`). **STILL OPEN:** #6 Full Venue Info cleanup, #9
 > accommodation summary on Overview, #10 Set/Guest popups, #7c (all-hotels/airport); Stage 2/3
 > (`GuestManagerDialog`), Stage 4 (hotel-grouped accommodations). **Overview-v2 layout is essentially
 > complete** — remaining is guest-mgmt popups + accommodation/venue-dialog depth.
