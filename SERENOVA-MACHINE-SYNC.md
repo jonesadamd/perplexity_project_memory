@@ -4,7 +4,7 @@
 > run an AI coding session against the same code repo (`jonesadamd/serenovahub_b44`) and share
 > this memory repo (`jonesadamd/perplexity_project_memory`) via git. This doc is the lightweight
 > protocol that keeps the two sessions from clobbering each other or duplicating work.
-> Last Updated: 2026-06-21T11:30 EDT
+> Last Updated: 2026-06-22T02:15 EDT
 
 ---
 
@@ -37,11 +37,12 @@
 
 | What | Value |
 |---|---|
-| Code repo `main` HEAD | `4f451a9` — "Flight times: render in each airport's local zone + DST 3-letter label" |
-| Serenova version | **0.6.0544** |
+| Code repo `main` HEAD | `d33ee3c` — "Venue Contacts polish: phone ext + country format, role-seed fix, expanded roles + Other" |
+| Serenova version | **0.6.0568** |
 | Memory repo HEAD | (this commit) |
 | Build | green |
-| Pending live-verify | **Mobile guest approve/deny** at `v0.6.0533` · **B4.1** at `v0.6.0525`. (✅ Flight times airport-local + **static IATA→IANA map, zero API cost** owner-confirmed live: "11:30 AM EDT → 2:50 PM PDT". Route-search/manual paths still UTC + display IATA-fallback = follow-ups. The AddTravel empty-dropdown was a Base44 **preview-only** 429 throttle — fine on live; if 429s ever hit live, memoize `getUsersByEmailsForAccount` + add retry/backoff.) |
+| Pending Base44 DEPLOYS (owner) | **(1)** redeploy fn **`getVenueRouteInfo`** · **(2)** re-sync **`Accommodation`** (`route_to_venue` + coord fields) · **(3)** sync **`Event`** (`primary_accommodation_id`) · **(4)** sync **`Venue`** (`contacts[].roles[]` + `contacts[].phone_ext`). Until done: #7 coordinate route + walk/drive cache, the primary-hotel dropdown persistence, and venue-contact role-tags/extension won't fully work live (everything else does). Geocoding API already enabled. |
+| Pending live-verify | The whole **EventDetails redesign** (`0.6.0541`→`0.6.0568`) — owner reviewed most of it live during the build (route map, times, guest popup, contacts popup, venue dialog all confirmed "looks good"); just needs the Base44 deploys above to light up the gated bits. |
 
 ## 🟢 Active work (claim before building; clear when done)
 
@@ -49,7 +50,9 @@
 |---|---|---|---|
 | laptop | **Guest notifications + TM picker + mobile approve/deny** (Push Groups 1–2 + approver-notify + searchable multi-TM picker + linked-mgmt fix + mobile TM/Admin approve/deny) | **✅ DONE — owner-confirmed working 2026-06-21** | `0.6.0527`→`0.6.0533`. Full guest flow: request → notify TM(s)/AMC (email+push+`Notification`) → approve/deny on **web + mobile** → requester notified (email+push+banner). `TourManagerPicker` (searchable, multi-select, linked AMC/BMC people, artist-functional roles + User-entity names). `npm:web-push` proven on Deno. Mobile approve/deny (`0.6.0533`) verify on next deploy. **Push Group 3 (flight alerts) is separate — see below.** Docs: working doc + decisions-log v2.105, build-phases v2.63. |
 | laptop | **Travel page — adding ground transportation issue** (FIX) | **✅ DONE — owner-confirmed working 2026-06-21** | TWO root causes fixed: (1) `0.6.0534` — link-only mgmt user 403'd `getUsersByEmailsForAccount` → Travel page fatal red-error; broadened that fn's access (also fixes TM-picker/Team enrichment for link-only mgmt) + made Travel enrichment non-fatal. (2) `0.6.0535` — Save no-op on ADD: `AddTravel` mis-wired `TravelForm` (React `ref` to a non-forwardRef fn that wants a `formRef` PROP; `?.save()` silent no-op; missing `accountId`/`onSave`) → fixed to `formRef`/`accountId`/`onSave`/`requestSubmit()` like EditTravel. Owner: "travel works and saves." |
-| laptop | **EventDetails (web) view cleanup/redesign** + inline Guest List mgmt | **in progress — planning captured** (2026-06-21) | **Plan in `docs/EVENTDETAILS-REDESIGN-WORKING-DOC.md`.** 4 tabs (Overview · People · Travel · Financials); header above tabs; **Guest List on Overview** as a "Manage guests" dialog (extract `GuestListTab` from EditEvent); **staged build** (scaffold → guest dialog → accommodation grouping). **Accommodation spec (owner):** Travel tab groups by HOTEL — multiple hotels = separate listings; same hotel diff dates = ONE listing, each stay's arrive/depart its own row + who's there, **date-only**. Mirror the print-itinerary occupant pattern. Next = Stage 1 (tab scaffold). |
+| _(RELEASED by laptop 2026-06-22)_ | **EventDetails (web) redesign** — big stretch DONE; remaining sub-items unclaimed below | **🟢 RELEASED — major progress, owner on break** (`0.6.0541`→`0.6.0568`) | **Source of truth: `docs/EVENTDETAILS-REDESIGN-WORKING-DOC.md` + decisions log v2.134.** DONE: 4-tab scaffold + brand-teal Option-3 header; **Venue card** + **#7 route map** (walk/drive times, primary-hotel auto-pick + manual dropdown, coordinate route, key-contacts Advance/Tech); **Data Room** tab (Financials renamed + Files); **TM quick-access** in tab bar (multi + make-lead); **Management→People**; **itinerary full-width** + density/dedupe + ground-tz fix; **reference cards above itinerary, colorized**; **Guest List card→popup** redesign (open to all, color buttons, Export CSV); **All Contacts popup** (TM/Team/Venue/Mgmt, colorized); **#6 Full Venue Info dialog** rebuilt (tabbed, reads Venue entity) + **Venue Contacts** full redesign (show-all + link toggle + inline edit + multi-role tags + Other + phone ext + country format). **REMAINING (unclaimed):** #9+Stage 4 accommodation (Overview summary + hotel-grouped Travel list), #10 Set List popup, #7c all-hotels/airport. **+ the 4 Base44 deploys above.** |
+| _(unclaimed)_ | EventDetails **#9 + Stage 4** — accommodation (Overview compact hotel summary + Travel hotel-grouped list, same-hotel-diff-dates consolidation) | next | spec in the redesign working doc (accommodation grouping section) |
+| _(unclaimed)_ | EventDetails **#10** — Set List as a popup button (small; mirror the guest popup pattern) | backlog | — |
 | _(unclaimed)_ | Push+Travel-alerts **Group 3** (GH-Actions cron + flight delay/gate alerts + on-entry lookup; builds `dispatchNotification`) | later | needs `NOTIFY_INTERNAL_SECRET` + a secret-gated `asServiceRole` entry; tiered cadence; idempotent alert dispatch |
 | _(unclaimed)_ | B4.2 — Verify-gated phone/email change | backlog | re-key Memberships on email change; Verify code on phone change |
 | _(unclaimed)_ | Phase SA C part 2 — Expenses (`StagedRequests`) | backlog (owner: not yet) | holding queue + receipt quarantine |

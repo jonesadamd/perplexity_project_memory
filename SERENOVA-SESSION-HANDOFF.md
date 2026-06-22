@@ -3,43 +3,50 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-22T02:05 EDT
+> Last Updated: 2026-06-22T02:20 EDT
 
 ---
 
-## 🟢 CURRENT STATE — 2026-06-21 (read this first; supersedes everything below)
+## 🟢 CURRENT STATE — 2026-06-22 (read this first; supersedes everything below)
 
 > **Serenova `0.6.0568`** · latest `main` commit **`d33ee3c`** · build green via
 > `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs in-repo: decisions log
 > **v2.134**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
 > `PUSH-TRAVEL-ALERTS-WORKING-DOC.md`, `STAGED-ACCESS-WORKING-DOC.md`, `MOBILEHUB-WORKING-DOC.md`.
 >
-> **#7 ROUTE MAP — current shape:** walk/drive times verified live earlier (`getVenueRouteInfo`).
-> Keyless DIRECTIONS embed world-zoomed on an ungeocodable hotel → moved to a **COORDINATE route**:
-> `getVenueRouteInfo` now also **geocodes** hotel+venue (Geocoding API, owner-enabled) and caches
-> `origin_lat/lng`+`dest_lat/lng` on `Accommodation.route_to_venue`; `VenueDetailsCard` draws
-> `maps?saddr=lat,lng&daddr=lat,lng&output=embed` → **both venue+hotel pins + route**, never world-zooms,
-> **falls back to venue pin** until coords arrive/if geocoding fails. **Manual primary-hotel dropdown**
-> (`Event.primary_accommodation_id`, admin/artist, >1 hotel) overrides the auto-pick (artist→longest→most);
-> switching is **optimistic** (no page reload, `0.6.0551`). **#8 done (`0.6.0552`):** venue card contacts
-> trimmed to **"Key Contacts" = Advance + Tech** (keyword-matched on role), rest expandable inline.
-> **#14 done (`0.6.0553`):** 4th tab **Financials → "Data Room"** (value kept `financials`), Linked Files
-> moved off Overview into it. **#12 done (`0.6.0554`):** persistent **Tour Manager quick-access** right of
-> the tab bar (`TourManagerQuickAccess`) — lead TM name always visible, click → Dialog w/ click-to-
-> call/email + (privileged) `TourManagerPicker` to change; **multi-TM + "Make lead" ⭐** sets index 0
-> (`0.6.0555`). **#11 done (`0.6.0556`):** `ManagementAgentsCard` (Management & Representation) moved to
-> top of the **People** tab. **#13 done (`0.6.0557`):** itinerary (`EventSchedule`) full-width on the
-> Overview (Venue → Action Items → full-width Itinerary → 3 reference cards). **Itinerary polish
-> (`0.6.0558`):** tighter row density + **dedupe duplicate hotel check-in/out rows** (same hotel + same
-> time → one line). Ground travel now shows NO tz label (was wrongly EDT for Seattle pickups) — only
-> recognised airports get a tz; address-derived ground tz = DEFERRED feature (`0.6.0559`). **STILL OPEN:** #6 Full Venue Info cleanup, #9
-> accommodation summary on Overview, #10 Set/Guest popups, #7c (all-hotels/airport); Stage 2/3
-> (✅ DONE 0.6.0560 — GuestManagerDialog popup on the Overview Guest List card: Manage button → add/edit/comps/approve-deny inline, persists guest_lists on Save; REDESIGNED 0.6.0561 — GuestListCard is now a clickable summary button opening the popup for EVERYONE, GuestListTab restyled brand-teal w/ color action buttons + inline Add + Export dropdown/CSV, editing gated to canEdit), Stage 4 (hotel-grouped accommodations on Travel). REFERENCE CARDS (0.6.0562): moved ABOVE itinerary + colorized (Contacts blue, Set List purple, Guest List teal). ALL CONTACTS popup (0.6.0563): ContactsCard button -> AllContactsDialog (TM/Team/Venue/Management, tap-to-call/email); replaces day-of-only card; venue-contact editing returns in #6. CONTACTS popup COLORIZED (0.6.0564 — section colors/avatars/green-blue actions). #6 DONE (0.6.0565): VenueInfoDialog rebuilt to read the Venue ENTITY (was sparse venue_snapshot) — brand-teal header + Parking + full Tech Specs + Notes, venue contacts EDITABLE via embedded DayOfContactsCard (canEdit threaded); unifies contact source to venue.contacts. VENUE POPUP TABBED + VENUE CONTACTS REDESIGNED (0.6.0566/0567): tabs (Contacts/Parking/Tech/Notes); DayOfContactsCard renamed Venue Contacts, shows ALL venue contacts w/ per-row on-event checkbox, INLINE single-row edit, MULTI-ROLE tags (new Venue.contacts[].roles[] -- NEEDS VENUE ENTITY SYNC). Outside engineers -> venue contacts; band crew -> roster. POLISH (0.6.0568): role-seed bug fixed (legacy text -> Other not duplicated), Other role w/ input, expanded role list, phone EXTENSION (phone_ext) shown as x233, country-aware phone format via libphonenumber. Venue sync now needs roles[] + phone_ext. **Overview-v2 layout is essentially
-> complete** — remaining is guest-mgmt popups + accommodation/venue-dialog depth.
-> **⏳ OUTSTANDING OWNER DEPLOY (`0.6.0550` batch):** (1) Geocoding API ✅ enabled; (2) **redeploy
-> `getVenueRouteInfo`**; (3) **re-sync `Accommodation`** (new `route_to_venue` coord fields); (4) **sync
-> `Event`** (`primary_accommodation_id`). Until done: map shows venue pin only / dropdown won't persist.
-> Key `GOOGLE_PLACES_API_KEY` in secrets, unrestricted.
+> **🎯 SESSION (laptop, 2026-06-21 PM → 2026-06-22): EventDetails (web) redesign — BIG STRETCH DONE,
+> owner on break; task RELEASED.** Source of truth = `docs/EVENTDETAILS-REDESIGN-WORKING-DOC.md` +
+> decisions log **v2.134**. Page-scoped brand-teal restyle (rest of app rebrands later). Shipped
+> `0.6.0541`→**`0.6.0568`**, all on `main`, build green:
+> - **Tabs + header** — 4-tab scaffold (Overview · People · Travel · **Data Room**) + brand-teal
+>   "Option-3" header (Back in header, quiet status, date range across performances).
+> - **Venue card + #7 route map** — venue-focused card; map draws the venue↔hotel **route + 🚶walk/
+>   🚗drive time + distance** via `getVenueRouteInfo` (Distance Matrix, cached on
+>   `Accommodation.route_to_venue`); switched to a **coordinate** route (geocoded) so it never world-
+>   zooms, **falls back to venue pin**. **Primary hotel** auto-picked (artist→longest stay→most
+>   occupants) with a **manual dropdown** override (`Event.primary_accommodation_id`, optimistic, no
+>   reload). **Key Contacts** (Advance/Tech) under the map.
+> - **Layout** — **TM quick-access** in the tab bar (multi-TM + ⭐ make-lead); **Management→People**;
+>   **itinerary full-width** (+ density tighten, dedupe duplicate hotel check-in/out rows, drop wrong
+>   ground-transport tz); **reference cards moved ABOVE the itinerary + colorized** (Contacts blue, Set
+>   List purple, Guest List teal).
+> - **Guest list** — card → **popup** (open to EVERYONE to view; admin/artist/TM edit/approve/deny;
+>   color ✓/✗/+ buttons; **Export CSV** dropdown; inline add/comps).
+> - **Contacts** — **All Contacts popup** (Tour Manager · Team · Venue · Management, colorized, initials
+>   avatars, tap-to-call/email).
+> - **#6 Full Venue Info** — rebuilt: **tabbed** (Contacts/Parking/Tech Specs/Notes), reads the rich
+>   **Venue entity** (was sparse `venue_snapshot`). **Venue Contacts** fully redesigned: show ALL venue
+>   contacts + per-row **on-event toggle**, **inline single-row edit**, **multi-role tags** + Other,
+>   **phone extension** (shown "x233") + **country-aware phone formatting** (libphonenumber).
+>
+> **⏳ OUTSTANDING OWNER DEPLOYS (4) — gate the LIVE behaviour (full list in `SERENOVA-MACHINE-SYNC.md`):**
+> (1) **redeploy fn `getVenueRouteInfo`** · (2) **re-sync `Accommodation`** (`route_to_venue` + coord
+> fields) · (3) **sync `Event`** (`primary_accommodation_id`) · (4) **sync `Venue`** (`contacts[].roles[]`
+> + `contacts[].phone_ext`). Until done: coordinate route + cached times, the primary-hotel dropdown
+> persistence, and venue-contact role-tags/extension won't fully work live (everything else does).
+> Geocoding API ✅ enabled; `GOOGLE_PLACES_API_KEY` in secrets, unrestricted.
+> **REMAINING redesign (unclaimed):** #9 + Stage 4 accommodation (Overview summary + hotel-grouped Travel
+> list), #10 Set List popup, #7c all-hotels/airport map mode.
 >
 > **✅ CLOSED 2026-06-21 (owner-confirmed working): Guest notifications + Tour Manager picker + mobile
 > approve/deny** (`0.6.0527`→`0.6.0533`). Full guest flow works end-to-end: request → notify TM(s)/AMC
@@ -54,9 +61,10 @@
 > (2) `AddTravel` mis-wired `TravelForm` (React `ref` to a non-forwardRef fn → `?.save()` silent no-op)
 > → fixed to `formRef`/`accountId`/`onSave`/`requestSubmit()`.
 >
-> **🎯 CURRENT FOCUS (owner, 2026-06-21): EventDetails (web) redesign — ACTIVELY BUILDING, staged.**
-> Source of truth = `docs/EVENTDETAILS-REDESIGN-WORKING-DOC.md`. Page-scoped brand-teal restyle (the
-> rest of the app rebrands later "as we update"). Done so far: **Stage 1** 4-tab scaffold
+> **🗂️ EventDetails redesign — DETAILED STAGE LOG (historical; SUPERSEDED by the SESSION summary at the
+> top of CURRENT STATE — as of session end the redesign is RELEASED at `0.6.0568`). Kept for per-stage
+> detail.** Source of truth = `docs/EVENTDETAILS-REDESIGN-WORKING-DOC.md`. Page-scoped brand-teal restyle
+> (the rest of the app rebrands later "as we update"). Done so far: **Stage 1** 4-tab scaffold
 > (Overview · People · Travel · Financials, `0.6.0541`) + polish (slim teal header, Quick Actions above
 > tabs/gated/collapsible, `0.6.0542`); **header "Option 3"** (`0.6.0544`, owner-picked — Back in header,
 > action buttons top-right, smaller iconless title, date RANGE across performances, quiet status
