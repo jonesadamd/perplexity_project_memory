@@ -3,15 +3,15 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-21T20:55 EDT
+> Last Updated: 2026-06-21T21:20 EDT
 
 ---
 
 ## 🟢 CURRENT STATE — 2026-06-21 (read this first; supersedes everything below)
 
-> **Serenova `0.6.0550`** · latest `main` commit **`9f95ea6`** · build green via
+> **Serenova `0.6.0552`** · latest `main` commit **`d0b05c7`** · build green via
 > `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs in-repo: decisions log
-> **v2.120**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
+> **v2.121**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
 > `PUSH-TRAVEL-ALERTS-WORKING-DOC.md`, `STAGED-ACCESS-WORKING-DOC.md`, `MOBILEHUB-WORKING-DOC.md`.
 >
 > **#7 ROUTE MAP — current shape:** walk/drive times verified live earlier (`getVenueRouteInfo`).
@@ -20,7 +20,9 @@
 > `origin_lat/lng`+`dest_lat/lng` on `Accommodation.route_to_venue`; `VenueDetailsCard` draws
 > `maps?saddr=lat,lng&daddr=lat,lng&output=embed` → **both venue+hotel pins + route**, never world-zooms,
 > **falls back to venue pin** until coords arrive/if geocoding fails. **Manual primary-hotel dropdown**
-> (`Event.primary_accommodation_id`, admin/artist, >1 hotel) overrides the auto-pick (artist→longest→most).
+> (`Event.primary_accommodation_id`, admin/artist, >1 hotel) overrides the auto-pick (artist→longest→most);
+> switching is **optimistic** (no page reload, `0.6.0551`). **#8 done (`0.6.0552`):** venue card contacts
+> trimmed to **"Key Contacts" = Advance + Tech** (keyword-matched on role), rest expandable inline.
 > **⏳ OUTSTANDING OWNER DEPLOY (`0.6.0550` batch):** (1) Geocoding API ✅ enabled; (2) **redeploy
 > `getVenueRouteInfo`**; (3) **re-sync `Accommodation`** (new `route_to_venue` coord fields); (4) **sync
 > `Event`** (`primary_accommodation_id`). Until done: map shows venue pin only / dropdown won't persist.
