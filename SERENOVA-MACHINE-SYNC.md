@@ -4,7 +4,11 @@
 > run an AI coding session against the same code repo (`jonesadamd/serenovahub_b44`) and share
 > this memory repo (`jonesadamd/perplexity_project_memory`) via git. This doc is the lightweight
 > protocol that keeps the two sessions from clobbering each other or duplicating work.
-> Last Updated: 2026-06-22T11:45 EDT
+> Last Updated: 2026-06-22T15:30 EDT
+> **NEW CONVENTION (2026-06-22): authorship signature.** Repo now has `LICENSE` (proprietary) +
+> `SIGNATURE.md` (overt RUSHMERE/KABINGA markers) + a CLAUDE.md "Authorship" pointer. Markers are
+> display-only, overt, removable — and **NEVER in security- or randomness-sensitive code** (no
+> seeds/salts/nonces/tokens/IDs). No markers applied to existing code yet (files + pointer only).
 
 ---
 
@@ -37,12 +41,12 @@
 
 | What | Value |
 |---|---|
-| Code repo `main` HEAD | `f9871d5` — "EventDetails #10: Set List popup + badge tidy" |
-| Serenova version | **0.6.0570** |
+| Code repo `main` HEAD | `85dcf5c` — "Add proprietary LICENSE + authorship signature (SIGNATURE.md)" |
+| Serenova version | **0.6.0571** |
 | Memory repo HEAD | (this commit) — **NOTE:** local memory clone is now `/Users/adamjones/Developer/perplexity_project_memory` (the `/Volumes/adamjones/...` external mount is gone). |
 | Build | green |
 | Base44 DEPLOYS | ✅ **ALL 4 DONE + verified live 2026-06-22** — `getVenueRouteInfo` redeployed (coordinate route works); `Accommodation` (`route_to_venue`+coords), `Event` (`primary_accommodation_id`), `Venue` (`contacts[].roles[]`+`contacts[].phone_ext`) synced. Coordinate route, primary-hotel dropdown persistence, and venue-contact role-tags/extension all confirmed working. |
-| Pending live-verify | **#10 Set List popup** (`0.6.0570`) — rebuild for the canary, then open EventDetails → Set List summary card → popup shows sets; privileged Add/Edit open the editor. (Rest of the EventDetails redesign already verified live.) |
+| Pending live-verify | **#10 + follow-ups** (`0.6.0571`) — rebuild for the canary: Set List summary card → popup (Add/Edit/**Delete** for admin/TM/owner now that `role_templates.perm_setlist`='full' for artist super_admin/admin/tour_manager; band_member stays edit); new set lists default-name "{venue} - {Month Year}"; Contacts popup no longer scrolls sideways. **Permission change is a live Supabase row update (no deploy)** — takes effect on next permission refresh/re-login. |
 
 ## 🟢 Active work (claim before building; clear when done)
 
