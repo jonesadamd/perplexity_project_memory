@@ -3,15 +3,15 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-21T21:20 EDT
+> Last Updated: 2026-06-21T21:55 EDT
 
 ---
 
 ## 🟢 CURRENT STATE — 2026-06-21 (read this first; supersedes everything below)
 
-> **Serenova `0.6.0552`** · latest `main` commit **`d0b05c7`** · build green via
+> **Serenova `0.6.0554`** · latest `main` commit **`5431f6d`** · build green via
 > `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs in-repo: decisions log
-> **v2.121**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
+> **v2.123**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
 > `PUSH-TRAVEL-ALERTS-WORKING-DOC.md`, `STAGED-ACCESS-WORKING-DOC.md`, `MOBILEHUB-WORKING-DOC.md`.
 >
 > **#7 ROUTE MAP — current shape:** walk/drive times verified live earlier (`getVenueRouteInfo`).
@@ -23,6 +23,13 @@
 > (`Event.primary_accommodation_id`, admin/artist, >1 hotel) overrides the auto-pick (artist→longest→most);
 > switching is **optimistic** (no page reload, `0.6.0551`). **#8 done (`0.6.0552`):** venue card contacts
 > trimmed to **"Key Contacts" = Advance + Tech** (keyword-matched on role), rest expandable inline.
+> **#14 done (`0.6.0553`):** 4th tab **Financials → "Data Room"** (value kept `financials`), Linked Files
+> moved off Overview into it. **#12 done (`0.6.0554`):** persistent **Tour Manager quick-access** right of
+> the tab bar (`TourManagerQuickAccess`) — lead TM name always visible, click → Dialog w/ click-to-
+> call/email + (privileged) `TourManagerPicker` to change. **STILL OPEN:** #6 Full Venue Info cleanup,
+> #9 accommodation summary on Overview, #10 Set/Guest popups, #11 Management/Representation → People,
+> #13 itinerary full-width, #7c (all-hotels/airport); Stage 2/3 (`GuestManagerDialog`), Stage 4
+> (hotel-grouped accommodations).
 > **⏳ OUTSTANDING OWNER DEPLOY (`0.6.0550` batch):** (1) Geocoding API ✅ enabled; (2) **redeploy
 > `getVenueRouteInfo`**; (3) **re-sync `Accommodation`** (new `route_to_venue` coord fields); (4) **sync
 > `Event`** (`primary_accommodation_id`). Until done: map shows venue pin only / dropdown won't persist.
