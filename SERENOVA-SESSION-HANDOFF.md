@@ -3,15 +3,15 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-21T23:05 EDT
+> Last Updated: 2026-06-21T23:25 EDT
 
 ---
 
 ## 🟢 CURRENT STATE — 2026-06-21 (read this first; supersedes everything below)
 
-> **Serenova `0.6.0559`** · latest `main` commit **`d66572f`** · build green via
+> **Serenova `0.6.0560`** · latest `main` commit **`7c082f3`** · build green via
 > `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs in-repo: decisions log
-> **v2.127**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
+> **v2.128**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
 > `PUSH-TRAVEL-ALERTS-WORKING-DOC.md`, `STAGED-ACCESS-WORKING-DOC.md`, `MOBILEHUB-WORKING-DOC.md`.
 >
 > **#7 ROUTE MAP — current shape:** walk/drive times verified live earlier (`getVenueRouteInfo`).
@@ -34,7 +34,7 @@
 > time → one line). Ground travel now shows NO tz label (was wrongly EDT for Seattle pickups) — only
 > recognised airports get a tz; address-derived ground tz = DEFERRED feature (`0.6.0559`). **STILL OPEN:** #6 Full Venue Info cleanup, #9
 > accommodation summary on Overview, #10 Set/Guest popups, #7c (all-hotels/airport); Stage 2/3
-> (`GuestManagerDialog`), Stage 4 (hotel-grouped accommodations). **Overview-v2 layout is essentially
+> (✅ DONE 0.6.0560 — GuestManagerDialog popup on the Overview Guest List card: Manage button → add/edit/comps/approve-deny inline, persists guest_lists on Save), Stage 4 (hotel-grouped accommodations on Travel). **Overview-v2 layout is essentially
 > complete** — remaining is guest-mgmt popups + accommodation/venue-dialog depth.
 > **⏳ OUTSTANDING OWNER DEPLOY (`0.6.0550` batch):** (1) Geocoding API ✅ enabled; (2) **redeploy
 > `getVenueRouteInfo`**; (3) **re-sync `Accommodation`** (new `route_to_venue` coord fields); (4) **sync
