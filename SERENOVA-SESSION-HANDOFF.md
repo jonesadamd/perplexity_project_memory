@@ -3,15 +3,15 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-21T23:55 EDT
+> Last Updated: 2026-06-22T00:15 EDT
 
 ---
 
 ## 🟢 CURRENT STATE — 2026-06-21 (read this first; supersedes everything below)
 
-> **Serenova `0.6.0561`** · latest `main` commit **`bb147cf`** · build green via
+> **Serenova `0.6.0562`** · latest `main` commit **`a035b9e`** · build green via
 > `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs in-repo: decisions log
-> **v2.129**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
+> **v2.130**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
 > `PUSH-TRAVEL-ALERTS-WORKING-DOC.md`, `STAGED-ACCESS-WORKING-DOC.md`, `MOBILEHUB-WORKING-DOC.md`.
 >
 > **#7 ROUTE MAP — current shape:** walk/drive times verified live earlier (`getVenueRouteInfo`).
