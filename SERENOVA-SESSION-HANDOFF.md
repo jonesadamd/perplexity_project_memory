@@ -3,15 +3,15 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-22T00:40 EDT
+> Last Updated: 2026-06-22T01:05 EDT
 
 ---
 
 ## 🟢 CURRENT STATE — 2026-06-21 (read this first; supersedes everything below)
 
-> **Serenova `0.6.0563`** · latest `main` commit **`3865b70`** · build green via
+> **Serenova `0.6.0565`** · latest `main` commit **`2cde66a`** · build green via
 > `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs in-repo: decisions log
-> **v2.131**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
+> **v2.132**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
 > `PUSH-TRAVEL-ALERTS-WORKING-DOC.md`, `STAGED-ACCESS-WORKING-DOC.md`, `MOBILEHUB-WORKING-DOC.md`.
 >
 > **#7 ROUTE MAP — current shape:** walk/drive times verified live earlier (`getVenueRouteInfo`).
@@ -34,7 +34,7 @@
 > time → one line). Ground travel now shows NO tz label (was wrongly EDT for Seattle pickups) — only
 > recognised airports get a tz; address-derived ground tz = DEFERRED feature (`0.6.0559`). **STILL OPEN:** #6 Full Venue Info cleanup, #9
 > accommodation summary on Overview, #10 Set/Guest popups, #7c (all-hotels/airport); Stage 2/3
-> (✅ DONE 0.6.0560 — GuestManagerDialog popup on the Overview Guest List card: Manage button → add/edit/comps/approve-deny inline, persists guest_lists on Save; REDESIGNED 0.6.0561 — GuestListCard is now a clickable summary button opening the popup for EVERYONE, GuestListTab restyled brand-teal w/ color action buttons + inline Add + Export dropdown/CSV, editing gated to canEdit), Stage 4 (hotel-grouped accommodations on Travel). REFERENCE CARDS (0.6.0562): moved ABOVE itinerary + colorized (Contacts blue, Set List purple, Guest List teal). ALL CONTACTS popup (0.6.0563): ContactsCard button -> AllContactsDialog (TM/Team/Venue/Management, tap-to-call/email); replaces day-of-only card; venue-contact editing returns in #6. **Overview-v2 layout is essentially
+> (✅ DONE 0.6.0560 — GuestManagerDialog popup on the Overview Guest List card: Manage button → add/edit/comps/approve-deny inline, persists guest_lists on Save; REDESIGNED 0.6.0561 — GuestListCard is now a clickable summary button opening the popup for EVERYONE, GuestListTab restyled brand-teal w/ color action buttons + inline Add + Export dropdown/CSV, editing gated to canEdit), Stage 4 (hotel-grouped accommodations on Travel). REFERENCE CARDS (0.6.0562): moved ABOVE itinerary + colorized (Contacts blue, Set List purple, Guest List teal). ALL CONTACTS popup (0.6.0563): ContactsCard button -> AllContactsDialog (TM/Team/Venue/Management, tap-to-call/email); replaces day-of-only card; venue-contact editing returns in #6. CONTACTS popup COLORIZED (0.6.0564 — section colors/avatars/green-blue actions). #6 DONE (0.6.0565): VenueInfoDialog rebuilt to read the Venue ENTITY (was sparse venue_snapshot) — brand-teal header + Parking + full Tech Specs + Notes, venue contacts EDITABLE via embedded DayOfContactsCard (canEdit threaded); unifies contact source to venue.contacts. **Overview-v2 layout is essentially
 > complete** — remaining is guest-mgmt popups + accommodation/venue-dialog depth.
 > **⏳ OUTSTANDING OWNER DEPLOY (`0.6.0550` batch):** (1) Geocoding API ✅ enabled; (2) **redeploy
 > `getVenueRouteInfo`**; (3) **re-sync `Accommodation`** (new `route_to_venue` coord fields); (4) **sync
