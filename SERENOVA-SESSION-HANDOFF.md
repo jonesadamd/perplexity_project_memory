@@ -3,22 +3,25 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-21T19:35 EDT
+> Last Updated: 2026-06-21T20:30 EDT
 
 ---
 
 ## 🟢 CURRENT STATE — 2026-06-21 (read this first; supersedes everything below)
 
-> **Serenova `0.6.0547`** · latest `main` commit **`f38b80c`** · build green via
+> **Serenova `0.6.0548`** · latest `main` commit **`473813f`** · build green via
 > `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs in-repo: decisions log
-> **v2.117**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
+> **v2.119**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
 > `PUSH-TRAVEL-ALERTS-WORKING-DOC.md`, `STAGED-ACCESS-WORKING-DOC.md`, `MOBILEHUB-WORKING-DOC.md`.
 >
-> **⏳ OUTSTANDING OWNER ACTION (#7b deploy):** the **`getVenueRouteInfo`** Base44 function +
-> the new **`Accommodation.route_to_venue`** field are CODE-DONE/pushed but **need deploying in Base44**
-> (new fn must provision; sync the entity). Until then the venue↔hotel **map route line shows** but the
-> **🚶/🚗 time numbers stay hidden** (fn invoke fails softly). Key `GOOGLE_PLACES_API_KEY` is in secrets,
-> unrestricted.
+> **✅ #7 ROUTE FEATURE VERIFIED LIVE** (`getVenueRouteInfo` deployed; walk/drive times showed on the
+> Venue card). **Map decision (live test):** the keyless DIRECTIONS embed zoomed to the whole world for
+> a hotel it couldn't geocode by name → reverted to **venue-pin map + distance/walk/drive readout +
+> "Directions in Maps" deep-link** (no drawn route embed). Added a **manual primary-hotel dropdown**
+> (`Event.primary_accommodation_id`, admin/artist, >1 hotel) over the auto-pick.
+> **⏳ OUTSTANDING OWNER ACTION:** sync the **`Event`** entity in Base44 so the new
+> **`primary_accommodation_id`** field persists (additive; same flow as the route deploy). Key
+> `GOOGLE_PLACES_API_KEY` in secrets, unrestricted.
 >
 > **✅ CLOSED 2026-06-21 (owner-confirmed working): Guest notifications + Tour Manager picker + mobile
 > approve/deny** (`0.6.0527`→`0.6.0533`). Full guest flow works end-to-end: request → notify TM(s)/AMC
