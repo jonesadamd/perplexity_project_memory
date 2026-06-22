@@ -3,16 +3,18 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-22T02:20 EDT
+> Last Updated: 2026-06-22T03:10 EDT
 
 ---
 
 ## 🟢 CURRENT STATE — 2026-06-22 (read this first; supersedes everything below)
 
-> **Serenova `0.6.0568`** · latest `main` commit **`d33ee3c`** · build green via
+> **Serenova `0.6.0569`** · latest `main` commit **`84d5a59`** · build green via
 > `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs in-repo: decisions log
-> **v2.134**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
+> **v2.135**, `EVENTDETAILS-REDESIGN-WORKING-DOC.md` (source of truth for the redesign),
 > `PUSH-TRAVEL-ALERTS-WORKING-DOC.md`, `STAGED-ACCESS-WORKING-DOC.md`, `MOBILEHUB-WORKING-DOC.md`.
+> **Local memory clone is now `/Users/adamjones/Developer/perplexity_project_memory`** (the
+> `/Volumes/adamjones/...` external mount is gone — use the `/Users` path).
 >
 > **🎯 SESSION (laptop, 2026-06-21 PM → 2026-06-22): EventDetails (web) redesign — BIG STRETCH DONE,
 > owner on break; task RELEASED.** Source of truth = `docs/EVENTDETAILS-REDESIGN-WORKING-DOC.md` +
@@ -39,14 +41,15 @@
 >   contacts + per-row **on-event toggle**, **inline single-row edit**, **multi-role tags** + Other,
 >   **phone extension** (shown "x233") + **country-aware phone formatting** (libphonenumber).
 >
-> **⏳ OUTSTANDING OWNER DEPLOYS (4) — gate the LIVE behaviour (full list in `SERENOVA-MACHINE-SYNC.md`):**
-> (1) **redeploy fn `getVenueRouteInfo`** · (2) **re-sync `Accommodation`** (`route_to_venue` + coord
-> fields) · (3) **sync `Event`** (`primary_accommodation_id`) · (4) **sync `Venue`** (`contacts[].roles[]`
-> + `contacts[].phone_ext`). Until done: coordinate route + cached times, the primary-hotel dropdown
-> persistence, and venue-contact role-tags/extension won't fully work live (everything else does).
-> Geocoding API ✅ enabled; `GOOGLE_PLACES_API_KEY` in secrets, unrestricted.
-> **REMAINING redesign (unclaimed):** #9 + Stage 4 accommodation (Overview summary + hotel-grouped Travel
-> list), #10 Set List popup, #7c all-hotels/airport map mode.
+> **✅ BASE44 DEPLOYS — ALL 4 DONE + verified live 2026-06-22:** `getVenueRouteInfo` redeployed
+> (coordinate route works); `Accommodation` (`route_to_venue`+coords), `Event` (`primary_accommodation_id`),
+> `Venue` (`contacts[].roles[]`+`contacts[].phone_ext`) synced. Coordinate route, primary-hotel dropdown
+> persistence, and venue-contact role-tags/extension all confirmed working live. (`GOOGLE_PLACES_API_KEY`
+> in secrets, unrestricted; Geocoding API enabled.)
+> **✅ #9 + Stage 4 DONE (`0.6.0569`):** Travel-tab accommodations **grouped by hotel**
+> (`src/utils/accommodationGroups.js`) — one listing per hotel + a row per stay (date-only +occupants);
+> #9 Overview summary already covered by the venue card. **REMAINING redesign (unclaimed):** #10 Set List
+> popup (+ tidy unused `getStatusBadge`/`getContractBadge`), #7c all-hotels/airport map mode.
 >
 > **✅ CLOSED 2026-06-21 (owner-confirmed working): Guest notifications + Tour Manager picker + mobile
 > approve/deny** (`0.6.0527`→`0.6.0533`). Full guest flow works end-to-end: request → notify TM(s)/AMC
