@@ -3,14 +3,14 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-23T15:10 EDT
+> Last Updated: 2026-06-23T16:40 EDT
 
 ---
 
 ## 🔝 TOP BRIEF — read FIRST (2026-06-23 PM · supersedes the morning brief below)
 
 > **Serenova `0.6.0588` LIVE** · `main` @ `d4964c0` · build green via `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`.
-> Docs: decisions log **v2.149**. Backup tag `safepoint-0587` on the remote.
+> Docs: decisions log **v2.150**, build phases **v2.65**. Backup tag `safepoint-0587` on the remote.
 
 **🔴 DEPLOY CHANGED — the Base44 editor "Publish" is BROKEN; deploy via the `base44` CLI now.**
 The editor ships a **frozen build** (served bundle hash never changes across "successful" publishes; live
@@ -45,7 +45,11 @@ try/catch-isolated** so a direct-to-live deploy can't break existing users.
 **👉 NEXT:** (a) tomorrow's `mj.oriole20` 11:30 flight = 2nd live check once in the 24h window. (b) **Push
 Group 3** = proactive delay/gate PUSH via the **AeroAPI Alerts webhook → Supabase Edge Function** receiver
 (decided direction, decisions log v2.148 — NOT polling). (c) entity-RLS-format migration so full
-`base44 deploy` works without the entities move-aside.
+`base44 deploy` works without the entities move-aside. (d) **Phase C — Calendar Integration** SCOPED &
+ready to build (spec `docs/CALENDAR-INTEGRATION-WORKING-DOC.md`; build phases v2.65): read-only tokenized
+one-way ICS feeds by role (Personal→Tour→Account→AMC "Busy — City"), schedule-only/never-financials,
+portable off Base44 (no `Core.*`); floating timezones + AMC-busy-from-actual-events resolved both open
+decisions → **C1 (Personal) has no prereqs, start there**.
 
 ---
 
