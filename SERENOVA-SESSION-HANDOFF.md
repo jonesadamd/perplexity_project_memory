@@ -56,8 +56,8 @@ resolver down. The owner is aware.
 day-of window) → live status block in `MobileTravelDetailDrawer`. On-demand-on-open for the demo.
 
 **Standing rules:** `git pull --rebase` before each push; build with `./node_modules/.bin/vite build`;
-bump `src/version.js` every deploy; commit author **Adam Jones <aj@adamdcjones.com>** + Claude co-author
-trailer; confirm the file list before any push; Base44 **"Synced" ≠ deployed** → editor add-space-Save.
+bump `src/version.js` every deploy; commit author **Adam Jones <aj@adamdcjones.com>** ONLY (NO Claude co-author
+trailer — owner owns authorship); confirm the file list before any push; Base44 **"Synced" ≠ deployed** → editor add-space-Save.
 
 ---
 
@@ -391,8 +391,8 @@ client write (fine); the optional "roster auto-suggests band/crew from account r
 
 **Reminders unchanged:** Base44 **"Synced" ≠ deployed** → editor add-space-Save trick → canary
 `v0.6.0522`; `git pull --rebase` before each push; build with `./node_modules/.bin/vite build`; bump
-`src/version.js` every deploy; commit author **Adam Jones <aj@adamdcjones.com>** + Claude co-author
-trailer; confirm the file list before any push.
+`src/version.js` every deploy; commit author **Adam Jones <aj@adamdcjones.com>** ONLY (NO Claude co-author
+trailer — owner owns authorship); confirm the file list before any push.
 
 ---
 
@@ -447,7 +447,7 @@ cleanup (stale entities/legacy imports). Full roadmap: `docs/SERENOVA-BUILD-PHAS
 **Critical reminders:** Base44 **"Synced" ≠ deployed** → force via editor add-space-Save; `git pull
 --rebase` before each push (Base44 2-way-syncs). Build with `./node_modules/.bin/vite build` (plain
 `npx vite build` may grab the wrong vite). **Bump `src/version.js` (affected hub) every deploy.** Commit
-author **Adam Jones <aj@adamdcjones.com>** + the Claude co-author trailer. **Confirm the file list
+author **Adam Jones <aj@adamdcjones.com>** ONLY — **no Claude co-author trailer** (owner owns authorship). **Confirm the file list
 before any push.** Docs: decisions log **v2.90**, build phases, working docs.
 
 ---

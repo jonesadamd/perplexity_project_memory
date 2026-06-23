@@ -34,7 +34,7 @@
    tracks are independent (e.g. B4.2 vs the Push planning doc), split them; otherwise serialize.
 6. **The on-screen version is the source of truth for "what's deployed."** Bump `src/version.js`
    every deploy; never assume the other machine's push is live until the canary shows on screen.
-7. **Commits:** author **Adam Jones <aj@adamdcjones.com>** + the Claude co-author trailer.
+7. **Commits:** author **Adam Jones <aj@adamdcjones.com>** ONLY — **no Claude co-author trailer** (owner owns authorship; 2026-06-23).
    Confirm the file list before any push.
 
 ## ⚙️ Build / deploy (unchanged — repeated here so it's one read)

@@ -8,7 +8,7 @@
 ## Standing rules (don't skip)
 - `git pull --rebase` BOTH repos before starting AND before each push.
 - Build: `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Bump `src/version.js` each deploy.
-- Commit author **Adam Jones <aj@adamdcjones.com>** + Claude co-author trailer. Confirm the file list before any push.
+- Commit author **Adam Jones <aj@adamdcjones.com>** ONLY (NO Claude co-author trailer — owner owns authorship). Confirm the file list before any push.
 - Base44 **"Synced" ≠ deployed** → force a rebuild via the editor add-space-Save; new functions/entity
   fields must **provision**.
 - **PWA install / standalone / push only work LIVE on `app.serenovahub.com`** — NOT in the Base44 preview iframe.
