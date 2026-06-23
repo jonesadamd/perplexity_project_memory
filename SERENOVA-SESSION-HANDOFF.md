@@ -3,11 +3,53 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-23T01:10 EDT
+> Last Updated: 2026-06-23T15:10 EDT
 
 ---
 
-## 🌅 MORNING START — read this FIRST (2026-06-23, laptop paused overnight)
+## 🔝 TOP BRIEF — read FIRST (2026-06-23 PM · supersedes the morning brief below)
+
+> **Serenova `0.6.0588` LIVE** · `main` @ `d4964c0` · build green via `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`.
+> Docs: decisions log **v2.149**. Backup tag `safepoint-0587` on the remote.
+
+**🔴 DEPLOY CHANGED — the Base44 editor "Publish" is BROKEN; deploy via the `base44` CLI now.**
+The editor ships a **frozen build** (served bundle hash never changes across "successful" publishes; live
+stayed on stale `0584` for weeks while the editor showed new code) and its git auto-sync wedged (an
+authorship force-push rewrote a commit it had ingested). Use the CLI (`npx -y base44@0.0.56`, app-id
+`68c22e8ff3726c063c4a53e2`):
+- `base44 login` (device-code — run in a REAL terminal; token persists to disk, shared with Claude's shell).
+- **Site:** build → `base44 --app-id … site deploy` (ships `./dist`; production-direct, NO preview).
+- **Functions:** `base44 --app-id … functions deploy <names…>` — **NEVER `--force`**.
+- **GOTCHA:** the CLI's entity validator rejects the repo's older `user_condition` RLS format (~28 files)
+  → before any deploy `mv base44/entities ../_entities_HOLD`, deploy, then move it back (git-tracked).
+  We do NOT deploy entities. (Follow-up: migrate the RLS format so full `base44 deploy` works.)
+- Production deploys are blocked by Claude's classifier → **owner runs the deploy commands**; Claude runs
+  read-only CLI (`whoami`/`functions list`/`logs`). **Verify** by curling `app.serenovahub.com/?cb=$RANDOM`
+  → check the `assets/index-*.js` hash + grep the version (don't trust the on-screen label alone).
+- Full detail: decisions log v2.149 + the `serenova-deploy-test-flow` auto-memory.
+
+**🧪 TEST BEFORE LIVE (no Base44 staging-deploy exists via CLI):** (1) **`base44 dev`** = app LOCALLY vs the
+live backend (best frontend gate); (2) **Base44 editor Preview** still works with real Lisa/staged data —
+but pull git→editor first via the owner's **`syncFromGitHub` function**, and note Preview hits the LIVE
+functions; (3) live + curl verify. For backend changes (no preview-fn env) keep them **additive +
+try/catch-isolated** so a direct-to-live deploy can't break existing users.
+
+**✅ DONE this session (`0.6.0585`→`0588`, all live via CLI):**
+- **MobileHub Live Flight bar** — peek bar on Home → full live-status sheet (delay/gate/terminal/alerts);
+  cache-first (`getUserUpcomingFlightsWithLiveData`, 15-min TTL) to bound AeroAPI cost/rate-limits.
+- **Staged band/crew get it too** — `LiveFlightData` is per-`flight_id` (shared per-segment). `getStagedMobileData`
+  attaches live status for the member's own imminent flights (additive/try-caught; seeds via AeroAPI when
+  stale; own-bookings-only → no traveller-less flights); `fetchLiveFlightData` got an assigned-traveller
+  guard; the bar reads the shared record for staged. **Verified live: mj.oriole20 sees the 11:30 banner.**
+
+**👉 NEXT:** (a) tomorrow's `mj.oriole20` 11:30 flight = 2nd live check once in the 24h window. (b) **Push
+Group 3** = proactive delay/gate PUSH via the **AeroAPI Alerts webhook → Supabase Edge Function** receiver
+(decided direction, decisions log v2.148 — NOT polling). (c) entity-RLS-format migration so full
+`base44 deploy` works without the entities move-aside.
+
+---
+
+## 🌅 MORNING START — (2026-06-23 AM — SUPERSEDED by the TOP BRIEF above; kept for history)
 
 > **You may be on DESKTOP now. Laptop pushed up to `0.6.0584` / commit `65e0e16` last night.**
 
