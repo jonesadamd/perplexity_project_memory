@@ -9,8 +9,8 @@
 
 ## 🟢 CURRENT STATE — 2026-06-22 PM (read this first; supersedes everything below)
 
-> **Serenova `0.6.0580`** · latest `main` commit **`60e9e53`** · build green via
-> `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs: decisions log **v2.144**,
+> **Serenova `0.6.0581`** · latest `main` commit **`d91a3af`** · build green via
+> `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs: decisions log **v2.145**,
 > EventDetails working doc (**redesign COMPLETE**), `SERENOVA-MACHINE-SYNC.md`, and **`LAPTOP-SESSION-NEXT.md`**.
 
 **✅ DONE 2026-06-22 — MobileHub personal travel/hotel scope for band/crew (`0.6.0577`→`0.6.0578`, pushed).**
@@ -42,6 +42,10 @@ tabs/home; drawers show My Reservation + others; event-detail pins own / summari
   now `formatAirportTime` (airport-local), not browser-local. (c) travel detail-drawer resolves traveller
   email→name via roster (`nameForEmail` from `MobileEventDetail`). **Known minor (still open):** the
   Travel-TAB drawer shows raw email if `name_on_ticket` blank (no single-event roster there).
+- **Round 5 (`0.6.0581`):** event-detail itinerary cleanup — **Flights + Ground merged into one "Travel"
+  card** (`dayTravelItems`, icon = type plane/car/train/bus), rows **lead with departure time** + arrival
+  hint, pin/expand preserved; times via `formatAirportTime`. **Day Schedule:** time leads, transport rows
+  get a car icon (`type==="transport"`), duration right-aligned when `end_time` exists. Hotel untouched.
 
 **✅ DONE 2026-06-22 (`0.6.0576`, `7a93173`, pushed) — Item 1: MobileHub home nudge.** New
 `src/components/mobile/MobileHomeNudge.jsx` at the top of the Home tab (above guest notices/week strip):
