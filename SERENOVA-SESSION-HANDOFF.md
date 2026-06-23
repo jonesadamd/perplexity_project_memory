@@ -9,21 +9,27 @@
 
 ## 🟢 CURRENT STATE — 2026-06-22 PM (read this first; supersedes everything below)
 
-> **Serenova `0.6.0577`** · latest `main` commit **`0497a6a`** · build green via
-> `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs: decisions log **v2.141**,
+> **Serenova `0.6.0578`** · latest `main` commit **`de6123c`** · build green via
+> `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs: decisions log **v2.142**,
 > EventDetails working doc (**redesign COMPLETE**), `SERENOVA-MACHINE-SYNC.md`, and **`LAPTOP-SESSION-NEXT.md`**.
 
-**✅ DONE 2026-06-22 (`0.6.0577`, `0497a6a`, pushed) — MobileHub personal travel/hotel scope for band/crew.**
+**✅ DONE 2026-06-22 — MobileHub personal travel/hotel scope for band/crew (`0.6.0577`→`0.6.0578`, pushed).**
 Roster-scoping narrowed band/crew to their events; this narrows one level further — to the individual.
-New `src/utils/personalTravelScope.js` (match: flights `EventFlightBooking.user_email`, ground
-`TravelSegment.travelers[].user_email`, hotels `Accommodation.rooming_list[].occupants[].email`).
-**Travel tab, Hotel tab, home week-strip/day-schedule, "Tonight" hotel** → own items only (applies to
-`band_member`/`crew_member`/`roadie_member`; mgmt/TM keep full view; events stay rostered). **Hotels use a
-per-event fallback** (their room if matched, else the event's hotel — rooming lists are often name-only).
-**Event detail shows ALL** but pins + teal-highlights the member's own (a "You" tag) and collapses others
-behind "Show N other flights/rides/hotels" (`OthersDisclosure`); no personal match → all plain/expanded.
-Frontend-only — plain rebuild. ⏳ Live-verify: staged band member sees only their own on tabs/home;
-event-detail pins own + collapses others.
+`src/utils/personalTravelScope.js` (match: flights `EventFlightBooking.user_email`, ground
+`TravelSegment.travelers[].user_email`, hotels `Accommodation.rooming_list[].occupants[].email` + exact
+name fallback). Applies to `band_member`/`crew_member`/`roadie_member` only; mgmt/TM keep full view; events
+stay rostered.
+- **Travel tab, Hotel tab, home week-strip/day-schedule, "Tonight" hotel** → own items only, **STRICT**
+  (round-2 reversed the earlier per-event hotel fallback per owner live test — only what you're
+  assigned to).
+- **Detail drawers:** "My Reservation" (flights group anyone sharing your booking ref) + "Other
+  Passengers"/"Others Also Here" name lists (`splitFlightBookings`/`splitRooms`). Travel tab passes the
+  FULL `flightBookings` to the drawer (list stays strict) so co-passengers resolve.
+- **Event detail shows ALL** but pins + **solid-teal** "You"-tags the member's own and collapses others
+  behind "Show N other …"; if on NOTHING in a section → a "{who} is flying · Show flights" summary
+  (`CollapsedSummary`).
+Frontend-only — plain rebuild. ⏳ Live-verify: staged/logged-in band member sees only their own on
+tabs/home; drawers show My Reservation + others; event-detail pins own / summarizes when not assigned.
 
 **✅ DONE 2026-06-22 (`0.6.0576`, `7a93173`, pushed) — Item 1: MobileHub home nudge.** New
 `src/components/mobile/MobileHomeNudge.jsx` at the top of the Home tab (above guest notices/week strip):
