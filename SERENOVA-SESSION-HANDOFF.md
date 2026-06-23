@@ -9,21 +9,22 @@
 
 ## 🌅 MORNING START — read this FIRST (2026-06-23, laptop paused overnight)
 
-> **You may be on DESKTOP now. Laptop pushed up to `0.6.0583` / commit `6c7131d` last night.**
+> **You may be on DESKTOP now. Laptop pushed up to `0.6.0584` / commit `65e0e16` last night.**
 
 **Do this before anything else:**
 1. **`git pull` BOTH repos** — the code repo (`serenovahub_b44`) AND this memory repo
    (`perplexity_project_memory`). The laptop is ahead; pull to avoid divergence. (`git pull --rebase`.)
-2. **Confirm you're at `0.6.0583`** — `grep serenova src/version.js` should show `0.6.0583`.
+2. **Confirm you're at `0.6.0584`** — `grep serenova src/version.js` should show `0.6.0584`.
 3. Build sanity (optional): `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build` (green as of last night).
-   ⚠️ The very last push was a **hotfix** for a TDZ `ReferenceError` (`eventAccomm` before init) that
-   crashed event detail in MobileHub — deploy **`0.6.0583`** (not `0.6.0582`).
+   **Deploy `0.6.0584`** (not earlier). Note: the event-detail Day Schedule synthesis (`0.6.0582`/`83`)
+   was already verified live last night and looked great; the FINAL `0.6.0584` (home Today's-Schedule
+   parity + hotel day-filter + Upcoming-Travel reorder) is the only un-deployed piece.
 
 **State of play:** A long laptop session (2026-06-22 PM → 01:10 EDT) did a big **MobileHub travel
-personalization + itinerary polish** arc (`0.6.0577`→`0.6.0583`), ALL pushed + build-green, but **NOT yet
-deployed to Base44**. The whole arc is **⏳ pending ONE live deploy + verify** (editor add-space-Save →
-rebuild → canary `v0.6.0583`). Everything is **frontend-only** — no new Base44 functions/entities/fields,
-so a plain rebuild is all it needs.
+personalization + itinerary polish** arc (`0.6.0577`→`0.6.0584`), ALL pushed + build-green. The
+event-detail half was verified live last night; the FINAL `0.6.0584` (home parity + hotel day-filter) is
+**⏳ pending ONE live deploy + verify** (editor add-space-Save → rebuild → canary `v0.6.0584`). Everything
+is **frontend-only** — no new Base44 functions/entities/fields, so a plain rebuild is all it needs.
 
 **🧪 FIRST THING TO DO after deploying = live-verify the whole arc on a real device** (PWA on
 `app.serenovahub.com`; test as a band member e.g. `mj.oriole20@gmail.com` AND as the artist owner Lisa):
@@ -38,6 +39,11 @@ so a plain rebuild is all it needs.
   tag; band/crew collapse others, Artist/admin see all under "Others".
 - **Event detail → Day Schedule:** YOUR own hotel check-out/in + flight check-in/depart/arrive + ground
   now appear inline, time-sorted with icons (works for Artist too). Non-travelling admin = manual items only.
+- **Home → Today's Schedule (`0.6.0584`):** now IDENTICAL to event-detail (same `buildDaySchedule` util) —
+  time-first, icons, synthesized flight/ground/hotel; **home times now correct** (were wrong before).
+- **Home order (`0.6.0584`):** Upcoming Travel sits **below** Today's Schedule.
+- **Event detail → Hotel card (`0.6.0584`):** shows only the hotel(s) ACTIVE that day (stay covers the
+  selected date) — a future stay no longer shows on earlier days.
 
 **Known minor (logged, not blocking):** the **Travel-TAB** detail drawer still shows the raw email if a
 traveller's `name_on_ticket` is blank (the tab has no single-event roster to resolve against — the
@@ -57,8 +63,8 @@ trailer; confirm the file list before any push; Base44 **"Synced" ≠ deployed**
 
 ## 🟢 CURRENT STATE — 2026-06-22 PM (read this first; supersedes everything below)
 
-> **Serenova `0.6.0583`** · latest `main` commit **`6c7131d`** · build green via
-> `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs: decisions log **v2.146**,
+> **Serenova `0.6.0584`** · latest `main` commit **`65e0e16`** · build green via
+> `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs: decisions log **v2.147**,
 > EventDetails working doc (**redesign COMPLETE**), `SERENOVA-MACHINE-SYNC.md`, and **`LAPTOP-SESSION-NEXT.md`**.
 
 **✅ DONE 2026-06-22 — MobileHub personal travel/hotel scope for band/crew (`0.6.0577`→`0.6.0578`, pushed).**
@@ -100,6 +106,10 @@ tabs/home; drawers show My Reservation + others; event-detail pins own / summari
   `EventSchedule.jsx` parity; airport-local times via `localParts`+`formatAirportTime`. **Own-scoped by
   email → runs for EVERYONE so the performing Artist + band/crew see THEIR trips, non-travelling admin
   gets nothing** (owner reminder: treat Artist like band/crew). `0.6.0583` = TDZ hotfix (memo order).
+- **Round 7 (`0.6.0584`):** extracted **`src/utils/itinerarySchedule.js`** (`buildDaySchedule`+
+  `SCHEDULE_ICONS`) shared by event-detail + **home Today's Schedule** (now identical; fixes home's wrong
+  times). **Upcoming Travel** moved below Today's Schedule. **Event-detail Hotel section day-filtered**
+  (`dayAccomm` = stay covers selected day). Tonight card untouched.
 
 **✅ DONE 2026-06-22 (`0.6.0576`, `7a93173`, pushed) — Item 1: MobileHub home nudge.** New
 `src/components/mobile/MobileHomeNudge.jsx` at the top of the Home tab (above guest notices/week strip):
