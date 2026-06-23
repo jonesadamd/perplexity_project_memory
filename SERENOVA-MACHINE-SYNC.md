@@ -4,20 +4,14 @@
 > run an AI coding session against the same code repo (`jonesadamd/serenovahub_b44`) and share
 > this memory repo (`jonesadamd/perplexity_project_memory`) via git. This doc is the lightweight
 > protocol that keeps the two sessions from clobbering each other or duplicating work.
-> Last Updated: 2026-06-23T02:00 EDT
-> **🌙 LAPTOP PAUSED FOR THE NIGHT 2026-06-23 ~02:00 EDT.** All work pushed (`65e0e16`, **`0.6.0584`**),
-> build green, NOT yet deployed to Base44 (rebuild + redeploy in the morning → canary `v0.6.0584`).
-> NOTE: part of this arc (event-detail Day Schedule synthesis `0.6.0582`/`83`) was VERIFIED LIVE late
-> tonight (owner deployed + tested — looked great); the FINAL `0.6.0584` (home Today's Schedule parity +
-> hotel day-filter + reorder) is **not yet deployed**. **If starting on DESKTOP: `git pull` BOTH repos
-> first** (laptop is ahead). See the "🌅 MORNING START" brief in `SERENOVA-SESSION-HANDOFF.md` (top).
-> **👉 NEXT (owner priority):** see `LAPTOP-SESSION-NEXT.md` — (1) ~~MobileHub home install/notifications
-> nudge~~ ✅ DONE (`0.6.0576`), (2) **live flight updates in MobileHub (Lisa flies 2026-06-23)** — still
-> unclaimed below.
-> **NEW CONVENTION (2026-06-22): authorship signature.** Repo now has `LICENSE` (proprietary) +
-> `SIGNATURE.md` (overt RUSHMERE/KABINGA markers) + a CLAUDE.md "Authorship" pointer. Markers are
-> display-only, overt, removable — and **NEVER in security- or randomness-sensitive code** (no
-> seeds/salts/nonces/tokens/IDs). No markers applied to existing code yet (files + pointer only).
+> Last Updated: 2026-06-23T18:00 EDT
+> **🖥️ DESKTOP wrapped 2026-06-23 PM. `0.6.0591` LIVE** (`main` @ `a09b593`), build green, login + live-flight
+> verified working. **Owner moving to LAPTOP shortly.** **On the laptop FIRST: `git pull --rebase` BOTH repos,
+> then do the "💻 SECOND-MACHINE SETUP" below (one-time `base44 login`).** Read the **🔝 TOP BRIEF** in
+> `SERENOVA-SESSION-HANDOFF.md` — deploy is now CLI-based (editor Publish is broken) and `.env.production` is
+> mandatory (both covered below).
+> **AUTHORSHIP:** commits author **Adam Jones only — NO Claude trailer**. `LICENSE` + `SIGNATURE.md` (overt
+> RUSHMERE/KABINGA markers, display-only, NEVER in security/randomness code) exist; no markers in code yet.
 
 ---
 
@@ -37,12 +31,32 @@
 7. **Commits:** author **Adam Jones <aj@adamdcjones.com>** ONLY — **no Claude co-author trailer** (owner owns authorship; 2026-06-23).
    Confirm the file list before any push.
 
-## ⚙️ Build / deploy (unchanged — repeated here so it's one read)
-- Build: `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build` (plain `npx vite build`
-  may grab the wrong vite).
-- Base44 **"Synced" ≠ deployed** → force a rebuild via the editor **add-space-Save** trick, then
-  hard-reload. New Base44 functions/entities must **provision** (watch the non-provisioning gotcha).
-- Bump the affected hub in `src/version.js` each deploy; verify the canary on screen.
+## ⚙️ Build / deploy — VIA THE BASE44 CLI (the editor "Publish" is BROKEN as of 2026-06-23)
+> The editor's git auto-sync wedged + "Publish to live" ships a frozen build. **Deploy with the
+> `base44` CLI.** Full detail: decisions log v2.149/v2.152 + the `serenova-deploy-test-flow` auto-memory.
+- **Build:** `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build` (plain `npx vite build` may
+  grab the wrong vite). **`.env.production` (committed) MUST be present** — it bakes in `VITE_BASE44_APP_ID`
+  / `APP_BASE_URL` / `BACKEND_URL`; without it the build 404s every `/api` call for fresh users. Verify:
+  `grep -o 68c22e8ff3726c063c4a53e2 dist/assets/index-*.js` must match.
+- **Deploy (owner runs — classifier blocks Claude from prod deploys):** `mv base44/entities ../_entities_HOLD`
+  (the CLI's entity validator rejects the repo's `user_condition` RLS format) → build →
+  `npx -y base44@0.0.56 --app-id 68c22e8ff3726c063c4a53e2 site deploy -y` → `mv ../_entities_HOLD base44/entities`.
+  Functions: `… functions deploy <names…>` (NEVER `--force`).
+- **Verify:** curl `https://app.serenovahub.com/?cb=$RANDOM` → check the `index-*.js` hash + grep the version.
+- Bump the affected hub in `src/version.js` each deploy; the on-screen canary = source of truth for "deployed."
+
+## 💻 SECOND-MACHINE (laptop) SETUP — do this before working on the laptop
+1. **`git pull --rebase` BOTH repos.** This pulls the committed **`.env.production`** + the
+   `src/api/base44Client.js` origin fallback — no manual env setup needed.
+2. **`base44 login` ON THE LAPTOP (one-time per machine).** The CLI auth token is stored on disk and does
+   **NOT** sync via git — each machine logs in separately. In a REAL terminal:
+   `npx -y base44@0.0.56 login` → device-code → confirm at https://app.base44.com/login/device (act fast,
+   it expires). Then `npx -y base44@0.0.56 whoami` should show `adamdcjones@gmail.com`. Token persists.
+3. **Node/npm present** (laptop has been the build machine, so fine). `npx` fetches the CLI on demand —
+   no global install needed; pin `base44@0.0.56`.
+4. Now build + deploy exactly as the ⚙️ section above. App id `68c22e8ff3726c063c4a53e2`.
+- **Preview testing** (optional): the owner's `syncFromGitHub` Base44 function pulls git→editor so the
+  Base44 editor Preview can smoke-test with real data; or `base44 dev` runs the app locally.
 
 ---
 
@@ -50,8 +64,8 @@
 
 | What | Value |
 |---|---|
-| Code repo `main` HEAD | `65e0e16` — "MobileHub: shared itinerary synthesis (home=event-detail), reorder, hotel day-filter" |
-| Serenova version | **0.6.0584** |
+| Code repo `main` HEAD | `a09b593` — "docs: log CLI-build /api 404 root cause + .env.production fix" |
+| Serenova version | **0.6.0591** (LIVE — login + live-flight verified) |
 | Memory repo HEAD | (this commit) — **NOTE:** local memory clone is now `/Users/adamjones/Developer/perplexity_project_memory` (the `/Volumes/adamjones/...` external mount is gone). |
 | Build | green |
 | Base44 DEPLOYS | ✅ **ALL 4 DONE + verified live 2026-06-22** — `getVenueRouteInfo` redeployed (coordinate route works); `Accommodation` (`route_to_venue`+coords), `Event` (`primary_accommodation_id`), `Venue` (`contacts[].roles[]`+`contacts[].phone_ext`) synced. Coordinate route, primary-hotel dropdown persistence, and venue-contact role-tags/extension all confirmed working. |
