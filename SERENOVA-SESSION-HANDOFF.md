@@ -9,8 +9,8 @@
 
 ## 🟢 CURRENT STATE — 2026-06-22 PM (read this first; supersedes everything below)
 
-> **Serenova `0.6.0579`** · latest `main` commit **`c034233`** · build green via
-> `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs: decisions log **v2.143**,
+> **Serenova `0.6.0580`** · latest `main` commit **`60e9e53`** · build green via
+> `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs: decisions log **v2.144**,
 > EventDetails working doc (**redesign COMPLETE**), `SERENOVA-MACHINE-SYNC.md`, and **`LAPTOP-SESSION-NEXT.md`**.
 
 **✅ DONE 2026-06-22 — MobileHub personal travel/hotel scope for band/crew (`0.6.0577`→`0.6.0578`, pushed).**
@@ -33,9 +33,15 @@ tabs/home; drawers show My Reservation + others; event-detail pins own / summari
 - **Round 3 (`0.6.0579`):** (a) ground-transport traveller label was showing the raw email prefix when
   `name_on_ticket` was blank → `nameForEmail()` resolves email→display name via roster `memberProfiles` +
   `getDisplayName` ("Lisa F"). (b) New compact **"Upcoming Travel"** card on Home under Current/Next Event
-  (next 3 trips after today, "6/24 ✈ Flight: JFK → SEA", own-only, taps to Travel tab). **Known minor:**
-  the travel detail-drawer Travelers list still shows raw email if `name_on_ticket` is blank (no
-  `memberProfiles` there) — logged follow-up.
+  (next 3 trips after today, "6/24 ✈ Flight: JFK → SEA", own-only, taps to Travel tab).
+- **Round 4 (`0.6.0580`):** (a) **"You" pin is now UNIVERSAL** — Artist/admin get it too. New
+  `splitItems()` mode `pinnedOpen` (admin pins own highlighted + sees all others under "Others"); band/
+  crew still `collapse`/`summary`. Home glances use new `mine` (viewer's own, everyone); tabs use
+  `personal` (band own / admin full). (b) **Travel-tab redesign** (`MobileTravelList`): card-per-day,
+  time-first compact rows, type icons (plane/car/train/bus), conf/PNR tag, ascending; **tz fix** — times
+  now `formatAirportTime` (airport-local), not browser-local. (c) travel detail-drawer resolves traveller
+  email→name via roster (`nameForEmail` from `MobileEventDetail`). **Known minor (still open):** the
+  Travel-TAB drawer shows raw email if `name_on_ticket` blank (no single-event roster there).
 
 **✅ DONE 2026-06-22 (`0.6.0576`, `7a93173`, pushed) — Item 1: MobileHub home nudge.** New
 `src/components/mobile/MobileHomeNudge.jsx` at the top of the Home tab (above guest notices/week strip):

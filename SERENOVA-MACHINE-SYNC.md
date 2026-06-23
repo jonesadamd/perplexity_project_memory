@@ -4,7 +4,7 @@
 > run an AI coding session against the same code repo (`jonesadamd/serenovahub_b44`) and share
 > this memory repo (`jonesadamd/perplexity_project_memory`) via git. This doc is the lightweight
 > protocol that keeps the two sessions from clobbering each other or duplicating work.
-> Last Updated: 2026-06-22T23:20 EDT
+> Last Updated: 2026-06-22T23:55 EDT
 > **👉 NEXT (owner priority):** see `LAPTOP-SESSION-NEXT.md` — (1) ~~MobileHub home install/notifications
 > nudge~~ ✅ DONE (`0.6.0576`), (2) **live flight updates in MobileHub (Lisa flies 2026-06-23)** — still
 > unclaimed below.
@@ -44,8 +44,8 @@
 
 | What | Value |
 |---|---|
-| Code repo `main` HEAD | `c034233` — "MobileHub: fix ground traveller name + home Upcoming Travel card" |
-| Serenova version | **0.6.0579** |
+| Code repo `main` HEAD | `60e9e53` — "MobileHub: universal You-pin, Travel-tab redesign + tz fix, drawer names" |
+| Serenova version | **0.6.0580** |
 | Memory repo HEAD | (this commit) — **NOTE:** local memory clone is now `/Users/adamjones/Developer/perplexity_project_memory` (the `/Volumes/adamjones/...` external mount is gone). |
 | Build | green |
 | Base44 DEPLOYS | ✅ **ALL 4 DONE + verified live 2026-06-22** — `getVenueRouteInfo` redeployed (coordinate route works); `Accommodation` (`route_to_venue`+coords), `Event` (`primary_accommodation_id`), `Venue` (`contacts[].roles[]`+`contacts[].phone_ext`) synced. Coordinate route, primary-hotel dropdown persistence, and venue-contact role-tags/extension all confirmed working. |
