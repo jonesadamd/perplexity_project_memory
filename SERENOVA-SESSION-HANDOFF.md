@@ -3,20 +3,29 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-22T17:00 EDT
+> Last Updated: 2026-06-22T20:05 EDT
 
 ---
 
 ## 🟢 CURRENT STATE — 2026-06-22 PM (read this first; supersedes everything below)
 
-> **Serenova `0.6.0575`** · latest `main` commit **`d537c5a`** · build green via
-> `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs: decisions log **v2.139**,
+> **Serenova `0.6.0576`** · latest `main` commit **`7a93173`** · build green via
+> `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Docs: decisions log **v2.140**,
 > EventDetails working doc (**redesign COMPLETE**), `SERENOVA-MACHINE-SYNC.md`, and **`LAPTOP-SESSION-NEXT.md`**.
 
-**👉 NEXT (owner priority, for the laptop tonight/tomorrow) — see `LAPTOP-SESSION-NEXT.md`:**
-1. **MobileHub home nudge** — "Add to Home Screen" if not a PWA, "Enable notifications" if a PWA without
-   push; dismissible, reappear ~every 3 days. (Reuse `useInstallPrompt` + `src/lib/push.js` + the
-   hamburger handlers; new `MobileHomeNudge` at top of the Home tab.)
+**✅ DONE 2026-06-22 (`0.6.0576`, `7a93173`, pushed) — Item 1: MobileHub home nudge.** New
+`src/components/mobile/MobileHomeNudge.jsx` at the top of the Home tab (above guest notices/week strip):
+ONE dismissible banner — **Add to Home Screen** if not a PWA (native prompt Android/Chrome; instruction
+sheet iOS — Apple exposes no programmatic install) **or Enable notifications** if standalone-without-push
+(`enablePush()`, reuses Push Group 1 + `public/sw.js`). Snooze ~3 days per type via localStorage
+(`nudge_install_until`/`nudge_push_until`); push only nudged while permission is `'default'`. **Frontend-
+only — plain rebuild, no fn/entity deploy.** Live-only on `app.serenovahub.com` (renders nothing in the
+preview iframe). ⏳ **Live-verify pending:** deploy (editor add-space-Save → canary `v0.6.0576`), then on
+an installed PWA confirm the notifications nudge appears + enables; on iOS Safari (non-installed) confirm
+the Add-to-Home-Screen sheet; dismiss → gone for 3 days.
+
+**👉 NEXT (owner priority) — see `LAPTOP-SESSION-NEXT.md`:**
+1. ~~**MobileHub home nudge**~~ ✅ DONE (`0.6.0576`, above).
 2. **Live flight updates in MobileHub** — delay/gate/status on the mobile flight drawer; **Lisa flies
    2026-06-23 and has the PWA**, so it's demoable. Reuse web `LiveFlightTracker.jsx` +
    `getUserUpcomingFlightsWithLiveData`/`fetchLiveFlightData` (`AEROAPI_KEY_LIVE`, day-of window) →
