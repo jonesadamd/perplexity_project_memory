@@ -9,8 +9,8 @@
 
 ## 🔝 TOP BRIEF — read FIRST (2026-06-23 PM · supersedes the morning brief below)
 
-> **Serenova `0.6.0588` LIVE** · `main` @ `d4964c0` · build green via `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`.
-> Docs: decisions log **v2.150**, build phases **v2.65**. Backup tag `safepoint-0587` on the remote.
+> **Serenova `0.6.0591` LIVE** · `main` @ `b208190` · build green via `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`.
+> Docs: decisions log **v2.152**, build phases **v2.65**. Backup tag `safepoint-0587` on the remote.
 
 **🔴 DEPLOY CHANGED — the Base44 editor "Publish" is BROKEN; deploy via the `base44` CLI now.**
 The editor ships a **frozen build** (served bundle hash never changes across "successful" publishes; live
@@ -18,7 +18,8 @@ stayed on stale `0584` for weeks while the editor showed new code) and its git a
 authorship force-push rewrote a commit it had ingested). Use the CLI (`npx -y base44@0.0.56`, app-id
 `68c22e8ff3726c063c4a53e2`):
 - `base44 login` (device-code — run in a REAL terminal; token persists to disk, shared with Claude's shell).
-- **Site:** build → `base44 --app-id … site deploy` (ships `./dist`; production-direct, NO preview).
+- **Site:** build → `base44 --app-id … site deploy -y` (ships `./dist`; production-direct, NO preview). **`-y` REQUIRED in a non-interactive shell.**
+- **🔴 `.env.production` MUST exist (committed) or every `/api` call 404s.** A plain `vite build` omits Base44's injected app params (`appId`/`appBaseUrl`) → SDK hits its default host → 404 on `me`/`batch`/all functions for fresh visitors (this caused the staged-login outage; fixed `0590`→`0591`). The committed `.env.production` bakes in `VITE_BASE44_APP_ID`/`VITE_BASE44_APP_BASE_URL`/`VITE_BASE44_BACKEND_URL` (public ids). **Verify after build:** `grep -o 68c22e8ff3726c063c4a53e2 dist/assets/index-*.js` must match. (A live **401 on `me` is NORMAL** = anonymous auth check; a **404 on `me`** = params missing.)
 - **Functions:** `base44 --app-id … functions deploy <names…>` — **NEVER `--force`**.
 - **GOTCHA:** the CLI's entity validator rejects the repo's older `user_condition` RLS format (~28 files)
   → before any deploy `mv base44/entities ../_entities_HOLD`, deploy, then move it back (git-tracked).
@@ -34,13 +35,21 @@ but pull git→editor first via the owner's **`syncFromGitHub` function**, and n
 functions; (3) live + curl verify. For backend changes (no preview-fn env) keep them **additive +
 try/catch-isolated** so a direct-to-live deploy can't break existing users.
 
-**✅ DONE this session (`0.6.0585`→`0588`, all live via CLI):**
+**✅ DONE this session (`0.6.0585`→`0591`, all live via CLI):**
 - **MobileHub Live Flight bar** — peek bar on Home → full live-status sheet (delay/gate/terminal/alerts);
   cache-first (`getUserUpcomingFlightsWithLiveData`, 15-min TTL) to bound AeroAPI cost/rate-limits.
 - **Staged band/crew get it too** — `LiveFlightData` is per-`flight_id` (shared per-segment). `getStagedMobileData`
   attaches live status for the member's own imminent flights (additive/try-caught; seeds via AeroAPI when
   stale; own-bookings-only → no traveller-less flights); `fetchLiveFlightData` got an assigned-traveller
   guard; the bar reads the shared record for staged. **Verified live: mj.oriole20 sees the 11:30 banner.**
+- **PnrSegmentManager flight lookup (`0589`)** — AeroAPI `/schedules` (`flightLookup`) in Add/Replace
+  autofills route/times/tz (de-dups onto the shared `Flight` → shared live cache); airport-tz-correct
+  `datetime-local`; "Check for schedule updates" button (schedule refresh ≠ day-of live). Use **Replace
+  Segment + Look up flight** to move a traveller onto the shared flight (e.g. Lisa → tomorrow's 11:30).
+- **Staged login fixes (`0589`→`0591`)** — (1) `sendCode` retries 3× past a cold-start 401; (2) **the big
+  one: `.env.production` + origin fallback** fixed the CLI-build 404-on-all-`/api` outage (see deploy
+  block above). **Login VERIFIED working** (mj.oriole20 → SMS code → in). Note `requestStagedCode` sends
+  **SMS** when a phone is on file (mj ends `4603`); email is the fallback / manual switch.
 
 **👉 NEXT:** (a) tomorrow's `mj.oriole20` 11:30 flight = 2nd live check once in the 24h window. (b) **Push
 Group 3** = proactive delay/gate PUSH via the **AeroAPI Alerts webhook → Supabase Edge Function** receiver
@@ -49,7 +58,10 @@ Group 3** = proactive delay/gate PUSH via the **AeroAPI Alerts webhook → Supab
 ready to build (spec `docs/CALENDAR-INTEGRATION-WORKING-DOC.md`; build phases v2.65): read-only tokenized
 one-way ICS feeds by role (Personal→Tour→Account→AMC "Busy — City"), schedule-only/never-financials,
 portable off Base44 (no `Core.*`); floating timezones + AMC-busy-from-actual-events resolved both open
-decisions → **C1 (Personal) has no prereqs, start there**.
+decisions → **C1 (Personal) has no prereqs, start there**. (e) **Staged-login cold-start at the source** —
+add a service-role-read retry inside `requestStagedCode`/`verifyStagedCode` (the frontend 3× retry is a
+band-aid; needs a function deploy). (f) **`fa_flight_id` as canonical id** in `fetchLiveFlightData`
+(FlightAware-recommended; currently matches airline+number+route).
 
 ---
 
