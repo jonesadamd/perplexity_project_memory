@@ -3,11 +3,29 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-23T21:45 EDT
+> Last Updated: 2026-06-24T10:30 EDT
 
 ---
 
-## 🔝 TOP BRIEF — read FIRST (2026-06-23 PM · supersedes the morning brief below)
+## 🔝 TOP BRIEF — read FIRST (2026-06-24 · supersedes everything below)
+
+> **Serenova `0.6.0603` LIVE** (deployed via `base44 site deploy`, verified — bundle `index-BW6tFu10.js`) · `main` @ `68cdd83` · build green via `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`.
+> Docs: decisions log **v2.155**, build phases **v2.66**. Backup tag `safepoint-0587` on the remote.
+
+**✅ DONE 2026-06-24 — MobileHub UX run `0.6.0593`→`0.6.0603` (all live, build-green). Full detail: decisions log v2.155.**
+- **Live Flight bar/sheet:** docked to the nav (no gap, status-tinted, rises from menu); expanded sheet = gradient status hero + countdown, status-tinted route card, **plane progresses along the route line** (live in-flight), bolder Gate & Terminal.
+- **Add to Calendar** (shared `src/utils/calendarExport.js`): flight + ground `.ics`; notes = own CONF only, airline, times, **travellers as a line-broken name list**, **2h/3h check-in** event (by `route_type`); floating airport-tz times; **flight travellers grouped across per-PNR flight records** (TM sees all). **Confirmed working.**
+- **Pull-to-close + scroll-lock** on all sheets (shared `src/hooks/useSheetDrag.js`); **hotel rooming list** compacted (name left / room info right).
+- **Events tab:** Past = descending; fixed tour-header duplication/phantom-buttons (React key collision → unique keys).
+- **Pull-to-refresh + reopen-refresh** (>5min idle AND online only); **silent reload** (`loadAccountData(account,{silent})`) keeps you on the current event+tab+scroll; discrete **"Refresh cache"** button in the hamburger menu (clears SW + Cache Storage, cache-busts).
+
+**🟢 PERMISSIONS — mgmt-TM edit on MobileHub RESOLVED (`0.6.0600`).** A logged-in TM (owner of Original Artists, linked to Lisa as `tour_manager`) now has setlist/guest edit on mobile. A temp diagnostic proved the linked-account bridge resolves to **`admin`** correctly (seat owner→admin, event-scoped link + matching `ManagerArtistAssignment`); earlier view-only was a transient data state. **👉 Owner's architectural direction (next phase):** make management-linked users **"placed" memberships inside the artist account** — visible/read-only to the artist, managed only by the management company/dashboard — collapsing the cross-account bridge into the normal membership path. **Related gap:** the management-dashboard UI to assign a management↔artist role appears lost (Team-page role is locked/uneditable) — needs rebuilding (likely the same phase).
+
+**👉 OPEN / NEXT:** (a) **placed-membership** model + management-dashboard role-assignment UI (above); (b) optional **in-app "update available → reload" prompt** for PWA users (no SW precache today — staleness is just `index.html`/HTTP); (c) gate the "Refresh cache" button behind a role/flag if it shouldn't be public; (d) earlier-session opens still stand (Push Group 3 webhook, entity-RLS-format migration so deploys skip the `base44/entities` move-aside, `@/entities/*`→`base44.entities.*` Phase 9, Calendar Integration Phase C).
+
+---
+
+## 🔝 PRIOR BRIEF (2026-06-23 PM)
 
 > **Serenova `0.6.0592` LIVE** (deployed via `base44 site deploy`, verified — bundle `index-CkTLwMK_.js`) · `main` @ `1374e86` · build green via `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`.
 > Docs: decisions log **v2.153**, build phases **v2.66**. Backup tag `safepoint-0587` on the remote.
