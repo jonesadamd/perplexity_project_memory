@@ -9,9 +9,10 @@
 
 ## 🔝 TOP BRIEF — read FIRST (2026-06-24 · supersedes everything below)
 
-> **🏁 MILESTONE — current MobileHub build COMPLETE.** **Serenova `0.6.0604` LIVE** (deployed via `base44 site deploy`, verified — bundle `index-HQn2KYdL.js`) · `main` @ `8f5bd68` · build green via `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`.
-> Docs: decisions log **v2.156**, build phases **v2.67**. Backup tag **`safepoint-0604`** on the remote (prior `safepoint-0587`).
-> Owner declared a clean stopping point — **next focus is a NEW/separate area of work** (brief incoming). MobileHub is feature-complete + stable for this build.
+> **🏁 MILESTONE — current MobileHub build COMPLETE.** **Live = Serenova `0.6.0604`** (bundle `index-HQn2KYdL.js`); **repo is bumped to `0.7.0605`** (`main` @ `d11c707`) — the **0.6→0.7 minor bump marks the milestone** and ships on the NEXT deploy (live still shows `0.6.0604` until then). Build green via `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`.
+> Docs: decisions log **v2.157**, build phases **v2.67**. Backup tag **`safepoint-0604`** on the remote (prior `safepoint-0587`).
+> **Versioning policy (owner-confirmed):** `minor` = the app's KEY development milestones; `build` is a CONTINUOUS per-hub counter that NEVER resets across minor bumps (`0.6.0604`→`0.7.0605`) — shows uninterrupted development + stays a strictly-increasing deploy canary. (Codified in `src/version.js` header.)
+> **👉 NEXT FOCUS (owner, this hub only):** (1) back to the **Events pages** for minor fixes; (2) **MAJOR: Finances** — build on **web FIRST**, then bring into **MobileHub only AFTER** the web Finances reaches a good milestone. MobileHub itself is feature-complete + stable for now.
 
 **`0.6.0604` (final this session):** guest-decision notice **dismiss is now instant** (local `dismissedNoticeIds` + background `dismissStagedNotice`) — no full-screen reload, header/scroll stay put. **Flight "boarding" researched + deliberately NOT built** (AeroAPI `/flights/{ident}` exposes no boarding time / "Now Boarding" — airline-proprietary; owner: "leave it off, what we have is great"; `estimated_out` is the closest real signal if ever wanted).
 
