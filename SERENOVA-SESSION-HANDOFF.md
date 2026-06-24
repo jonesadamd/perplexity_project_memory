@@ -3,14 +3,17 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-24T10:30 EDT
+> Last Updated: 2026-06-24T12:10 EDT
 
 ---
 
 ## 🔝 TOP BRIEF — read FIRST (2026-06-24 · supersedes everything below)
 
-> **Serenova `0.6.0603` LIVE** (deployed via `base44 site deploy`, verified — bundle `index-BW6tFu10.js`) · `main` @ `68cdd83` · build green via `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`.
-> Docs: decisions log **v2.155**, build phases **v2.66**. Backup tag `safepoint-0587` on the remote.
+> **🏁 MILESTONE — current MobileHub build COMPLETE.** **Serenova `0.6.0604` LIVE** (deployed via `base44 site deploy`, verified — bundle `index-HQn2KYdL.js`) · `main` @ `8f5bd68` · build green via `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`.
+> Docs: decisions log **v2.156**, build phases **v2.67**. Backup tag **`safepoint-0604`** on the remote (prior `safepoint-0587`).
+> Owner declared a clean stopping point — **next focus is a NEW/separate area of work** (brief incoming). MobileHub is feature-complete + stable for this build.
+
+**`0.6.0604` (final this session):** guest-decision notice **dismiss is now instant** (local `dismissedNoticeIds` + background `dismissStagedNotice`) — no full-screen reload, header/scroll stay put. **Flight "boarding" researched + deliberately NOT built** (AeroAPI `/flights/{ident}` exposes no boarding time / "Now Boarding" — airline-proprietary; owner: "leave it off, what we have is great"; `estimated_out` is the closest real signal if ever wanted).
 
 **✅ DONE 2026-06-24 — MobileHub UX run `0.6.0593`→`0.6.0603` (all live, build-green). Full detail: decisions log v2.155.**
 - **Live Flight bar/sheet:** docked to the nav (no gap, status-tinted, rises from menu); expanded sheet = gradient status hero + countdown, status-tinted route card, **plane progresses along the route line** (live in-flight), bolder Gate & Terminal.
