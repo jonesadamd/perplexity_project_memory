@@ -3,11 +3,38 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-24T12:10 EDT
+> Last Updated: 2026-06-24T18:11 EDT
 
 ---
 
-## 🔝 TOP BRIEF — read FIRST (2026-06-24 · supersedes everything below)
+## 🔝 TOP BRIEF — read FIRST (2026-06-24 PM · supersedes everything below)
+
+> **Events (web) UX + brand pass DONE — repo `0.7.0607`, build-green, pushed to `main`. NOT deployed
+> (live still `0.6.0604`).** Owner reviewed via a new **local preview** and is happy; refinements applied.
+> Docs: decisions log **v2.159**, build phases **v2.69**.
+>
+> **🔍 NEW — LOCAL PREVIEW workflow (test before live, no deploy):** plain Vite + the Base44 `/api`
+> proxy to the live backend. `git pull` → `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite --port 5173`
+> → `localhost:5173` → log in (real auth + LIVE data) → serves the latest local commit. Committed
+> **`.env.development`** carries the public params so it works on any machine. Base44 has NO CLI
+> deploy-to-preview; `base44 dev` is unusable (needs Deno + strips entities). **Full recipe:
+> `SERENOVA-MACHINE-SYNC.md` → 🔍 LOCAL PREVIEW.**
+>
+> **What shipped this pass (`0.7.0605`→`0.7.0607`, web Events area):** Events landing teal/tan brand
+> header + status-colored card borders + bordered tab control + slimmer cards + shows→count +
+> Action-Required inline pill; Event Details **People** (Management 3-col, Personnel real First-Last
+> names via `getUsersByEmailsForAccount`, real account role, thinner rows, Cancel-right, full role list);
+> **Travel** (Accommodations above Travel + clean 3-col location·dates·people; TravelCard date-led/
+> time-sorted slim rows + SWR cache); **Accommodations popup** (slim rooming + cached Getting-Around
+> distances). `syncFromGithub` fn pulled into repo for reference. Auth/access verified canonical.
+>
+> **👉 NEXT (owner, on laptop):** (1) **role-reassignment walkthrough** + **team updates** (owner flagged
+> "we need to go through that" on Personnel role editing); (2) continue Events tweaks; (3) **MAJOR:
+> Finances** — web first, then MobileHub. **Deploy `0.7.0607` to live when ready** (owner-run
+> `base44 site deploy`, then curl/canary verify). **Open follow-ups:** global teal retheme (harmony
+> tokens in `Layout.jsx`); repo authorship credit line; route-info needs `getVenueRouteInfo` redeploy.
+
+## 🔝 PRIOR TOP BRIEF (2026-06-24 AM · superseded)
 
 > **🏁 MILESTONE — current MobileHub build COMPLETE.** **Live = Serenova `0.6.0604`** (bundle `index-HQn2KYdL.js`); **repo is bumped to `0.7.0605`** (`main` @ `d11c707`) — the **0.6→0.7 minor bump marks the milestone** and ships on the NEXT deploy (live still shows `0.6.0604` until then). Build green via `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`.
 > Docs: decisions log **v2.157**, build phases **v2.67**. Backup tag **`safepoint-0604`** on the remote (prior `safepoint-0587`).

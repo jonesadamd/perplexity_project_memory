@@ -45,6 +45,25 @@
 - **Verify:** curl `https://app.serenovahub.com/?cb=$RANDOM` → check the `index-*.js` hash + grep the version.
 - Bump the affected hub in `src/version.js` each deploy; the on-screen canary = source of truth for "deployed."
 
+## 🔍 LOCAL PREVIEW — test changes BEFORE live (works on any machine)
+> Established 2026-06-24 (decisions log v2.159). Base44 has **no CLI deploy-to-preview** and the editor
+> Preview depends on the wedged GitHub auto-sync, so this is the reliable test-before-live path.
+> It serves the **latest local commit** against the **LIVE backend** (real data + real auth, incl.
+> email/password), via the Base44 vite plugin's `/api` proxy. **Nothing is deployed.**
+
+**Recipe (laptop or desktop):**
+1. `git pull --rebase` (gets committed **`.env.development`** with the public app params — already in repo).
+2. `npm install` (only if deps changed).
+3. `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite --port 5173`
+4. Open **http://localhost:5173**, log in normally. You'll be your own Base44 account. Look for the
+   plugin log line **`[base44] Proxy enabled: /api -> https://app.serenovahub.com`** (confirms live data).
+5. Stop with `pkill -f vite` (or Ctrl-C) when done.
+
+**Why not `base44 dev`:** it runs a LOCAL backend that needs **Deno** AND the `base44/entities` move-aside
+(which strips entity definitions so user/membership/event lists don't populate) and only wires Google
+auth. Plain Vite + the live `/api` proxy avoids all of that. (The owner's `syncFromGithub` fn only READS
+repo files via the GitHub REST API — it does NOT push code into the editor or rebuild.)
+
 ## 💻 SECOND-MACHINE (laptop) SETUP — do this before working on the laptop
 1. **`git pull --rebase` BOTH repos.** This pulls the committed **`.env.production`** + the
    `src/api/base44Client.js` origin fallback — no manual env setup needed.
@@ -55,8 +74,9 @@
 3. **Node/npm present** (laptop has been the build machine, so fine). `npx` fetches the CLI on demand —
    no global install needed; pin `base44@0.0.56`.
 4. Now build + deploy exactly as the ⚙️ section above. App id `68c22e8ff3726c063c4a53e2`.
-- **Preview testing** (optional): the owner's `syncFromGitHub` Base44 function pulls git→editor so the
-  Base44 editor Preview can smoke-test with real data; or `base44 dev` runs the app locally.
+- **Preview testing:** use the **🔍 LOCAL PREVIEW** recipe above (plain Vite + live `/api` proxy) — the
+  reliable test-before-live path. (The old `syncFromGitHub`/editor-Preview and `base44 dev` notes are
+  superseded — see that section for why.)
 
 ---
 
@@ -64,8 +84,8 @@
 
 | What | Value |
 |---|---|
-| Code repo `main` HEAD | `a09b593` — "docs: log CLI-build /api 404 root cause + .env.production fix" |
-| Serenova version | **0.6.0591** (LIVE — login + live-flight verified) |
+| Code repo `main` HEAD | `66b021f` — "Events/People/Travel refinements + local-preview workflow (v0.7.0607)" |
+| Serenova version | repo **0.7.0607** (build-green, pushed, NOT deployed) · **LIVE = 0.6.0604** |
 | Memory repo HEAD | (this commit) — **NOTE:** local memory clone is now `/Users/adamjones/Developer/perplexity_project_memory` (the `/Volumes/adamjones/...` external mount is gone). |
 | Build | green |
 | Base44 DEPLOYS | ✅ **ALL 4 DONE + verified live 2026-06-22** — `getVenueRouteInfo` redeployed (coordinate route works); `Accommodation` (`route_to_venue`+coords), `Event` (`primary_accommodation_id`), `Venue` (`contacts[].roles[]`+`contacts[].phone_ext`) synced. Coordinate route, primary-hotel dropdown persistence, and venue-contact role-tags/extension all confirmed working. |
