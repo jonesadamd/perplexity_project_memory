@@ -3,14 +3,16 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-23T16:40 EDT
+> Last Updated: 2026-06-23T21:45 EDT
 
 ---
 
 ## 🔝 TOP BRIEF — read FIRST (2026-06-23 PM · supersedes the morning brief below)
 
-> **Serenova `0.6.0591` LIVE** · `main` @ `b208190` · build green via `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`.
-> Docs: decisions log **v2.152**, build phases **v2.65**. Backup tag `safepoint-0587` on the remote.
+> **Serenova `0.6.0592` LIVE** (deployed via `base44 site deploy`, verified — bundle `index-CkTLwMK_.js`) · `main` @ `1374e86` · build green via `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`.
+> Docs: decisions log **v2.153**, build phases **v2.66**. Backup tag `safepoint-0587` on the remote.
+
+**🔴 FIXED `0.6.0592` (commit `1374e86`, live) — CLI builds broke the LEGACY `@/entities/*` client + Events 42703 + EventDetails loop.** A TM (Adam @ Original Artists, in the Lisa Fischer account) hit `Base44Error: App not found` 404 + an infinite "Loading event…" spinner on EventDetails — while the Events LIST and MobileHub showed the event fine. **Root cause:** EventDetails reads via the *legacy* `@/entities/Event` compat client (`@base44/vite-plugin/compat/base44Client.cjs`, `serverUrl = process.env.VITE_BASE44_BACKEND_URL`, no origin fallback), separate from the canonical `base44.entities`. The vite plugin reads `mode` from the **wrong config-hook arg** → its `loadEnv` defaults to development → `process.env.VITE_BASE44_*` defined as `undefined` → bundle had `serverUrl:void 0` → SDK default host → "App not found" on **every** `@/entities/*` read (~60 files; the frozen-editor builds had masked it). **Fix:** `vite.config.js` re-injects the define with the correct mode via a plugin after `base44()` (bundle now bakes `serverUrl:"https://app.serenovahub.com"`). Also: `AllEvents.jsx` off the legacy `useMultiplePermissions` (it queried the non-existent `memberships.permission_template_id` → 42703, suppressing all event-card alert badges) → canonical `canView('events')`; `EventDetails.jsx` loop fixed (dropped `loading` from `loadEvent` deps) + clean "Event not found" state on 404. Decisions log v2.153 has the full chain. **Deploy gotcha confirmed:** `base44 site deploy` DOES validate `base44/entities` → the `mv base44/entities ../_entities_HOLD` move-aside is mandatory around every deploy (Account.jsonc `user_condition` RLS format). **Follow-ups (logged):** migrate the entity RLS format so deploys stop needing the move-aside; `base44 dev` still leaves the legacy client unconfigured in dev; migrate `@/entities/*`→`base44.entities.*` (Phase 9).
 
 **🔴 DEPLOY CHANGED — the Base44 editor "Publish" is BROKEN; deploy via the `base44` CLI now.**
 The editor ships a **frozen build** (served bundle hash never changes across "successful" publishes; live
