@@ -4,12 +4,13 @@
 > run an AI coding session against the same code repo (`jonesadamd/serenovahub_b44`) and share
 > this memory repo (`jonesadamd/perplexity_project_memory`) via git. This doc is the lightweight
 > protocol that keeps the two sessions from clobbering each other or duplicating work.
-> Last Updated: 2026-06-23T18:00 EDT
-> **🖥️ DESKTOP wrapped 2026-06-23 PM. `0.6.0591` LIVE** (`main` @ `a09b593`), build green, login + live-flight
-> verified working. **Owner moving to LAPTOP shortly.** **On the laptop FIRST: `git pull --rebase` BOTH repos,
-> then do the "💻 SECOND-MACHINE SETUP" below (one-time `base44 login`).** Read the **🔝 TOP BRIEF** in
-> `SERENOVA-SESSION-HANDOFF.md` — deploy is now CLI-based (editor Publish is broken) and `.env.production` is
-> mandatory (both covered below).
+> Last Updated: 2026-06-24T22:05 EDT
+> **💻 LAPTOP wrapped 2026-06-24 PM. Repo `main` @ `a093414` = `0.7.0608`** (build green, pushed, **NOT deployed**;
+> LIVE still `0.6.0604`). EventDetails People/Travel bugs fixed + prep-on-touch policy established (see TOP BRIEF).
+> **Owner moving to DESKTOP shortly.** **On the desktop FIRST: `git pull --rebase` BOTH repos** (NOTE: laptop
+> force-pushed an authorship amend `b393d02→a093414` — a plain `git pull --rebase` fast-forwards cleanly since the
+> desktop hasn't committed). Read the **🔝 TOP BRIEF** in `SERENOVA-SESSION-HANDOFF.md`. Deploy is CLI-based
+> (editor Publish broken); `.env.production` mandatory (both covered below).
 > **AUTHORSHIP:** commits author **Adam Jones only — NO Claude trailer**. `LICENSE` + `SIGNATURE.md` (overt
 > RUSHMERE/KABINGA markers, display-only, NEVER in security/randomness code) exist; no markers in code yet.
 
@@ -84,8 +85,10 @@ repo files via the GitHub REST API — it does NOT push code into the editor or 
 
 | What | Value |
 |---|---|
-| Code repo `main` HEAD | `66b021f` — "Events/People/Travel refinements + local-preview workflow (v0.7.0607)" |
-| Serenova version | repo **0.7.0607** (build-green, pushed, NOT deployed) · **LIVE = 0.6.0604** |
+| Code repo `main` HEAD | `a093414` — "EventDetails fixes (Personnel names + Accommodations card) + prep-on-touch policy (v0.7.0608)" |
+| Serenova version | repo **0.7.0608** (build-green, pushed, NOT deployed) · **LIVE = 0.6.0604** |
+| Live DB change (no deploy) | `role_templates.perm_accommodations` seeded = `perm_travel` for artist `super_admin`/`admin`/`tour_manager` (was `none`) — owner ran the SQL, confirmed. Fixes Accommodations card for non-owner admin/TM. Takes effect on next permission refresh. |
+| Policy | **Prep-on-touch migration-readiness** now in effect (CLAUDE.md + decisions log v2.160) — bounded relaxation of scope-only rule #3. |
 | Memory repo HEAD | (this commit) — **NOTE:** local memory clone is now `/Users/adamjones/Developer/perplexity_project_memory` (the `/Volumes/adamjones/...` external mount is gone). |
 | Build | green |
 | Base44 DEPLOYS | ✅ **ALL 4 DONE + verified live 2026-06-22** — `getVenueRouteInfo` redeployed (coordinate route works); `Accommodation` (`route_to_venue`+coords), `Event` (`primary_accommodation_id`), `Venue` (`contacts[].roles[]`+`contacts[].phone_ext`) synced. Coordinate route, primary-hotel dropdown persistence, and venue-contact role-tags/extension all confirmed working. |

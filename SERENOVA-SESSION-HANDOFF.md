@@ -3,11 +3,39 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-24T18:11 EDT
+> Last Updated: 2026-06-24T22:05 EDT
 
 ---
 
-## 🔝 TOP BRIEF — read FIRST (2026-06-24 PM · supersedes everything below)
+## 🔝 TOP BRIEF — read FIRST (2026-06-24 LATE PM · supersedes everything below)
+
+> **Repo `main` @ `a093414` = `0.7.0608`, build-green, pushed. NOT deployed (LIVE still `0.6.0604`).**
+> Two EventDetails bugs the owner found in local preview are FIXED + verified in preview; a standing
+> **prep-on-touch** migration policy is now in effect. Docs: decisions log **v2.160**, CLAUDE.md updated.
+>
+> **🐞 Bug 2 (FIXED) — Personnel showed email prefixes ("grandbaton") not names.** `PersonnelCard` now
+> resolves band/crew names via `getEventTravelSummary` (`name_on_ticket`), matching the Travel tab.
+> Prep-on-touch: swapped its legacy `usePermissions` → canonical `usePermissionContext()`.
+> **🐞 Bug 3 (FIXED — live DB) — Accommodations card vanished for non-owner admin/TM.** `role_templates.
+> perm_accommodations` was `none` for all privileged artist roles; owner ran SQL to seed it = `perm_travel`
+> (super_admin/admin/tour_manager → `full`). No code change. **Both verified good in preview by owner.**
+>
+> **🆕 PREP-ON-TOUCH POLICY (owner-approved):** as we edit files, also bring THEM to migration-ready
+> patterns (canonical perms; `base44.entities.*` not `@/entities/*`; data behind `src/api/<domain>.js`
+> seams) — bounded relaxation of scope-only rule #3. Bigger refactors are LOGGED, not done. Full detail:
+> CLAUDE.md → "Migration-readiness (prep-on-touch)" + decisions log v2.160. **Caveat:** makes the Base44
+> exit cheaper, does NOT unblock it — **Phase 0/F** (Supabase auth session + RLS) is still the gate.
+>
+> **AUTHORSHIP REMINDER:** commits are **Adam Jones only — NO Claude trailer** (laptop slipped once this
+> session and amended+force-pushed `b393d02`→`a093414` to remove it; clean now).
+>
+> **👉 NEXT (desktop):** (1) **role-reassignment walkthrough + team updates** (owner flagged on Personnel
+> role editing — likely ties to the placed-membership model); (2) **MAJOR: Finances — web first**, then
+> MobileHub. **Deploy `0.7.0608` when ready** (owner-run `base44 site deploy` + entities move-aside +
+> curl/canary verify). **Logged prep follow-ups:** `AccommodationCard` legacy `@/entities/Accommodation`
+> + legacy perms; create `src/api/events.js`/`travel.js` seams (structural task).
+
+## 🔝 PRIOR TOP BRIEF (2026-06-24 PM · superseded)
 
 > **Events (web) UX + brand pass DONE — repo `0.7.0607`, build-green, pushed to `main`. NOT deployed
 > (live still `0.6.0604`).** Owner reviewed via a new **local preview** and is happy; refinements applied.
