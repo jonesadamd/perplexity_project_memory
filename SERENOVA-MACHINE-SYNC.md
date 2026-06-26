@@ -55,9 +55,13 @@
 **Recipe (laptop or desktop):**
 1. `git pull --rebase` (gets committed **`.env.development`** with the public app params — already in repo).
 2. `npm install` (only if deps changed).
-3. `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite --port 5173`
-4. Open **http://localhost:5173**, log in normally. You'll be your own Base44 account. Look for the
-   plugin log line **`[base44] Proxy enabled: /api -> https://app.serenovahub.com`** (confirms live data).
+3. `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite --port 5173 --host 0.0.0.0`
+   (**always include `--host 0.0.0.0`** — owner standard 2026-06-26 — so another device on the SAME
+   network can reach this machine's preview at `http://<this-machine-LAN-IP>:5173`, e.g. the desktop
+   at `192.168.7.198`. LAN access needs both on the same network + the macOS firewall to allow `node`.)
+4. Open **http://localhost:5173** (or the LAN IP from another device), log in normally. You'll be your
+   own Base44 account. Look for the plugin log line
+   **`[base44] Proxy enabled: /api -> https://app.serenovahub.com`** (confirms live data).
 5. Stop with `pkill -f vite` (or Ctrl-C) when done.
 
 **Why not `base44 dev`:** it runs a LOCAL backend that needs **Deno** AND the `base44/entities` move-aside

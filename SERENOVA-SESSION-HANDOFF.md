@@ -3,11 +3,57 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-24T22:05 EDT
+> Last Updated: 2026-06-26T18:30 EDT
 
 ---
 
-## 🔝 TOP BRIEF — read FIRST (2026-06-24 LATE PM · supersedes everything below)
+## 🔝 TOP BRIEF — read FIRST (2026-06-26 PM · supersedes everything below)
+
+> **LIVE = Serenova `0.7.0610` (deployed + verified). Repo `main` @ `b812347` pushed to GitHub.**
+> Huge multi-part session. Two big arcs: (A) **Team/Member management** + (B) **Finances web-first** (current focus).
+>
+> **🆕 LOCAL PREVIEW is now `--port 5173 --host 0.0.0.0`** (LAN-accessible so the **laptop** can test the
+> desktop preview at `http://<desktop-LAN-IP>:5173`, e.g. `192.168.7.198`). Owner is **switching to the
+> laptop** — `git pull` there, `npm install`, run the preview command. Two-machine sync via git (push from
+> wherever you work, pull on the other). See `SERENOVA-MACHINE-SYNC.md`.
+>
+> **💰 FINANCES (web-first) — current focus, deployed `0.7.0610`.** Built on the existing finance
+> foundation (FinancialHub + EventFinancialDetails + EventFinancials). Shipped: **team payments AUTO-SYNC
+> to the event roster** (NO button — pay line from `AccountFinancialDefaults` rate defaults × **gig days**
+> = distinct `event.performances` dates; manual edits are `is_override` and protected, never reverted);
+> an **at-a-glance finance strip on EventDetails** (top, gated by `financials` view) showing **Gross ·
+> Band & Crew · Other Exp · Commissions · Buyout · Est. Net**, **LIVE-computed from source** (no need to
+> open the settlement page) — flights/hotels pulled from `FlightBookingGroup.total_cost`/`Accommodation
+> .total_cost`; a **shared commission calculator** (`src/utils/eventCommissions.js`) + finance-summary util
+> (`src/utils/eventFinanceSummary.js`). **Fixed a pre-existing blank `EventFinancialDetails` crash**
+> (`CommissionOverrideManager` undefined-commission guard). Net = Gross − Band&Crew − Other − Commissions
+> + Buyout (buyout POSITIVE). Source of truth: decisions log **v2.164**, build phases **v2.71**,
+> `docs/FINANCIALHUB-WORKING-DOC.md`.
+>
+> **👉 FINANCE NEXT (owner-flagged):** (1) **FinancialHub "Event Finances" cards** still use the old calc
+> (Team $1,900 stale / Expenses $0) → point them at the shared calculators; (2) **member-level Pay & Rates**
+> section on the Team member dialog (finance-gated) + keep the Finance Hub bulk table (one source of truth);
+> (3) **travel-day** rate component (owner chose **manual per event**); (4) **Summary / Close-out + Closeout
+> Wizard**; (5) DRY-merge EventFinancialDetails' commission math onto the shared util. Rate model = per-gig
+> (flat) · per-day (× gig days) · travel-day (smaller, manual) · per-diem (× days).
+>
+> **🔗 PHASE ML (Cross-Artist Member Linking & Consent) — SCOPED, partly built, NOT fully live.**
+> Spec: `docs/MEMBER-LINKING-CONSENT-WORKING-DOC.md`. Built: roles/positions rework (profile-as-key,
+> Position + Role Description flow-through), Band Groups fixes, **Associated Crew**, two-step **"Add or
+> Invite to Team"** (team-member vs **associated-with** fork), **member removal** (forward-only). **⏳ OWNER
+> -SIDE BACKEND DEPLOYS PENDING** for these to persist/work live: (a) add Membership fields
+> `associated_crew` (array) + `removed_at` (date-time) in the **Base44 entity editor**; (b) deploy the
+> `lookupPersonByContact` function (`! mv base44/entities base44/.entities-hidden; npx -y base44@0.0.56
+> --app-id 68c22e8ff3726c063c4a53e2 functions deploy lookupPersonByContact; mv base44/.entities-hidden
+> base44/entities` — the harness blocks Claude from the functions-deploy bypass; owner runs it or adds a
+> Bash permission rule). **Finances DON'T depend on these.** Big design logged: associated crew DERIVED
+> from the management relationship (auto-scope, Phase 0/F-era); LIVE access model; data-ownership boundary.
+>
+> **DEPLOY NOTE:** Claude now executes Base44 **site deploy** directly after git push + owner OK (proven;
+> `mv base44/entities aside` → `site deploy -y` → restore). `functions deploy` bypass is harness-blocked.
+> **AUTHORSHIP:** commits are **Adam Jones only — NO Claude trailer**.
+
+## 🔝 PRIOR TOP BRIEF (2026-06-24 LATE PM · superseded)
 
 > **Repo `main` @ `a093414` = `0.7.0608`, build-green, pushed. NOT deployed (LIVE still `0.6.0604`).**
 > Two EventDetails bugs the owner found in local preview are FIXED + verified in preview; a standing
