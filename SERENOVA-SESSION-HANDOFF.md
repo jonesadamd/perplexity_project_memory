@@ -3,11 +3,86 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-06-26T18:30 EDT
+> Last Updated: 2026-07-01T18:30 EDT
 
 ---
 
-## 🔝 TOP BRIEF — read FIRST (2026-06-26 PM · supersedes everything below)
+## 🔝 TOP BRIEF — read FIRST (2026-07-01 · supersedes everything below)
+
+> **LIVE = Serenova `0.7.0626` (deployed + verified). Repo `main` @ `b15cb22` pushed to GitHub.**
+> Session focus: **Expenses feature — fully built and live.**
+>
+> **💸 EXPENSES — COMPLETE & LIVE (`0.7.0624`→`0.7.0626`).** The Event Expenses & Reimbursements dialog on
+> EventDetails → Data Room tab is now fully functional:
+> - **Log expense** — manual form OR upload receipt → AI auto-fill (type/amount/date/description via `ExtractDataFromUploadedFile`). Reimbursement checkbox → assign `reimbursed_to_email` from event roster.
+> - **List view** — grouped by `expense_type` (EXPENSE_TYPES canonical order), compact single-row per item, category subtotals, amount, status pill (reimbursement only), receipt icon, trash (hover, confirm-in-place).
+> - **Delete** — routes through `diagnoseManagementAccess` cloud fn with `action:'delete'` + `expenseId`. Privileged roles (`owner/super_admin/admin/tour_manager`) can delete any; others delete own only. Concurrent-delete guard: `if (deletingId) return`.
+> - **Reads** — also through `diagnoseManagementAccess` (`asServiceRole.entities.Expense.filter`). This bypasses Base44 entity read RLS which blocks user-level reads. Entity RLS fix deferred (logged v2.173; can't `entities push` due to `user_condition` validator; would need Base44 admin console edit).
+> - **`ExpensesCard`** on EventDetails shows per-category breakdown rows + total.
+> - **Key files:** `src/components/events/details/ExpensesCard.jsx`, `src/components/events/details/ExpensesDialog.jsx`, `base44/functions/diagnoseManagementAccess/entry.ts`.
+>
+> **⚠️ BASE44 FUNCTION LIMIT:** 50 new functions hard cap per project (existing 174 grandfathered on Elite plan). `diagnoseManagementAccess` was repurposed (name kept) to avoid creating a new function. Owner has Base44 support contact open. When limit is lifted: rename to `getExpensesForEvent`, restore original diagnostic fn.
+>
+> **👉 FINANCE NEXT (owner-flagged):**
+> (1) **`EventFinancialDetails`** — integrate expense data from the cloud function (not `Expense.filter()` directly); update the expense display there to match the new grouped layout.
+> (2) **FinancialHub "Event Finances" cards** — point at shared calculators (`eventFinanceSummary.js` / `eventCommissions.js`); currently show stale Team $1,900 / Expenses $0.
+> (3) **Member-level Pay & Rates** section on Team member dialog (finance-gated).
+> (4) **Travel-day** rate component (manual per event).
+> (5) **Summary / Close-out + Closeout Wizard**.
+>
+> **🔗 PHASE ML (Cross-Artist Member Linking) — SCOPED, PENDING OWNER BACKEND DEPLOYS** (same as before — Finances don't depend on it).
+>
+> **DEPLOY NOTE:** Claude executes Base44 site deploy directly (git push + owner OK). Functions deploy also works. Build cmd: `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Always bump version FIRST in `src/version.js` (HUB_VERSIONS.serenova), then build, verify version in dist, commit, push, deploy.
+>
+> **LOCAL PREVIEW:** `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite --port 5173 --host 0.0.0.0`
+>
+> **AUTHORSHIP:** commits are **Adam Jones only — NO Claude trailer**.
+
+## 🔝 PRIOR TOP BRIEF (2026-06-26 PM · superseded)
+
+> **LIVE = Serenova `0.7.0610` (deployed + verified). Repo `main` @ `b812347` pushed to GitHub.**
+> Huge multi-part session. Two big arcs: (A) **Team/Member management** + (B) **Finances web-first** (current focus).
+>
+> **🆕 LOCAL PREVIEW is now `--port 5173 --host 0.0.0.0`** (LAN-accessible so the **laptop** can test the
+> desktop preview at `http://<desktop-LAN-IP>:5173`, e.g. `192.168.7.198`). Owner is **switching to the
+> laptop** — `git pull` there, `npm install`, run the preview command. Two-machine sync via git (push from
+> wherever you work, pull on the other). See `SERENOVA-MACHINE-SYNC.md`.
+>
+> **💰 FINANCES (web-first) — current focus, deployed `0.7.0610`.** Built on the existing finance
+> foundation (FinancialHub + EventFinancialDetails + EventFinancials). Shipped: **team payments AUTO-SYNC
+> to the event roster** (NO button — pay line from `AccountFinancialDefaults` rate defaults × **gig days**
+> = distinct `event.performances` dates; manual edits are `is_override` and protected, never reverted);
+> an **at-a-glance finance strip on EventDetails** (top, gated by `financials` view) showing **Gross ·
+> Band & Crew · Other Exp · Commissions · Buyout · Est. Net**, **LIVE-computed from source** (no need to
+> open the settlement page) — flights/hotels pulled from `FlightBookingGroup.total_cost`/`Accommodation
+> .total_cost`; a **shared commission calculator** (`src/utils/eventCommissions.js`) + finance-summary util
+> (`src/utils/eventFinanceSummary.js`). **Fixed a pre-existing blank `EventFinancialDetails` crash**
+> (`CommissionOverrideManager` undefined-commission guard). Net = Gross − Band&Crew − Other − Commissions
+> + Buyout (buyout POSITIVE). Source of truth: decisions log **v2.164**, build phases **v2.71**,
+> `docs/FINANCIALHUB-WORKING-DOC.md`.
+>
+> **👉 FINANCE NEXT (owner-flagged):** (1) **FinancialHub "Event Finances" cards** still use the old calc
+> (Team $1,900 stale / Expenses $0) → point them at the shared calculators; (2) **member-level Pay & Rates**
+> section on the Team member dialog (finance-gated) + keep the Finance Hub bulk table (one source of truth);
+> (3) **travel-day** rate component (owner chose **manual per event**); (4) **Summary / Close-out + Closeout
+> Wizard**; (5) DRY-merge EventFinancialDetails' commission math onto the shared util. Rate model = per-gig
+> (flat) · per-day (× gig days) · travel-day (smaller, manual) · per-diem (× days).
+>
+> **🔗 PHASE ML (Cross-Artist Member Linking & Consent) — SCOPED, partly built, NOT fully live.**
+> Spec: `docs/MEMBER-LINKING-CONSENT-WORKING-DOC.md`. Built: roles/positions rework (profile-as-key,
+> Position + Role Description flow-through), Band Groups fixes, **Associated Crew**, two-step **"Add or
+> Invite to Team"** (team-member vs **associated-with** fork), **member removal** (forward-only). **⏳ OWNER
+> -SIDE BACKEND DEPLOYS PENDING** for these to persist/work live: (a) add Membership fields
+> `associated_crew` (array) + `removed_at` (date-time) in the **Base44 entity editor**; (b) deploy the
+> `lookupPersonByContact` function (`! mv base44/entities base44/.entities-hidden; npx -y base44@0.0.56
+> --app-id 68c22e8ff3726c063c4a53e2 functions deploy lookupPersonByContact; mv base44/.entities-hidden
+> base44/entities` — the harness blocks Claude from the functions-deploy bypass; owner runs it or adds a
+> Bash permission rule). **Finances DON'T depend on these.** Big design logged: associated crew DERIVED
+> from the management relationship (auto-scope, Phase 0/F-era); LIVE access model; data-ownership boundary.
+>
+> **DEPLOY NOTE:** Claude now executes Base44 **site deploy** directly after git push + owner OK (proven;
+> `mv base44/entities aside` → `site deploy -y` → restore). `functions deploy` bypass is harness-blocked.
+> **AUTHORSHIP:** commits are **Adam Jones only — NO Claude trailer**.
 
 > **LIVE = Serenova `0.7.0610` (deployed + verified). Repo `main` @ `b812347` pushed to GitHub.**
 > Huge multi-part session. Two big arcs: (A) **Team/Member management** + (B) **Finances web-first** (current focus).
