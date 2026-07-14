@@ -3,11 +3,139 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-07-01T18:30 EDT
+> Last Updated: 2026-07-14T19:45 EDT
 
 ---
 
-## 🔝 TOP BRIEF — read FIRST (2026-07-01 · supersedes everything below)
+## 🔝 TOP BRIEF — read FIRST (2026-07-14 evening · supersedes everything below)
+
+> **LIVE = Serenova `0.7.0629` (deployed + verified — grepped the version string in the live bundle
+> at `app.serenovahub.com`). Repo `main` @ `18ffc17`, pushed to GitHub. Desktop session done for the
+> day; handing off to LAPTOP.** Decisions log **v2.184**, build phases **v2.79**, CLAUDE.md refreshed.
+>
+> **This was a long hands-on-testing session on EventFinancialDetails + the Guest List popup —
+> shipped in three deploys (`0.7.0627` → `0.7.0628` → `0.7.0629`), owner testing and iterating live
+> the whole way, not a code-review pass.**
+>
+> **`0.7.0627` — EventFinancialDetails test-and-fix pass.** `CommissionOverrideManager` was silently
+> rendering nothing (wrong props passed — now 3 instances, one per commission slot, overrides persist);
+> duplicated total formulas had drifted the top summary bar out of sync with section badges (consolidated
+> to one shared source); **Business Manager commission is account-level, not per-event** (owner correction
+> — built a per-event dropdown first, reverted it; both commission calculators now resolve the account's
+> Business Management company directly, no event field needed); summary bar now floats fixed-to-viewport
+> on scroll (was unreliable `position: sticky`) showing all 7 deduction buckets; two Edit dialogs (Team
+> Payments, Admin Fees) saved but never closed (no-op `onClose`, fixed); numeric `$` inputs across 5
+> files/11 spots snapped back to "0" on every keystroke that emptied them — new shared
+> `src/components/financial/NumberInput.jsx` fixes all of them (**same bug still open in the Settings
+> page's `TeamRateSettings.jsx`/`FinancialDefaults.jsx` — logged, not fixed, different page never
+> touched this session**); accordion sections merged into single bordered cards; Commissions +
+> Settlement Checklist default open. **New:** Admin Fee "Fee Name" is a searchable/free-type field
+> (native datalist) seeded with 7 defaults, learns new names per-account via a new
+> `AccountFinancialDefaults.admin_fee_names` field (**caveat: untested against a cold Base44 schema
+> cache — watch for silent persistence failures if new names stop sticking**).
+>
+> **`0.7.0628` — Guest List popup ("Manage Guest List") redesign.** Sticky header/footer (Export
+> moved into the header via a state-backed DOM-node portal — a plain `useRef` doesn't work for this,
+> refs attach after the child's first render); "Comps per show" bulk setter; per-show teal header
+> consolidated ("Comps 3 / [10] used" instead of two redundant numbers); redundant "Confirmed" badge
+> removed; new "Assigned to" roster picker (routes through the existing `decideGuestRequest`
+> approve-pipeline — no new notify backend); real names resolved via `getUsersByEmailsForAccount` +
+> `Membership` (same fix Personnel/Travel already had); darker card shading; widened two number inputs
+> + new `.spin-light` CSS util for visible spinner arrows on dark backgrounds.
+>
+> **`0.7.0629` — "Assigned to" picker fixes (root-caused via an owner-authorized live read-only
+> check) + row redesign.** Confirmed via `base44 exec` against production (read-only, narrowly scoped,
+> owner explicitly authorized after the auto-mode classifier blocked the first unauthorized attempt):
+> (1) TM push/email notification is **NOT broken** — `adam@originalartists.com`'s TM assignment +
+> active PushSubscription are both correctly configured; the real explanation is that every guest on
+> the test event was added via the admin dialog, which never calls `submitStagedGuestRequest` (the
+> only function that notifies a TM of a "new request") — nothing to fix, just no real mobile-submitted
+> request had happened yet. (2) Crew + the event's Tour Manager(s) were missing from "Assigned to" —
+> `roster_members` alone doesn't carry them; now folds in `tour_manager_user_email(s)` + every roster
+> member's Membership `associated_crew` (found the exact case owner described: a band member's
+> personal Tour Manager). (3) Artist-first sort was checking `Membership.role === 'owner'` — wrong;
+> the artist's real role is `'artist'`, confirmed live — now checks `Account.owner_user_email`/
+> `artist_user_email` (same signal `decideGuestRequest` already uses). **Row redesign:** permanent
+> `added_by_email`/`added_by_name` stamped on every guest at creation (answers "who added this guest,"
+> separate from "who it's assigned to"); view-mode-by-default (plain text, no dropdown/delete/confirm
+> clutter); new pencil icon opens ONE row into edit mode at a time; Requested (pending) guests always
+> show quick ✓/✗ regardless of edit state; brand-new guests open directly into edit mode.
+>
+> **Also answered (no code, just findings):** owner asked whether the teal/tan brand direction is
+> centrally documented — **logged as Phase TH (Global Theme Centralization), scoped, NOT STARTED.**
+> `docs/MOBILEHUB-WORKING-DOC.md` has the real owner-approved palette (teal `#284854`/tan `#d9a774`
+> accent-only/cream `#faf8f4`/sage `#b8b8aa`), explicitly never rolled out past MobileHub. The system
+> default today is still the BLUE `--harmony-*` CSS vars in `Layout.jsx`. `src/config/hubThemes.js`
+> already has the correct teal/tan values and a `hubTheme()` accessor built for exactly this — **zero
+> actual usages anywhere**, every one of ~39 components pastes the hex literal instead. See decisions
+> log 2026-07-14T18:00 EDT for the full scope-when-picked-up plan.
+>
+> ## 👉 UNFINISHED — laptop pick-up, in priority order (owner's own words)
+>
+> 1. **Guest List Export dropdown redesign** — change "Export All" from one full-row button to
+>    `Export All   [PDF] [CSV]` with separate icon buttons on the right (same for each per-show row
+>    in the dropdown). File: `src/components/events/edit/GuestListTab.jsx` (the `exportMenu` /
+>    `downloadCsv` section).
+> 2. **Clean, titled PDF export** — needs an actual visual design pass (title, clean layout), with
+>    **"By Show"** (current per-performance grouping) AND **"By Date"** (owner-confirmed meaning: a
+>    same-day rollup merging multiple shows on one calendar date — owner picked the recommended
+>    option for this). **No PDF generation exists yet for guest lists** — CSV only today. Reuse the
+>    jsPDF pattern already proven in `base44/functions/generateFinancialSummaryPdf/entry.ts` (server-
+>    side `new jsPDF({format:'letter'})`) — don't reinvent as client-side jsPDF. Will need either a
+>    NEW cloud function (mind the 50-new-function cap — 174 existing are grandfathered) or repurpose
+>    an existing one (established convention: `diagnoseManagementAccess`/`syncTeamPaymentsForEvent`
+>    were both repurposed to dodge the cap).
+> 3. **Public shareable Guest List link** (e.g. to send to a venue) — clean, legible, presentable,
+>    with its own PDF/CSV download (All or by Date) built in. Model on the existing pattern:
+>    `ShareableLink` entity (`base44/entities/ShareableLink.jsonc` — `link_type` enum needs a new
+>    value, e.g. `event_guest_list`), `generateShareableLink`/`validateShareableLink` cloud fns
+>    (generic enough to reuse as-is), `getSharedItineraryData` (extend with a new branch, or copy its
+>    pattern into a new fn), a new public route mirroring `src/pages/SharedEventView.jsx` (registered
+>    in `src/App.jsx` — extend the `isSharedItinerary`-style auth-bypass check to also match the new
+>    route), and the share-dialog UX mirrored on `src/components/mobile/MobileShareDialog.jsx`.
+>    **Expiry rule (owner decision, needs building — doesn't exist for ANY share link today):**
+>    final performance/event date + 14 days. **Owner explicitly wants this retrofitted onto the
+>    EXISTING itinerary share links too**, not just the new guest-list one — compute dynamically at
+>    validation time (don't store a redundant `expires_at`; derive from the linked event/tour's own
+>    last performance date so it stays correct even if dates change later). Skip this expiry logic
+>    for `link_type: 'staged_session'` — that already has its own unrelated 30-day idle TTL.
+> 4. **SystemHub "Staged Users" browser UI** — backend is DONE (`adminStagedSessions` cloud fn gained
+>    a `list_all` action, already deployed: every staged identity platform-wide, grouped by email,
+>    `is_active`/`active_sessions`/`total_sessions`/`last_active`/`devices` computed, real names via
+>    `User.list()`). **No UI built yet.** Owner wants: (a) the Overview "Active Staged" KPI tile
+>    (`src/components/systemhub/HubOverview.jsx` — currently a static, non-clickable `Card`) made
+>    clickable → jumps to a new "Staged Users" sub-tab; (b) that sub-tab as a THIRD tab alongside
+>    "All Users"/"System Users" in `src/pages/SystemHub.jsx`'s Users tab (`usersSubTab` state already
+>    exists — mirror the `setUsersSubTab('all')` + `setActiveTab('users')` pattern used elsewhere in
+>    that file for deep-linking); (c) a filter toggle (All / Active / Inactive) and a table (name/
+>    email, active vs total sessions, last active, device labels). Owner ALSO separately asked
+>    (unresolved, worth a follow-up conversation not just a code change): is requiring a 2-character
+>    search before "All Users" shows anything actually more secure, or just an arbitrary UX choice?
+>    (Researched: **not security** — `systemUsersSearch`'s backend loads ALL users/accounts into
+>    memory regardless of query length once past the 2-char gate; the gate is purely client-side UX,
+>    no stated rationale in code. "System Users" shows its list with zero search needed, same
+>    permission boundary.) Owner also wants staged users' active/inactive status visible directly in
+>    the "All Users" search results, not just after opening the detail panel.
+>
+> **Lower priority / just logged, not scoped further:** the `NumberInput` snap-to-zero bug also
+> exists in `src/components/financial/TeamRateSettings.jsx` and `FinancialDefaults.jsx` (Settings
+> page) — same fix (`src/components/financial/NumberInput.jsx` already exists, just needs wiring in).
+>
+> **DEPLOY NOTE (unchanged):** Claude executes the Base44 site deploy directly after git push + owner
+> OK. Build: `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build`. Deploy:
+> `mv base44/entities base44/.entities-hidden && npx -y base44@0.0.56 --app-id
+> 68c22e8ff3726c063c4a53e2 site deploy -y && mv base44/.entities-hidden base44/entities`. Always
+> bump `src/version.js` (`HUB_VERSIONS.serenova`) FIRST, build, verify the version string landed in
+> `dist/assets/*.js`, commit, push, deploy, then verify live via `curl` against the deployed bundle.
+>
+> **LOCAL PREVIEW:** `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite --port 5173 --host
+> 0.0.0.0` (LAN-accessible; real auth + live data via the `/api` proxy — nothing here is a mock).
+>
+> **AUTHORSHIP:** commits are **Adam Jones only — NO Claude trailer.**
+
+---
+
+## 🔝 PRIOR TOP BRIEF (2026-07-01 · superseded)
 
 > **LIVE = Serenova `0.7.0626` (deployed + verified). Repo `main` @ `b15cb22` pushed to GitHub.**
 > Session focus: **Expenses feature — fully built and live.**
