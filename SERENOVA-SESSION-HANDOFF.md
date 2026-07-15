@@ -3,11 +3,58 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-07-14T19:45 EDT
+> Last Updated: 2026-07-15T00:20 EDT
 
 ---
 
-## 🔝 TOP BRIEF — read FIRST (2026-07-14 evening · supersedes everything below)
+## 🔝 TOP BRIEF — read FIRST (2026-07-15 · supersedes everything below)
+
+> **LIVE = Serenova `0.7.0646` (deployed + verified). System Hub `1.0.0021`. Repo `main` @ `b555aa9` pushed. Tree clean.**
+> Huge multi-arc session (2026-07-14 → 07-15). Full detail: decisions log **v2.199** (many entries this session). Highlights:
+>
+> **⚠️ WORKFLOW RULE (owner, reinforced — saved to auto-memory `test-before-push-deploy`):** TEST on `localhost:5173`
+> BEFORE commit/push/deploy. A green build is NOT a passing test — the owner found many real runtime bugs by hands-on
+> testing this session. Flow: change → build passes → say "ready to test on localhost:5173" → wait → only deploy on
+> the owner's explicit "ship it". Do NOT auto-deploy on green.
+>
+> **🎫 GUEST LIST (all live):** export redesign (separate CSV/PDF buttons), **titled PDF** (By Show/By Date, keep-a-show-
+> together page-breaks, running header + page numbers, "Created by Serenova Hub" footer), **public shareable Guest List
+> link** (`/GuestList/:code`) — dedicated data-minimal `SharedGuestList` page; **Share Guest List dialog** (own Share-menu
+> item) with recipient multi-select (band/crew/venue) + **email send** via `@/integrations/Core` SendEmail (migrate to our
+> own email service off-Base44 later); landing page **Download (CSV/PDF)** with "as of" stamp. **Smart short links** —
+> base62 8-char codes, clean paths `/GuestList/:code` + `/Itinerary/:code` (legacy `?share_token=` still works), existing-
+> link reuse in both share dialogs. **⏳ OWNER:** add `expires_at` (date-time) to the **ShareableLink** entity in the Base44
+> editor so guest-list links carry the 14-day expiry (functions `generateShareableLink`/`getSharedItineraryData` already
+> deployed with expiry logic).
+>
+> **🛠️ SYSTEMHUB:** new **Staged Users** browser (tab + clickable KPI; `adminStagedSessions.list_all` deployed). Root-caused
+> a stale **`functions_version` localStorage pin** (was masking new function deploys) — guarded in `src/lib/app-params.js`.
+>
+> **📱 MOBILEHUB event detail:** Contacts now includes **Tour Manager(s) + Associated Crew** (phone resolved from
+> Membership `phone_mobile`); right-aligned tap-to-call/email CTAs; **venue route map + capacity/Database badges** ported
+> from web; **date pills moved into the Schedule tab** (thinner header); guest order + Venue-tab parking crash fixed.
+> **Known gap:** a cross-account (management) TM's phone doesn't resolve (lives on their mgmt-account membership).
+>
+> **🎼 SET LISTS (big):** page **rebuilt** as sortable/filterable table (Date·Venue·Band·Set List·Songs, Event/band join,
+> click→editor, row delete). **Analytics** = its OWN nav page (Repertoire → **Analytics / Set Lists / My Repertoire**) with
+> KPIs, top songs, dormant/never-played, match-rate, **PDF report**. **⭐ SET LIST TEMPLATES rebuilt SUPABASE-FIRST**
+> (owner: cleanest + off-Base44): new Supabase tables **`set_list_templates`** + **`set_list_template_usages`** behind seam
+> **`src/api/setlistTemplates.js`** (temp `anon` RLS, settlements pattern), standalone **New Template editor** (event-less,
+> band-assigned, SongTypeahead), **Save-as-Template → Supabase** (no more Historical dup — that bug was Base44 dropping the
+> non-existent `is_template` field), **provenance/usage logging** on save (Autofill→From template), **Template usage +
+> Unused** analytics panels. NOT on the Base44 SetList entity by design.
+>
+> **DEPLOY:** unchanged — `git push` + `mv base44/entities aside → npx -y base44@0.0.56 --app-id 68c22e8ff3726c063c4a53e2
+> site deploy -y → restore`. Functions deploy same but with `functions deploy <names>`. Build: `BASE44_LEGACY_SDK_IMPORTS=true
+> ./node_modules/.bin/vite build`. Bump `src/version.js` first. **AUTHORSHIP: Adam Jones only, no Claude trailer.**
+>
+> **NEXT / BACKLOG:** header/template spec (Phase HD, not started — inventory done: 4 header heights, no shared component,
+> chrome bar is ours in `Layout.jsx:1173`); template follow-ups ("Based on <template>" badge, template usage in the PDF,
+> fuzzy typo de-dup); the two owner Base44 items above (`expires_at` field; cross-account TM phone).
+
+---
+
+## 🔝 PRIOR TOP BRIEF (2026-07-14 evening · superseded — the 4 to-do items here are all DONE, see the 2026-07-15 brief above)
 
 > **LIVE = Serenova `0.7.0629` (deployed + verified — grepped the version string in the live bundle
 > at `app.serenovahub.com`). Repo `main` @ `18ffc17`, pushed to GitHub. Desktop session done for the
@@ -132,7 +179,6 @@
 > 0.0.0.0` (LAN-accessible; real auth + live data via the `/api` proxy — nothing here is a mock).
 >
 > **AUTHORSHIP:** commits are **Adam Jones only — NO Claude trailer.**
-
 ---
 
 ## 🔝 PRIOR TOP BRIEF (2026-07-01 · superseded)
