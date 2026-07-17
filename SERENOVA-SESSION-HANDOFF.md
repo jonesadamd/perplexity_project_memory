@@ -3,11 +3,70 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-07-15T00:20 EDT
+> Last Updated: 2026-07-16T15:25 EDT
 
 ---
 
-## 🔝 TOP BRIEF — read FIRST (2026-07-15 · supersedes everything below)
+## 🔝 TOP BRIEF — read FIRST (2026-07-16 · supersedes everything below)
+
+> **LIVE = Serenova `0.7.0659` (deployed + verified). Repo `main` @ `51ae309` pushed. Tree clean.**
+> Session started from a real production incident, ended with a new MobileHub feature. Full detail:
+> decisions log **v2.209–v2.213**; build phases **v2.82**.
+>
+> **⚠️ CONFIRMED DATA-LOSS INCIDENT, ROOT-CAUSED + FIXED:** a band member (Mark Whitfield Jr) submitted
+> 5 guest requests from MobileHub — his own notifications/emails proved the writes fired server-side,
+> but none appeared in the Guest List. Root cause: `GuestManagerDialog`/`GuestListTab`'s Save (and
+> mobile's `addGuestDirect`/`requestGuestManaged`) all batched edits locally and wrote the WHOLE
+> `guest_lists` array back — a stale snapshot's Save silently erased requests that arrived after
+> page-load. `submitStagedGuestRequest` also had an unguarded read-modify-write race (could let rapid
+> concurrent submissions clobber each other). **Mark's 5 guests are very likely permanently lost** (no
+> revision history in this data model) — owner re-adding manually from his emails, not a code task.
+>
+> **FIX — every `guest_lists` mutation is now atomic** (fresh-read → single-item write →
+> verify-after-write retry, bounded — Base44 has no native optimistic concurrency): new action
+> dispatch folded into **`decideGuestRequest`** (add/updateFields/remove/setComps/setCompsAll/
+> setAssignee/decide) — **NOT a separate `mutateGuestList` function**, because deploying one hit
+> Base44's **50-function-per-app hard cap** mid-session; consolidated into the existing function
+> instead (zero new slots). `submitStagedGuestRequest` got `remove`/`lowerPartySize` actions too (same
+> retry pattern) for a requester's self-manage. `GuestManagerDialog`'s Save button is **gone** — nothing
+> left to batch. `EditEvent.jsx` no longer resends `guest_lists` in its global Save (stripped from that
+> payload — it's exclusively atomic-committed elsewhere now).
+>
+> **⚠️ THE SAME ANTI-PATTERN STILL EXISTS ELSEWHERE — NOT YET FIXED:** `EditEvent.jsx`'s global "Save
+> Changes" still batches-then-overwrites `roster_members`/`schedule_items`/`advance_items`/
+> `action_items`/`additional_provisions`/`buyouts`/`contract_files`/`tour_manager_user_emails` (+ cross-
+> event `Venue.contacts`) exactly the same way guest_lists used to. **This is the next task the owner
+> asked for** ("move on to Full EditEvent architecture fix") — was starting this when this handoff was
+> written. Same fix shape as guest_lists: atomic per-field/per-item server actions instead of one
+> whole-record Save, likely folded into an existing function again given the 50-function cap.
+>
+> **Follow-ups shipped same session:** ticket-count number spinner → capped 1-10 dropdown (mobile +
+> web, native spinners are fiddly to tap on phone); requester self-manage (remove own guest anytime incl.
+> Confirmed, gated by a confirm popup; lower — never raise — own guest's ticket count, no fresh approval
+> needed); fixed an "Add guest" 400 (the merged action wrongly required a name up front — GuestListTab's
+> Add button deliberately creates a blank-name row, fills in during edit mode); linked companies
+> (AMC/BMC/booking/tour mgmt) now assignable in "Assigned to" even with no email on file — tracking-only,
+> tagged "(no email)", never triggers a notification.
+>
+> **📱 NEW MOBILEHUB FEATURE (unrelated to the incident, owner-requested):** the Home screen's "This
+> Week" strip is now **"Next 7 Days"** — rolling yesterday/today/+5, not a fixed Sun-Sat week. Day cells
+> are tappable → new **`MobileDayDetailDrawer`** (flight/hotel-style bottom sheet, Event/Performances/
+> Rehearsals/Travel/Schedule grouping, same as the web's `DayDetailsDialog`). New "View calendar" header
+> link → new **`MobileCalendarView`** full-screen month grid (mobile rebuild of `DailyCalendar.jsx`'s
+> look, not a reused import — that one's web-only styled). New shared **`useMobileDayItemsMap`** hook
+> builds the per-day items map once for all three surfaces. **Known gap, logged not fixed:**
+> `MobileEventDetail` has no initial-date prop, so "Go To Event" from the popup for a non-today date
+> lands on the event but not necessarily that date's itinerary sub-tab.
+>
+> **⚠️ WORKFLOW REMINDER (carried forward, still true):** build green ≠ tested. Confirm exact file/change
+> list before pushing; deploy only on explicit "deploy"/"push live" go-ahead (this session got that
+> go-ahead 4 times, each for a specific change). Base44 deploy recipe unchanged: `mv base44/entities
+> ../_entities_HOLD` → `base44 functions deploy <name>` / `base44 site deploy -y` → move entities back.
+> Verify via `curl app.serenovahub.com` bundle hash + grep the version string.
+
+---
+
+## 🔝 TOP BRIEF (2026-07-15 · superseded by the entry above, kept for detail)
 
 > **LIVE = Serenova `0.7.0646` (deployed + verified). System Hub `1.0.0021`. Repo `main` @ `b555aa9` pushed. Tree clean.**
 > Huge multi-arc session (2026-07-14 → 07-15). Full detail: decisions log **v2.199** (many entries this session). Highlights:
