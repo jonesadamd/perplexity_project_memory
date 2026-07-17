@@ -3,11 +3,66 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-07-16T15:25 EDT
+> Last Updated: 2026-07-17T09:20 EDT
 
 ---
 
-## 🔝 TOP BRIEF — read FIRST (2026-07-16 · supersedes everything below)
+## 🔝 TOP BRIEF — read FIRST (2026-07-17 · supersedes everything below)
+
+> **LIVE = Serenova `0.7.0660` (deployed + verified). Repo `main` @ `202d73a` pushed. Tree clean.**
+> Direct continuation of the guest_lists incident session (below) — owner said "move on to Full
+> EditEvent architecture fix." Full detail: decisions log **v2.214–v2.216**; build phases **v2.83**.
+>
+> **PHASE 1 — diff-based Save (`EditEvent.jsx`):** re-verified the prior audit fresh (not just
+> repeated old findings) and confirmed `roster_members`, `schedule_items`/`performances`/
+> `rehearsals`, and `advance_items` all have a LIVE immediate-writer counterpart on EventDetails
+> racing against EditEvent's batch-until-Save tabs — same shape as the guest_lists incident.
+> `action_items` has no immediate-writer counterpart anywhere — narrower risk. Fix: `handleSave`
+> now diffs `eventData` against the page-load-time `originalEvent` and only sends keys that
+> actually changed, instead of the full record. `schedule_items` gets special handling (it's
+> derived from performances/rehearsals — only regenerated/sent if any of the three changed).
+> `guest_lists`/`roster_members` stay explicitly excluded regardless of diff outcome (atomic-
+> committed elsewhere; re-sending even a "changed" local mirror risks re-triggering the bug).
+> **Does NOT fully solve two people editing the SAME field concurrently** — only closes the far
+> more common "editing one tab reverts an untouched field" case.
+>
+> **PHASE 2 — roster_members fully atomic:** the one field phase 1 alone couldn't protect (live
+> same-field race: `PersonnelCard.jsx`/`AddPersonnelDialog.jsx` on EventDetails already wrote
+> immediately, `PersonnelTab.jsx` on EditEvent batched only). New `rosterAdd`/`rosterUpdate`/
+> `rosterRemove`/`rosterSetBandGroup` actions — same fresh-read → mutate → write → verify-retry
+> shape as the guest_lists fix — keyed by `user_email` (roster entries have no stable id, unlike
+> guests) instead of the old fragile array-index/name double-match `PersonnelCard.jsx` used.
+> Converted all three writers. Inline field edits (role/instrument/phone/city) stay local-only on
+> keystroke, commit atomically on blur.
+>
+> **⚠️ BASE44 50-FUNCTION CAP HIT AGAIN — now a CONFIRMED standing constraint, not a one-off:**
+> attempted a genuinely new `manageEventRoster` function (unlike guest_lists' `mutateGuestList`,
+> which had no prior deploy attempt to compare against) — failed identically: "Maximum of 50
+> functions per app reached." **Every future new-domain fix will hit this too.** Folded into
+> `decideGuestRequest` again (same `commitRosterWithRetry` pattern, same auth block reused).
+> `decideGuestRequest` is now explicitly multi-domain (guest-list decisions/mutations + roster
+> mutations) purely because of this slot constraint — documented plainly in its own file header
+> so it doesn't read as an accident to a future session. **Assume any next architecture-fix phase
+> (schedule_items/advance_items) will need the SAME consolidation trick from the start** — don't
+> waste a deploy attempt creating a new function first; go straight to folding into an existing
+> one, or ask the owner about the Base44 support ticket status on raising the limit.
+>
+> **Owner workflow this round:** implement → build/test → local checkpoint commit (no push) →
+> present findings/open questions → owner said "test on localhost first" → then "deploy" →
+> pushed + deployed both phases together. Consistent with the standing test-before-push-deploy
+> rule; owner is comfortable batching a few local commits before one deploy round.
+>
+> **Still open, not started:** `schedule_items`/`performances`/`rehearsals` (`ScheduleTab.jsx`'s
+> `updateScheduleItem`) and `advance_items` (`ActionItemsCard.jsx`) have the narrower
+> "immediate-but-not-fresh-read, no retry" residual risk — same class as `decideGuestRequest`'s
+> own un-upgraded `decide` action, not the worse batched-until-Save pattern already fixed.
+> `action_items` — no immediate-writer counterpart, lowest priority. `EventDetails.jsx`'s
+> `eventCacheRef` has no TTL (separate stale-display bug). Owner still needs to manually re-add
+> Mark Whitfield Jr's 5 guests lost in the original incident (not a code task).
+
+---
+
+## 🔝 TOP BRIEF (2026-07-16 · superseded by the entry above, kept for detail)
 
 > **LIVE = Serenova `0.7.0659` (deployed + verified). Repo `main` @ `51ae309` pushed. Tree clean.**
 > Session started from a real production incident, ended with a new MobileHub feature. Full detail:
