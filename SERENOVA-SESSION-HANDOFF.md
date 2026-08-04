@@ -3,11 +3,150 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-07-17T09:20 EDT
+> Last Updated: 2026-07-30T12:45 EDT
 
 ---
 
-## 🔝 TOP BRIEF — read FIRST (2026-07-17 · supersedes everything below)
+## 🔝 TOP BRIEF — read FIRST (2026-07-30 · supersedes everything below)
+
+> **LIVE = Serenova `0.7.0672` (deployed + verified). Repo `main` @ `30b2cde` pushed. Tree clean.**
+> Machine being restarted after this update — no local checkpoint commits pending, everything
+> below is already pushed to `main` and deployed. Local dev server was killed by the restart;
+> restart it with `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite --port 5173 --host
+> 0.0.0.0` (always both flags — LAN-accessible for laptop testing). Full detail for everything
+> below: decisions log **v2.229–v2.231**, build phases **v2.91–v2.93**. This brief covers
+> `0.7.0661`→`0.7.0672` (the gap since the last handoff entry, which stopped at `0.7.0660` —
+> several rounds were pushed/deployed without a handoff update in between; decisions log has the
+> full blow-by-blow for `0.7.0661`–`0.7.0668` if needed, not repeated in full here).
+
+> **Quick summary of `0.7.0661`–`0.7.0668` (Phase P + Phase S + misc bug fixes, pre-dates this
+> brief's detailed section):** Phase P (Permission Areas dynamic registry) shipped, closing Tier 0
+> item #1 — plus a real bug fix (company-seat membership wrongly trusted as direct on a linked
+> artist account). Then **Phase S (Security Hardening) — full secret rotation, closing Tier 0 item
+> #2**: every actively-exposed secret in the leaked `.env.local` rotated and verified (Stripe
+> live+test — highest severity, missed on the first pass due to mixed-case naming —, Supabase
+> service-role, Google Places, AeroAPI, Twilio, Resend); R2 turned out N/A (never actually set up);
+> `VAPID_PRIVATE_KEY` deliberately deferred (owner has a graceful-transition plan). Found + fixed 2
+> real bugs along the way: `getStripeMode` had the secret/publishable naming convention backwards
+> (always logged 'unknown'); Travel page's Upcoming/Past tabs classified flights by departure
+> instead of arrival. **Still open from this era:** Phase S step 4 (git history scrub — hygiene
+> only now, every exposed value is dead, needs its own go-ahead + a force-push).
+
+> **`0.7.0669` — Phase ML: closed a LIVE User-entity PII exposure at the app layer.** Resuming
+> Phase ML (Cross-Artist Member Linking) surfaced that the built-in Base44 `User` entity had no
+> working RLS — a custom `rls` block is confirmed INERT on built-in entities per Base44's own
+> platform guidance — meaning any authenticated user could potentially read every other user's full
+> PII (address/DOB/passport/SSN/bank info/etc.) via a direct `User.list()` call. This jumped the
+> queue over the actual Phase ML build-out and was fixed same-day: migrated all 5 direct
+> `base44.entities.User.list()` call sites onto the existing scoped `getUsersByEmailsForAccount`
+> function, which now REDACTS a defined PII field set per-person unless
+> `Membership.pii_consent.granted` (new field, added live via Base44's dashboard editor — did NOT
+> run `entities push`, see the standing near-miss warning below). Same redaction added to
+> `getStagedMobileData`; `acceptInvitation` grants consent on invite accept. **The actual Phase ML
+> steps 1–7 resume (remaining consent-capture mechanisms, ML-7 associated-crew propagation) is
+> STILL NOT done** — only this emergent security fix landed.
+>
+> Bundled into the same deploy: an **onboarding rebrand** (Artist/Band-forward account-type
+> selection, teal `#284854`/tan `#d9a774` palette replacing indigo/purple, new dynamic
+> `OnboardingProgress.jsx` setup-stage tracker, country-aware profile form with a real US-states/
+> CA-provinces dropdown + auto-timezone) and a **real bug fix**: the "Artist Type" dropdown only
+> ever wrote `industry_type` (documented legacy field) — `act_type` (what display code actually
+> reads) was never set, so every onboarded artist account showed as "Solo" regardless of the real
+> selection. **Pricing mismatch flagged, NOT fixed as code** (it's a data issue): shared docs say
+> Basic/Advanced/Pro = $35/$60/$90 (storage 2/25/100GB), live `BillingTier` data still showed
+> $45/$65/$95 (1/5/50GB) as of this entry — owner was walked through `BillingTierManager.jsx`
+> (SystemHub) as the fix path, including the required "Sync with Stripe" step (Stripe prices are
+> immutable) — **not yet confirmed done.**
+
+> **`0.7.0669`–`0.7.0671` — AddTravel + flightLookup bug-fix round.** Owner live-tested "Add
+> Flight" end to end and found a chain of real bugs: (1) flight save crashed outright — a stray
+> undeclared `date` variable thrown on every "Add this flight" click (one-line fix); (2)
+> `linkFlightConnection` 400'd on every connecting-flight save — caller sent
+> `from_flight_id`/`to_flight_id`, function has always expected
+> `primary_flight_id`/`connecting_flight_id`/`leg_number`; (3) no Cost input existed ANYWHERE in
+> the flight form despite `total_cost`/`currency` already being wired into the save payload —
+> added a Financials & Notes card; (4) that new Cost field then hit the classic
+> can't-clear-to-blank controlled-input bug — fixed with the existing shared `NumberInput`
+> component (same fix already applied elsewhere; **Settings page still has this same bug open,
+> not touched**); (5) Flight Segments list was printing raw UTC digits with zero timezone
+> conversion — fixed to reuse the working `formatAirportDateTime()` formatter.
+>
+> **The real headline bug took 3 attempts:** `flightLookup` was picking the WRONG DAY's AeroAPI
+> schedule row for redeye flights, corrupting layover math by ~24h. First fix (rank candidates by
+> closeness to noon UTC) was ALSO wrong — breaks for negative-offset origins where a correct late
+> departure lands farther from noon UTC than the wrong adjacent-day occurrence (owner caught this
+> via a live re-test showing the wrong day again). **Real fix:** embedded the IATA→IANA airport
+> timezone map (~5,500 airports, same data as `src/utils/airportTimezones.json`) directly into the
+> function (kept single-file — every Base44 function in this repo is single-file, didn't want to
+> rely on unverified multi-file CLI-deploy bundling), widened the AeroAPI query window to 3 days,
+> and now converts each candidate's UTC departure instant into the ORIGIN airport's real local
+> calendar date before comparing against what the user typed. Verified against the exact reported
+> case before deploying. **Owner floated a good idea, not started:** turn Add Flight into a
+> stepped wizard (Booking Ref/Travelers/Event → Flight Info → Costs) instead of one long page.
+
+> **`0.7.0672` — EventDetails Travel: connecting inbound flight was vanishing entirely.** Owner
+> reported (after the above fixes landed) that a 4-leg connecting itinerary only showed 3 legs on
+> the event's Travel Arrangements card/Full Itinerary — asked for the logic to be traced (used
+> plan mode) before any fix. Root cause: `getEventTravelSummary`'s inbound classification used an
+> IATA/date heuristic meant to collapse a connecting inbound journey to its final leg, but it
+> dropped the FIRST leg (the actual chain head) with zero trace instead of the second (already
+> correctly represented via a real `FlightConnection` record it wasn't consulting). **My first
+> proposed fix was wrong** — I initially assumed BOTH inbound and departing should collapse
+> symmetrically; owner corrected this: the departing side's existing "show every leg in full" (two
+> full rows + a compact via-note) is INTENTIONAL — event 1 (departure context) should show full
+> detail since someone might be looking at only that event; event 2 (arrival context) should stay
+> minimal — one clean row for the flight that lands you there, with a note about what connects into
+> it. Confirmed tour-level view/print already shows a flight once correctly, no fix needed there.
+> **Fix:** real-connection-based chain-head filtering, applied to INBOUND ONLY; departing left
+> unfiltered/unchanged. `TravelCard.jsx`'s arrival rows now lead with the LAST leg in a chain
+> (previously always the first); `EventSchedule.jsx` needed no code change — already correctly
+> expands a chain head's connections, it just never received one before.
+>
+> **Flagged, explicitly NOT fixed — two follow-ups for whenever picked back up:**
+> 1. `PrintEventItinerary.jsx` is a separate component with independent flight-grouping logic
+>    (doesn't use `getEventTravelSummary` at all) — from reading it, likely has the OPPOSITE
+>    problem (shows every leg on its own date, no collapsing at all) — unverified end-to-end.
+> 2. Unrelated gap found while investigating: `FlightBookingGroup.linked_event_ids` genuinely
+>    supports linking one flight to multiple events (the "event 1 near point A / event 2 near
+>    point B" tour scenario), but `EventFlightBooking.event_id` (what both prints key off) only
+>    ever stores the FIRST linked event — a multi-event-linked flight would be missing from either
+>    print's output for its second event. The on-screen card is unaffected (checks
+>    `linked_event_ids` directly).
+> 3. Also flagged, awaiting owner confirmation (not a bug, a design check): the on-screen "Full
+>    Event Itinerary" will now show a fuller multi-day expansion for the arrival leg (Check-in/
+>    Departing on the earlier city's day, THEN layover/arrival) rather than staying as minimal as
+>    the compact card — reasonable default for something called "Full Itinerary," but not
+>    explicitly confirmed as wanted.
+
+> **Standing rule, reconfirmed multiple times this arc — `base44 entities push` is a destructive
+> SYNC, not additive.** Any locally-missing entity file is a DELETE candidate against the live
+> schema. Do not attempt with files "moved aside" for any reason. Entity RECORD changes (not
+> schema) go through Base44's dashboard editor directly, or a service-role function — never this
+> CLI command for anything other than a verified, complete, validator-clean full entity directory.
+> The standard safe workaround for `site deploy`/`functions deploy` (which DON'T touch entities)
+> remains: `mv base44/entities ../_entities_HOLD_<label>`, deploy, `mv` back immediately after —
+> confirmed working reliably across every deploy this session (`npx base44 site deploy --yes`,
+> `npx base44 functions deploy <name>` with no `--yes` flag — that flag doesn't exist on
+> `functions deploy`, only `site deploy`).
+
+> **Still open / next up, in the order they'd naturally resume:**
+> - Confirm the pricing data fix (`BillingTierManager.jsx`, $35/$60/$90 + Stripe sync) actually got
+>   done — last known status was "not yet confirmed."
+> - Decide on the two EventDetails Travel follow-ups above (`PrintEventItinerary.jsx`,
+>   multi-event-link print gap) — pick up if owner wants them.
+> - Decide on the AddTravel stepped-wizard redesign idea (liked, not scoped).
+> - Per the 2026-07-19 Master Sequencing (Tier 0), Phase ML steps 1–7 is technically still next
+>   before Phase 0/F — but the last several sessions have been reactive live-bug-fixing driven by
+>   owner testing rather than working the sequencing list top-down. Check with owner on priority
+>   before assuming Phase ML resume is next.
+> - Small loose ends carried for a while, still unconfirmed: no duplicate rehearsal rows left on
+>   the test event from pre-idempotency-guard failed attempts (owner to check); Mark Whitfield
+>   Jr's 5 lost guests still need manual re-adding (owner action, not code).
+> - Phase S step 4 (git history scrub) — hygiene only, needs its own go-ahead + force-push.
+
+---
+
+## 🔝 TOP BRIEF (2026-07-17 · superseded by the entry above, kept for detail)
 
 > **LIVE = Serenova `0.7.0660` (deployed + verified). Repo `main` @ `202d73a` pushed. Tree clean.**
 > Direct continuation of the guest_lists incident session (below) — owner said "move on to Full
