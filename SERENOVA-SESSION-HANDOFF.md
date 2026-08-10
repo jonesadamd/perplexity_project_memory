@@ -3,11 +3,144 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-07-30T12:45 EDT
+> Last Updated: 2026-08-10T16:45 EDT
 
 ---
 
-## 🔝 TOP BRIEF — read FIRST (2026-07-30 · supersedes everything below)
+## 🔝 TOP BRIEF — read FIRST (2026-08-10 · supersedes everything below)
+
+> **LIVE = Serenova `0.7.0674` (deployed + verified). Repo `main` @ `03d15ff` pushed. Tree clean.**
+> Big session after an 11-day break. Full detail: decisions log **v2.232–v2.235**, build phases
+> **v2.94–v2.95**, and the new **`docs/NEEDS-LIVE-VERIFICATION.md`**.
+>
+> **⏭️ NEXT SESSION STARTS WITH A DECISION, NOT CODE.** Owner asked for a **sequencing
+> conversation** (tonight or next day): *exit-Base44-first vs Phase-0/F-first*. Brief prepared at
+> **`docs/SEQUENCING-DECISION-BRIEF.md`** — read that plus this brief and you're ready. **Do not
+> start building the next phase until that call is made.**
+
+### 1. Supabase had PAUSED — and it was invisible to the owner
+
+Free-tier projects auto-pause after 7 days with no requests; there had been an 11-day break
+(owner break, artists on hiatus, so no logins either). **Restored** (`INACTIVE` → `ACTIVE_HEALTHY`).
+**The lesson worth keeping:** `usePermissions.js:448` resolves every user's permissions via a
+`role_templates` query and degrades to *"no access on every area"* on failure (deliberate, line
+455) — but the **super_admin/owner bypass returns BEFORE that query runs**. So a paused project
+looks completely healthy to the owner while locking out every band member, crew, TM and management
+user. Nobody was actually affected (hiatus). **Diagnostic shortcut for the future: "non-owners
+locked out of everything, owner fine" → check Supabase availability, not the permission logic.**
+
+Added `.github/workflows/supabase-keepalive.yml` — daily ping, 3× retry, fails loudly. Verified
+green on GitHub with a real 200. Secret is **`VITE_SUPABASE_PUBLISHABLE_KEY`** (same name as
+`.env.local`/Base44 deliberately — one name everywhere; the `VITE_` prefix is meaningless in CI but
+a second name is a rotation trap). **Known accepted gap:** GitHub disables scheduled workflows on
+repos idle 60 days — exactly the scenario this covers. An external pinger would close it; **owner
+declined it 2026-08-10**, recorded in the workflow header as accepted risk, not oversight.
+**Postgres also upgraded** to `17.6.1.155` (done while the DB is nearly empty and unused — free
+tier has NO backups, so this only gets riskier after 0/F migrates real identities).
+
+### 2. OTP login — decided, folded into Phase 0/F, NO code
+
+Owner asked whether staged users' passcode login should be offered to everyone. **It cannot be
+built on Base44**: the SDK's entire auth surface is `loginViaEmailPassword` + `loginWithProvider`
+(verified by grepping the dist). Phase SA's OTP works only by bypassing Base44 auth entirely —
+giving a full user a *staged* token would null out `base44.auth.me()`, which ~20 call sites depend
+on. **Decision: fold into Phase 0/F as steps 4–5** rather than sequence it after — step 4 already
+forces every user through a re-entry flow (passwords aren't migrated), and an emailed code beats a
+password reset, so OTP *becomes* the migration path and the login UI is built once. Owner chose:
+**OTP + password + Google** (nothing removed), **email first, SMS opt-in**. Phase 0/F is now **5
+steps, not 4** — propagated to Master Sequencing and CLAUDE.md. Phase SA explicitly **survives**
+0/F (it serves people with *no account*; different subject, not duplication).
+
+### 3. Phase ML-2 LIVE (`0.7.0673`) — FIRST FUNCTION ON OUR OWN INFRASTRUCTURE
+
+`lookupPersonByContact` now runs as a **Supabase Edge Function**
+(`supabase/functions/lookup-person-by-contact/`), not Base44. It could never be a Base44 function —
+the **50-NEW-function cap** blocked it (a deploy attempt failed with "Maximum of 50 functions per
+app reached"). Written 2026-06-25, **never deployed**, yet `InviteUserForm.jsx` and
+`AssignArtistDialog.jsx` called it and **failed closed to `state:'new'`** — so Phase ML's entire
+existing-person branch was **silently dead in production for ~6 weeks with no error ever
+surfacing**. Client now goes through the new **`src/api/personLookup.js`** seam — *the template
+every later own-server call should copy*.
+
+> **⚠️ KEY TECHNICAL FINDING, don't re-derive it:** an edge function CAN verify a Base44 caller from
+> outside Base44. `createClient({ appId, token, serviceToken })` forwards the caller's token as an
+> **`on-behalf-of`** header alongside the service credential (`@base44/sdk` `dist/client.js:51–104`),
+> so `base44.auth.me()` works exactly as `createClientFromRequest` did, and `asServiceRole` covers
+> privileged reads. **No auth bridge needed.** (I argued the opposite first — that was wrong; the
+> owner's call was better.) Deployed `verify_jwt: false` because it does its own Base44 auth.
+> Secrets live at **Edge Functions → Secrets** (`/dashboard/project/_/functions/secrets`) — **NOT**
+> under Project Settings; that path doesn't exist any more. Config trap caught pre-deploy:
+> `BASE44_API_BASE` already ends in `/api` but the SDK appends `/api` itself → normalize or every
+> call 404s.
+
+### 4. Phase ML-6 LIVE (`0.7.0674`) — staged users can finally grant consent
+
+Before this, **`acceptInvitation` was the ONLY writer of `pii_consent` anywhere**. Anyone arriving
+via the staged route (most band and crew) had **no path to consent at all**, and ML-5's redaction
+masked their details permanently. Added a `setPiiConsent` action to **`saveStagedProfile`** (folded
+in, 50-cap again) — scoped **per-artist**, writing only the membership named by `account_id` and
+only if it belongs to this session's email. `getStagedMobileData` now returns `pendingPiiConsent`.
+New **`StagedPiiConsentPrompt.jsx`**, rendered right after the first-login confirm card so one
+component covers **both** populations (dormant meets it after confirming; already-active meets it
+on next open). Grant *and* decline persist; **"Not now" writes nothing and re-asks** — deliberate.
+⚠️ The prompt's copy mirrors the server `MASKED_FIELDS` list; **change both together** or the app
+promises something different from what it withholds.
+
+### 5. Testing approach CHANGED — batch verification, written down
+
+Owner: app is in **beta with our own artists only**, artists **on hiatus**, happy to push hard and
+batch-test. Three bugs today had the **identical shape** (ML-2 undeployed; `_pii_masked` produced
+but consumed nowhere; `pii_consent` enforced but ungrantable) — **none would have been caught by
+finer-grained testing**; each needed one human to walk the path once. So batching is fine; **what
+is not fine is unverified work with no record of it**. New register:
+**`docs/NEEDS-LIVE-VERIFICATION.md`** — 15 rows, each keyed by **role + a named real person**
+(owner's idea, and the sharpest one in the thread) with an *expected symptom if broken* column.
+**Split:** machine-verifiable (canary in live bundle, status codes, CORS, old path absent) = Claude
+does it every deploy, never a row; human-verifiable = a row. **Written trigger to STOP batching:**
+when artists come off hiatus or a new artist/management company is onboarded → verify-before-deploy
+for auth/permissions/PII/billing.
+
+### 6. Things I got WRONG this session (recorded so the wrong version doesn't outlive the right one)
+
+1. Flagged "173 functions on remote" vs "max 50" as a docs contradiction to investigate. **It
+   isn't** — the cap is on *creation*, and this very handoff already said so ("174 existing are
+   grandfathered"). **The memory-first rule in CLAUDE.md exists for exactly this; apply it before
+   flagging anything as inconsistent.**
+2. Argued against hosting ML-2 off Base44, expecting a throwaway auth bridge. **Wrong** — see §3.
+3. Gave a stale dashboard path for edge-function secrets (Project Settings → Edge Functions). It's
+   under the main-nav **Edge Functions → Secrets**.
+4. The Phase ML step table read "all ⬜ not started" while ML-1/ML-3 were built, ML-5 shipped, and
+   ML-4/ML-6 were part-done. Now corrected against code. **"Not started" in a tracker and "not
+   working in production" are different claims** — asserting the first while the second was true is
+   what hid ML-2 for six weeks.
+
+### 7. Environment / workflow notes
+
+- **Claude cannot edit its own permission allowlist** (classifier blocks it, by design). Base44
+  deploy rules had to be added by the owner. Rules now allow `npx base44 functions deploy *` /
+  `site deploy *` / `functions list`. **Deliberately NOT `npx base44 *`** — that would silently
+  allowlist `entities push`, the destructive sync that nearly wiped `Account`'s schema in July.
+- The allowlisted entities-aside path is the **exact literal** `/tmp/serenova_base44_entities_deploy_hold`
+  (docs elsewhere say `../_entities_HOLD_<label>` — that form is NOT allowlisted and will prompt).
+- Deploy sequence used all session: `mv base44/entities /tmp/serenova_base44_entities_deploy_hold`
+  → `npx base44 functions deploy <name>` / `npx base44 site deploy --yes` → **`mv` back immediately**.
+
+### 8. Open / next up
+
+- **FIRST: the sequencing conversation** (`docs/SEQUENCING-DECISION-BRIEF.md`).
+- **ML-4** — `_pii_masked` is produced server-side but **consumed nowhere in `src/`**; masked fields
+  render blank, indistinguishable from missing data. Now honest to build (ML-6 makes approval real).
+  ⚠️ `getUsersByEmailsForAccount` has **31 consumers** — do NOT retrofit all; build one shared
+  display primitive, adopt in `PersonnelCard` + `AllContactsDialog` first, log the rest.
+- **ML-7** associated-crew propagation (open design question in working doc §7). ML-8 gated on 0/F.
+- **Phase S step 4** (git history scrub) — hygiene only, needs its own go-ahead + force-push.
+- `User.list()` full-table scan inside the ML-2 edge function (TODO in file) — fine at ~11 users.
+- Owner actions still open: duplicate rehearsal rows check; re-add Mark Whitfield Jr's 5 lost
+  guests; confirm the pricing fix ($35/$60/$90 **+ the Stripe sync step**) actually landed.
+
+---
+
+## 🔝 TOP BRIEF (2026-07-30 · superseded by the entry above, kept for detail)
 
 > **LIVE = Serenova `0.7.0672` (deployed + verified). Repo `main` @ `30b2cde` pushed. Tree clean.**
 > Machine being restarted after this update — no local checkpoint commits pending, everything
