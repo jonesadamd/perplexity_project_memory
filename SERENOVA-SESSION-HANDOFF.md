@@ -3,11 +3,172 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-08-10T16:45 EDT
+> Last Updated: 2026-08-12T15:30 EDT
 
 ---
 
-## 🔝 TOP BRIEF — read FIRST (2026-08-10 · supersedes everything below)
+## 🔝 TOP BRIEF — read FIRST (2026-08-12 · supersedes everything below)
+
+> **LIVE = Serenova `0.7.0678` + edge fn `lookup-person-by-contact` v9. Repo `main` @ `9fb9505`
+> pushed. Branch `phase-0f` created and realigned to main. Tree clean.** 20 commits today.
+> Detail: decisions log **v2.236–v2.240**, build phases **v2.96–v2.98**, and four new docs:
+> `PHASE-0F-STEP1-SCOPE.md`, `IDENTITY-LIFECYCLE-DESIGN.md`, `BASE44-CORE-INVENTORY.md`,
+> `SEQUENCING-DECISION-BRIEF.md` (now historical/decided).
+
+### ⚠️ 0. READ THIS FIRST — the pattern that cost most of the day
+
+**Base44 answers an unauthorized/failed read with HTTP 200 and an EMPTY ARRAY, not an error.**
+Combined with client seams that fail closed, a broken call and a genuine "not found" are
+indistinguishable. **Five** separate silent failures today traced to this shape. So:
+
+1. **`git push` is NOT a deploy.** Base44 needs `site deploy` for bundle changes and
+   `functions deploy <name>` per changed function. I pushed the flight fix, told the owner it was
+   live, and had deployed *neither half*. **Always check the live bundle hash / `functions list`
+   before claiming anything ships.**
+2. **A function-only deploy does NOT move the version canary** (it lives in the site bundle).
+   `0.7.0674` was the *correct* thing to see after an edge-function fix. Expect this to confuse.
+3. **"Verified" must mean the running system, not the code.** Twice today I claimed a mechanism
+   was verified when the test had *timed out* and never completed, then built on it.
+4. **Simulate against live data BEFORE deploying.** What finally fixed ML-2 was running the whole
+   gate + state logic locally against real Base44 data, not another deploy-and-see cycle.
+
+### ⚠️ 1. CALLING BASE44 FROM OUTSIDE ITS RUNTIME — hard-won rules
+
+This governs every function migrated off Base44, so it is the most reusable thing here.
+
+- **Service auth is an `api_key` HEADER.** `Authorization: Bearer <serviceToken>` — what the SDK
+  sends for `asServiceRole` — returns **200 with zero rows**. Proven with identical requests:
+  `api_key` → 3 rows; `Authorization: Bearer` → 0 rows; no auth → 0 rows.
+- **Use RAW `fetch`, not the SDK, for service reads.** The SDK's `headers:{api_key}` form was
+  never verified end-to-end; raw fetch against `/api/apps/{appId}/entities/{Entity}?...` is.
+- **The built-in `User` entity is refused to an api_key client entirely** ("Authentication
+  required to list users"). Person state must come from `Membership`. This also means an edge
+  function CANNOT read `system_role` — it only arrives via `auth.me()`.
+- The SDK **is** fine for `auth.me()` with the caller's bearer token (identity verification works).
+
+### 2. Phase ML COMPLETE-ish — ML-2 verified live after FOUR silent failures
+
+`lookup-person-by-contact` (Supabase Edge Function) **works**, verified by owner across all four
+branches: full user, full+admin, **staged**, and new. The staged branch matters most — 17 of 30
+identities. Failures in order: (1) never deployed (50-fn cap); (2) SDK `asServiceRole` →
+`Authorization: Bearer` → empty; (3) reading `User` via api_key → 500; (4) SDK `headers:{api_key}`
+unverified → raw fetch. Client seam `src/api/personLookup.js` fails closed but now `console.warn`s.
+**ML-6 (staged PII consent) shipped `0.7.0674`, still untested live.**
+
+### 3. 🎯 SEQUENCING DECIDED — and the reframe that resolved it
+
+Owner's goal is **NOT "exit Base44"** — it is *"don't accumulate migration debt while growing the
+test cohort"* (wants 1–2 more test artists + ≥1 AMC; Lisa Fischer's account is the canary
+throughout). **Decisive argument was SAFETY:** RLS is deny-all with ZERO policies and isolation is
+client-side, so adding artists multiplies the blast radius of any permissions bug. 0/F is the
+prerequisite for growing the cohort, not a detour.
+
+**Order:** (1) Phase 0/F ← NEXT · (2) Vercel hosting IN PARALLEL · (3) onboard 1 AMC **now** on
+Base44, rework knowingly accepted (expect *missing functionality*, not just rework) · (4) `Core.*`
+inventory ✅ done · (5) onboard test artists AFTER 0/F step 4 as native identities.
+The other ~173 functions stay on Base44 until after 0/F.
+
+### 4. Phase 0/F — RENUMBERED to 6 steps; the old order was unbuildable
+
+A token's `sub` must be a real `auth.users` UUID, but creating those rows was Step 4 — so the
+bridge could not go first. Old Step 4 also wrongly bundled *creating identities* with *letting
+people log in*. **New order:** create identities → mint bridge tokens → author RLS → fix the bad
+import → first login by OTP → OTP as a standing option.
+
+- **Mechanism decided:** asymmetric signing key + minting edge function + `createClient`'s
+  `accessToken` option. Third-party auth ruled out (Base44 isn't a supported provider); **HS256
+  shared secret ruled out on security** — one of Supabase's named leak vectors is `VITE_`-prefixed
+  env vars, this project's exact prior failure.
+- **Step 1 is 30 identities, not 13** — 13 `User` records + **17 unclaimed** staged people (57%),
+  + 4 orphan Users with no membership. Exports confirmed there is **no provider column**, so we
+  cannot tell who uses Google — *and it does not matter*, because OTP re-entry makes provider
+  irrelevant. (Under the OLD "password reset" plan it would have been a blocker.)
+- **🔑 STAGED USERS ARE "UNCLAIMED ACCOUNTS"** (owner's model, better than mine, adopted). One
+  identity from the moment a person is added; claiming is a *permissions upgrade*, not an identity
+  creation. ⚠️ **Security rule that must not be inverted:** the row grants **nothing** until a
+  verified OTP login, and the inviter may correct email/phone **only while unclaimed** — allowing
+  it after claiming is a straight account-takeover path.
+
+### 5. Bugs fixed live today (all owner-verified)
+
+- **Performance-time edit chain, 3 bugs stacked:** `findByIdOrMatch` contradicted its own comment
+  (`!x.id` made the match fallback useless once a row self-healed an id → permanent 404);
+  auto-derived `auto-perf-*` rows were editing a GENERATED copy the server rebuilds every commit
+  (now routed to `perfUpdate`); and every edit did a **redundant whole-record `Event.update`** plus
+  a full-page reload (`loadEvent` gained a `silent` param; all four `window.location.reload()` in
+  EventSchedule removed).
+- **Flight lookup:** returned only the FIRST same-day leg (`.find()`), so multi-leg flight numbers
+  hid legs entirely — now returns all in `matches[]` with a picker in AddTravel. Then deduped
+  **codeshare rows by physical leg** (`origin|destination|scheduled_out`), which also fixed two
+  rows rendering as selected. Response stayed backward compatible; **`PnrSegmentManager` untouched**
+  and still reads the top-level single match.
+- **Hardcoded hosts centralised** → `src/config/appHosts.js` (`VITE_APP_ORIGIN` overridable). The
+  worst was fragile-by-construction: share URLs did `location.href.replace('<preview host>', …)`,
+  which leaks the raw current URL from any other host. Edge fn CORS moved to an `ALLOWED_ORIGINS`
+  secret.
+
+### 6. Infra
+
+Supabase had **auto-paused** (7-day free-tier rule; 11-day gap). Restored → **org upgraded to
+PRO** ($25/mo, daily backups; `⬜ owner should still eyeball Database → Backups`) → **Postgres
+upgraded to 17.6.1.155**. Keep-alive workflow kept as a canary (paid projects can't pause).
+⚠️ **The pause was INVISIBLE to the owner** — `usePermissions` degrades to "no access on every
+area" but the super_admin bypass returns *before* that query. Diagnostic: *"non-owners locked out,
+owner fine" → check Supabase, not the permission logic.*
+
+### 7. ⛔ BLOCKER for the Supabase dev branch — schema baseline
+
+**Do not create a Supabase branch yet.** Branches apply *migrations*, and only **6 of 29 tables**
+have `create_*` migrations — `users`, `accounts`, `events`, `tours`, `contracts`, `role_templates`
+and ~17 others predate migration tracking. A branch would come up missing them and then FAIL on
+ALTER migrations. **Underlying gap: the migration history cannot rebuild the database.** Fix =
+capture a `--schema-only` dump as `00000000000000_baseline`. Branch cost confirmed: **$0.01344/hr**
+(~$9.68/mo) — `get_cost`/`confirm_cost` flow required.
+
+### 8. Migration assessment (ready to use)
+
+**40 entities with data, 22 empty**; live field-name map at `/tmp/live-schema.json` (regenerate with
+the raw-fetch probe pattern — aggregates only, no PII). **`Core.*` inventory done and it corrects a
+long-standing error:** `InvokeLLM` is **NOT** the migration blocker — it powers venue/hotel/airline
+autocomplete + AI setlist import, all degrading to manual entry. PDF extraction uses
+`ExtractDataFromUploadedFile`. **Real blocking set: `SendEmail` (15 sites, easy Resend swap) +
+`UploadFile` (9) + `ExtractDataFromUploadedFile` (3)** — and keeping PDF extraction REQUIRES
+replacing `UploadFile`, since the flow is upload→extract. Row 12's "already on Cloudflare R2" was
+false; storage is an open choice (likely Supabase Storage).
+
+### 9. Architecture decided this session
+
+- **SystemHub stays in the CORE database** (cross-DB joins would cripple support/override). Use
+  Postgres **schemas** — `public` + `system` — not separate databases.
+- **Separate `admin.` subdomain login** for SystemHub: agreed as *defence in depth only* — the real
+  boundary is RLS + server-side role checks. Cookies host-scoped; nothing shared with `app.`.
+  Support/impersonation resolved as: admin plane issues a **short-lived, audited, bannered
+  impersonation token** that `app.` consumes, carrying the TARGET user's rights; the admin session
+  stays alive on `admin.` in another tab.
+- **Scale:** `account_id` on 48/62 entities is the right shape — index it everywhere; RLS policies
+  run per row and must be index-friendly. Append-only audit tables are the real growth risk.
+- **DNS:** Supabase is never a DNS target. App → Vercel. Keep `app.` on Base44 until cutover; use
+  Vercel's free preview URLs (owner's choice) rather than a new subdomain. ⚠️ **Vercel needs a
+  `/api` rewrite to Base44** or every call 404s (`base44Client` uses `window.location.origin`).
+
+### 10. Open / next up
+
+1. **⬜ Gate deny-path test — HIGHEST VALUE.** The `lookup-person-by-contact` access gate was
+   rewritten twice today and **only its ALLOW path has ever run.** Its whole job is to not reveal
+   whether a person exists. Needs a `band_member`/`crew` account attempting a lookup against an
+   account they do not belong to. Register row 2.
+2. **⬜ Schema baseline migration** (see §7) — blocks the Supabase dev branch.
+3. **⬜ ML-6 staged-consent testing** — needs a real staged phone session; register rows 3–8.
+4. **⬜ Verify Supabase backups exist** (dashboard).
+5. Scoped, NOT built: `hasChanges`/staleness flag on Event (supersedes the `eventCacheRef` TTL
+   item); two-sided billing (cost tracking for all vendors + Stripe revenue dashboard);
+   codeshare flight identity (display marketed ident, group by operating).
+6. Carried: Phase S step 4 (git history scrub); Mark Whitfield Jr's 5 lost guests; duplicate
+   rehearsal rows check; pricing fix confirmation ($35/$60/$90 **+ Stripe sync**).
+
+---
+
+## 🔝 TOP BRIEF (2026-08-10 · superseded by the entry above, kept for detail)
 
 > **LIVE = Serenova `0.7.0674` (deployed + verified). Repo `main` @ `03d15ff` pushed. Tree clean.**
 > Big session after an 11-day break. Full detail: decisions log **v2.232–v2.235**, build phases
