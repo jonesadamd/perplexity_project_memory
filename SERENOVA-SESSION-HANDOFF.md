@@ -3,11 +3,138 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-08-13T23:59 EDT
+> Last Updated: 2026-08-14T13:30 EDT
 
 ---
 
-## 🔝 TOP BRIEF — read FIRST (2026-08-13 · supersedes everything below)
+## 🔝 TOP BRIEF — read FIRST (2026-08-14 · supersedes everything below)
+
+> **LIVE = Serenova `0.7.0717` (bundle `index-BRt4H2pu.js`).** All repos pushed, trees clean.
+> Detail: decisions log **v2.249–v2.251**, build phases **v2.101**,
+> `docs/SCHEDULE-REBUILD-SCOPE.md`.
+
+### 🖥️ MACHINE NOTE
+Owner works desktop + laptop off the **same folder over the local network**
+(`~/Developer/serenovahub_b44`).
+- **Same working tree → NOTHING to pull.** Run `git log --oneline -3`, expect `0.7.0717`.
+- **Separate clone → `git pull` on BOTH** `serenovahub_b44` and `perplexity_project_memory`.
+- One session writes at a time (`SERENOVA-MACHINE-SYNC.md`). True remote wanted later, not set up.
+
+### ⚠️ 0. HOW TO NOT WASTE THIS SESSION
+
+**A green `vite build` proves the module parsed. It does NOT prove a component renders.**
+Five blank-page/render bugs this week, every one build-green and runtime-only:
+`<Check>` never imported · `heading={null}` into cmdk (`typeof null === "object"`) · TDZ
+(`useMemo` reading `data` one line above `const { data } = useQuery`) · a zero-page render that
+threw nothing · `sectionTitle` written into the wrong component.
+
+➡️ **Before claiming a UI fix works, say whether it was verified by RUNNING or by READING.**
+The owner tests live and will find it in minutes either way; claiming more than you checked
+costs trust and a round trip.
+
+➡️ **For "X is on top of Y" bugs, INSPECT THE DOM.** `0.7.0716` blamed `SidebarRail` (z-20)
+from reading source and applied `z-50`; the real culprit was the toast viewport at **z-[100]**.
+The owner's devtools screenshot settled in seconds what code-reading got wrong.
+
+### ⚠️ 1. PLATFORM RULES (unchanged, still bite)
+- **Base44 answers unauthorized/failed reads with HTTP 200 + `[]`** — silent failure everywhere.
+- **`git push` is NOT a deploy.** `npx base44 site deploy --yes`; `functions deploy <name>` per
+  function. **Verify the live hash:**
+  `curl -s https://app.serenovahub.com/ | grep -o '/assets/index-[A-Za-z0-9_-]*\.js'`
+- Deploys need `mv base44/entities /tmp/hold` first (validator), then move it back.
+- **Base44 silently STRIPS unknown entity fields**, including nested object keys.
+- `base44 entities push` has **no per-entity targeting, no dry-run**, and there is no `pull`.
+
+### 📌 2. STANDING RULE — printing is ALWAYS a generated PDF in a new tab
+
+Owner decision, project-wide (decisions log v2.249). **Never build an HTML print layout again.**
+
+Browser printing cannot be made reliable: the printable area depends on the printer's
+unprintable hardware edge and the reader's dialog settings, and **JS can measure none of it**.
+Proof: identical content printed **6 pages on US Legal, 12 on US Letter**. Scaling even changed
+the page *count*, which only happens when the browser re-flows instead of honouring breaks.
+
+Implementation to copy: `src/utils/schedulePdf.js` on **jsPDF** (already a dependency; also
+`guestListPdf.js`, `setlistReportPdf.js`). Opens via blob URL in a new tab, falls back to
+download if popup-blocked.
+⚠️ **jsPDF's Helvetica is Latin-1** — wrap `doc.text` and transliterate, or `→` prints as `!'`.
+⚠️ CSS `@page { @bottom-right { counter(page) } }` **does not work in any browser** — which is
+why `PrintTourItinerary`'s page numbers have never appeared on paper.
+
+### 🔴 3. OWNER ACTIONS PENDING (Base44 entity editor)
+
+| Entity | Fields | Effect while missing |
+|---|---|---|
+| `FlightBookingGroup` | `receipt_url` | Imported itinerary PDF not kept as the booking receipt. Per-line receipt attach/replace **does** work. |
+| `AccountSettings.print_settings` | `default_schedule_layout`, `show_title`, `show_print_date`, `show_page_numbers`, `show_finances` | Print options work per-print; **saved defaults do not persist**. Finances fails safe (OFF). |
+
+Both recorded in the local `.jsonc` with the same warning.
+
+### 🟡 4. OWNER DECISIONS OPEN (they gate real work)
+
+1. **Storage pricing** — divergence raised in `../serenovahub_site/docs/shared/README.md`.
+   Measured: **one event = 240 GB**; **Pro includes 100 GB**; add-ons ⇒ ~$80/mo for that one
+   event forever. R2 raw ≈ $3.60/mo. **Should bulk/cold archive be a separate per-TB product?**
+   Owner parked it ("we definitely need to figure out pricing and plans more").
+2. **`schedule_entries` RLS (Schedule S4)** — needed for Off/Open marking, personal holds,
+   recording sessions. **NOT** a copy of `settlements`' anon-permissive policy: the reference
+   calendar contains *"Outpatient Surgery (1-2 week recovery)"*, so this is personal PII →
+   deny-by-default + service-role function. **Decide before creating the table.**
+
+### ✅ 5. SHIPPED THIS SESSION (`0.7.0709` → `0.7.0717`)
+
+**Schedule** — rebuilt earlier as a **continuous date spine** (every day gets a row; that is the
+point). Now also: **defaults to MY schedule** with an "Everyone" toggle gated on travel access
+(explicit test against `'own'`/`'none'` — the documented order puts `own` ABOVE `view`, so a
+`>=` test would read as "own sees everything"); band filter **now filters travel too** (flights
+carry `eventIds`/`bandGroupIds`/`emails` from `EventFlightBooking`, and attribution survives the
+journey-collapsing step); travel reads as **"Travel: LGA to OGG"** (legs chained by airport;
+two people from different cities correctly stay two rows).
+
+**Print/PDF** — `schedulePdf.js`, three layouts (list · calendar 2/page · calendar+detail),
+finances **OFF by default** (permission is the wrong gate — a schedule leaves the building),
+band members can print **their own pay** via server-scoped `listMine`.
+
+**Nav** — "Overview" → **My Hub**; Team → bottom of Tour Management; only My Hub + Tour
+Management open on load (plus: the group containing the current page always opens); SETTINGS
+sidebar group **removed as duplicate** of the user menu; version stamp into the menu;
+"SystemHub" one word; new narrow-screen bar ("Account — Section", real hamburger,
+`env(safe-area-inset-top)`).
+
+**Theme** — `--harmony-*` values switched to brand teal/tan from `hubThemes.js`.
+
+### 🎨 6. THEME STATE — measured, do not over-claim
+
+| | Count | Status |
+|---|---|---|
+| `harmony-*` class uses re-skinned | **72** | ✅ centralised |
+| Hardcoded `#284854`/`#d9a774` | **264 / 61 files** | on-brand, NOT centralised |
+| Tailwind `slate-*`/`blue-*` chrome | **140** | still old palette |
+
+**Phase TH is two jobs:** (1) replace the 264 hardcoded hexes with the variables — mechanical,
+low risk, do any time; (2) audit the 140 Tailwind usages — judgement, since some are genuinely
+neutral UI that must NOT become teal.
+
+### ▶️ 7. NEXT — pick up here
+
+**Nothing is half-finished.** Everything above is deployed and logged. Live-test findings still
+worth confirming: the PDF print output (page count stable, no reflow when scaling) and that
+toasts still appear/dismiss after the `pointer-events-none` fix.
+
+Then, in priority order:
+1. **Schedule S4** (`schedule_entries`) — blocked on the RLS decision above.
+2. **Tier 0 → Phase 0/F** — Phase ML steps 1–7 (paused since June), two small loose ends, then
+   0/F itself on a dedicated branch + Supabase dev branch.
+3. **Phase TH part 1** (the 264 hexes) — safe, mechanical, any time.
+4. Logged, not built: pinned favourites in My Hub · IATA→city names for travel rows
+   (`airportTimezones.json` is tz-only; OpenFlights has `city`, same source/licence) ·
+   orphaned `PrintSchedule.jsx`/`PrintShell.jsx` + six legacy itinerary templates → PDF path ·
+   `src/api/files.js` upload seam + strip dead `R2_*` vars (R2 = **Tier 3 item #1, right after
+   0/F**).
+
+---
+
+## 📜 PREVIOUS BRIEF (2026-08-13 · superseded)
 
 > **LIVE = Serenova `0.7.0708` (bundle `index-DOVmEs0L.js`).** Both repos pushed, trees clean.
 > ~22 deploys today. Detail: decisions log **v2.242–v2.248**, build phases **v2.101**, and
