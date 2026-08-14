@@ -3,11 +3,119 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-08-12T15:30 EDT
+> Last Updated: 2026-08-13T23:59 EDT
 
 ---
 
-## 🔝 TOP BRIEF — read FIRST (2026-08-12 · supersedes everything below)
+## 🔝 TOP BRIEF — read FIRST (2026-08-13 · supersedes everything below)
+
+> **LIVE = Serenova `0.7.0708` (bundle `index-DOVmEs0L.js`).** Both repos pushed, trees clean.
+> ~22 deploys today. Detail: decisions log **v2.242–v2.248**, build phases **v2.101**, and
+> `docs/SCHEDULE-REBUILD-SCOPE.md` (new).
+
+### 🖥️ MACHINE NOTE (2026-08-13)
+Owner is moving to the **laptop, working off the SAME folder over the local network**
+(`~/Developer/serenovahub_b44`). So:
+- **If it is genuinely the same working tree → there is NOTHING to pull.** Just run
+  `git log --oneline -5` and confirm you see `0.7.0708`. Do not `git pull` expecting changes.
+- **If it turns out to be a separate clone → `git pull` on BOTH repos** (`serenovahub_b44`
+  and `perplexity_project_memory`; `serenovahub_site` also has one commit today).
+- Only one session should write at a time — see `SERENOVA-MACHINE-SYNC.md`.
+- True remote (different location) is wanted later; not set up yet.
+
+### ⚠️ 0. THE PATTERN THAT COST THE MOST TODAY — a green build proves almost nothing
+
+**Four separate blank-page bugs, all with `vite build` passing.** A green build means the module
+parsed and resolved; it does **not** mean a component can render. Every one was runtime-only:
+
+1. `<Check>` icon used but never imported (`0.7.0689`) — Vite does not resolve JSX identifiers.
+2. `heading={null}` into **cmdk** (`0.7.0692`) — cmdk does `typeof m === "object" && "current" in m`,
+   and `typeof null === "object"`, so it throws inside a layout effect → React unmounts the tree →
+   blank page, not a caught error. **Never pass `null` to a cmdk `heading`; `undefined` is safe.**
+3. **TDZ** (`0.7.0707`) — a `useMemo` reading `data` placed one line *above* `const { data } = useQuery()`.
+4. **Zero-page render** (`0.7.0708`) — an empty array of pages is a *valid* render, so it blanked
+   with **nothing in the console**.
+
+➡️ For anything visual: reason about the runtime path, and say plainly when a fix is
+"verified by reading, not by running". The owner tests live; do not call a UI fix confirmed.
+
+### ⚠️ 1. STILL TRUE FROM THE LAST SESSION
+- **Base44 answers unauthorized/failed reads with HTTP 200 + `[]`.** Silent failure everywhere.
+- **`git push` is NOT a deploy.** `npx base44 site deploy --yes` for bundle, `functions deploy <name>`
+  per function. **Always verify the live bundle hash** before claiming anything is live:
+  `curl -s https://app.serenovahub.com/ | grep -o '/assets/index-[A-Za-z0-9_-]*\.js'`
+- **Base44 silently STRIPS unknown entity fields** — including nested object keys. Writing a field
+  that is not in the live schema is a no-op, not an error.
+- `base44 entities push` has **no per-entity targeting and no dry-run**, and there is no `pull`.
+  Do not run it to add one field.
+- Deploys: `mv base44/entities /tmp/hold` first (validator), then move it back.
+
+### 🔴 2. OWNER ACTIONS PENDING (nothing else blocks these features)
+
+Add in the **live Base44 entity editor** — until then the code works per-session but does not persist:
+
+| Entity | Field(s) | Effect while missing |
+|---|---|---|
+| `FlightBookingGroup` | `receipt_url` (string) | Imported itinerary PDF is not kept as the booking's receipt. Per-line receipt attach/replace on EventFinancialDetails **does** work. |
+| `AccountSettings.print_settings` | `default_schedule_layout`, `show_title`, `show_print_date`, `show_page_numbers`, `show_finances` | Print toggles work per print; **saved defaults do not stick**. Finances fails safe (reverts to OFF). |
+
+Both are recorded in the local `.jsonc` files with the same warning.
+
+### 🟡 3. OWNER DECISIONS OPEN (they gate real work)
+
+1. **Storage pricing — raised as a formal divergence** in
+   `../serenovahub_site/docs/shared/README.md`. Measured: **one event = 240 GB**
+   (`Lisa Fischer July 2026`, 4 nights × 2 sets, Ardour multitracks). **Pro includes 100 GB.**
+   Add-ons at +25 GB/$8 ⇒ ~$80/mo for that one event forever; a 10-event archive ≈ $770/mo.
+   R2 list is ~$0.015/GB/mo ⇒ 240 GB ≈ **$3.60/mo raw**. **Question: should bulk/cold archive
+   storage be a separate product priced per TB?** Owner said "we definitely need to figure out
+   pricing and plans more" and parked it.
+2. **`schedule_entries` RLS (Schedule S4).** Needed for Off/Open marking, personal holds and
+   recording sessions. **NOT a copy of `settlements`' anon-permissive policy** — the reference
+   calendar literally contains *"Outpatient Surgery (1-2 week recovery)"*, so this is the
+   personal-PII case: deny-by-default + service-role function. **Decide before creating the table.**
+
+### ✅ 4. WHAT SHIPPED TODAY (`0.7.0689` → `0.7.0708`)
+
+**Add Travel** — 3-step flow; PDF import drops into step 1 pre-filled (its separate preview page
+removed); Event/Tour leads step 1; connections inferred on import (same airport, ≤6h) with a
+manual toggle only where physically possible; traveller picker crash fixed; glued name suffixes
+(`WHITFIELDII/MARK`) now match.
+
+**Event finances** — were reading $0 with the data present. Four faults: wrong schema field names
+(`guarantee_amount`, `balance.bonus_amount`, `balance.expense_deduction`); gross lives in **two
+stores** (`event.guarantee` vs `EventFinancials`) with nothing copying between them; flight costs
+allocated by `expense_event_ids` which **nothing populated** (fixed client + server + on save,
+falling back to `linked_event_ids` split evenly); server now seeds the contracted guarantee.
+Also: map stopped reloading on every tab switch; booked travel shows under Expenses; per-line
+**receipts** with attach/replace (replace can only *detach* — Base44 has **no delete API**).
+
+**Schedule — REBUILT** (`docs/SCHEDULE-REBUILD-SCOPE.md`, S1/S2/S3/S5 done). List + calendar
+views built on a **continuous date spine** (every day gets a row — that is the point). Band
+filter/dropdown + Key popover. Compact = collapse blank runs with buffers **derived from the
+owner's two worked examples** (shows ±2, travel ±1 — reproduces both exactly). Printable: three
+layouts (list · calendar 2/page · calendar+detail), shared `PrintShell`, Settings-driven,
+**finances OFF by default**, band members can print **their own pay** via the server-scoped
+`listMine`.
+
+🐞 Found on the way: **`travel_and_performance` was unreachable dead code app-wide** —
+`isDistanceTravel()` read `.type` (always `'travel'`) before `.travel_type`. Fixing it also
+changed **Dashboard** behaviour.
+⚠️ **CSS `@page` margin boxes do not work in any browser** — `PrintTourItinerary`'s page numbers
+render nothing on paper. That is why the new print view paginates in JS.
+
+### ▶️ 5. NEXT
+
+- **Owner testing `0.7.0708`'s print output** — confirm the print dialog's page count now matches
+  the footer (was 6 vs 12), and that the tab no longer blanks.
+- Then either **Schedule S4** (needs the RLS decision) or back to **Tier 0 → Phase ML steps 1–7**,
+  the two small loose ends, then **Phase 0/F**.
+- Not started, offered: `src/api/files.js` upload seam + stripping the dead `R2_*` vars from
+  `.env.local` (R2 is **Tier 3 item #1, immediately after 0/F** — decided today).
+
+---
+
+## 📜 PREVIOUS BRIEF (2026-08-12 · superseded)
 
 > **LIVE = Serenova `0.7.0678` + edge fn `lookup-person-by-contact` v9. Repo `main` @ `9fb9505`
 > pushed. Branch `phase-0f` created and realigned to main. Tree clean.** 20 commits today.
