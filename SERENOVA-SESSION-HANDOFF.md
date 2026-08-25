@@ -3,11 +3,143 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-08-14T13:30 EDT
+> Last Updated: 2026-08-25T22:00 EDT
 
 ---
 
-## 🔝 TOP BRIEF — read FIRST (2026-08-14 · supersedes everything below)
+## 🔝 TOP BRIEF — read FIRST (2026-08-25 · supersedes everything below)
+
+> **LIVE = Serenova `0.7.0730` (bundle `index-BfeL_rZA.js`).**
+> Branch **`phase-0f`** pushed, NOT merged to main. **PR #1** (blur-save) open, NOT merged.
+> Detail: decisions log **v2.260**, build phases **v2.109**, `docs/PHASE-0F-STEP3-SCOPE.md`.
+> **The Supabase RLS work is ALREADY APPLIED TO PRODUCTION** — migrations went in as they were
+> written. Merging `phase-0f` publishes code and docs; it does not change the database.
+
+### ⚠️ 0. THE THREE THINGS THAT COST THE MOST THIS SESSION
+
+**A. `git worktree` silently ships a BROKEN build.** `.env.local` is gitignored, so
+`git worktree add` does NOT copy it. Vite then inlines nothing, `supabase === null` forever in
+that bundle, and **permissions, settlements, set-list templates and error reporting all die
+silently**. This is what took the app down on 2026-08-24 — not Base44, which was the first
+(wrong) hypothesis.
+➡️ **Building in a worktree? `cp ../../.env.local .` FIRST.** The CI canary added this session
+does NOT catch it, because a worktree deploy never touches CI.
+
+**B. The version canary verifies IDENTITY, not COMPLETENESS.** The version string is inlined
+*from source*; env vars are *not*. So "grep the version out of the served bundle" — the
+documented deploy check — **structurally cannot** detect a missing env var. It passed happily on
+a bundle with Supabase entirely disabled.
+➡️ Always also assert: `curl -s <live bundle> | grep -c "supabase.co"` — expect ≥1.
+
+**C. A canary confirms what you put IN. It says NOTHING about what you took OUT.** Two sessions
+deployed `0.7.0729` hours apart from different branches. **A site deploy ships the whole bundle**,
+so the second silently reverted 72 lines of the first's `ScheduleTab.jsx` — with every canary
+green. Functions are unaffected (they deploy separately).
+➡️ **Before any site deploy:** `gh run list --limit 5` and check the live bundle hash. If another
+branch shipped since yours diverged, cherry-pick or rebase FIRST. Version number is not a lock.
+
+### 🤝 MULTI-SESSION RULE (new, learned the hard way)
+Sessions run in parallel on this machine (`ListAgents` to see them; `SendMessage` to talk).
+**Only ONE session deploys at a time, and it says so.** Peer sessions were genuinely useful here —
+the other session independently verified both of this session's findings and corrected its own
+"verified live" claim. Talk to them rather than guessing.
+
+### ⚠️ 1. PLATFORM RULES (unchanged, still bite)
+- **Base44 answers unauthorized/failed reads with HTTP 200 + `[]`** — silent failure everywhere.
+- **`git push` is NOT a deploy.** `npx base44 site deploy --yes` (the `--yes` is required
+  non-interactively); `functions deploy <name>` per function.
+- Deploys need `mv base44/entities /tmp/hold` first (validator), then move it back.
+- **Base44 silently STRIPS unknown entity fields**, including nested object keys.
+- 🆕 **Base44 silently REVERTED 24 deployed functions to older copies on 2026-08-21**, breaking all
+  guest-list, roster, advance-item and schedule writes for four days. All 24 restored.
+  **The only detector:** `backend_project.deployment_name_to_info[<fn>].entry` —
+  `entry.ts` = our CLI deploy is live · `main.ts` = the platform's build is. 150 functions still
+  read `main.ts` but are byte-identical to the repo, so harmless today. Nothing in the app, CLI or
+  logs signals this; that field is it.
+
+### 🔴 2. OWNER ACTIONS PENDING
+1. **⚠️ GUEST-LIST DATA CHECK, 2026-08-21 → 2026-08-25.** Guest requests submitted from MobileHub
+   during the function-revert window may have **failed silently from the user's side**. This
+   project has already had one confirmed guest-list data-loss incident. **Check before assuming
+   nothing was lost.**
+2. **Guest-list write verification — one manual pass.** An add, a ticket-count change, an assignee
+   change. ⚠️ Testing approve/deny proves NOTHING — that is the one action that never broke.
+   Code is restored and provenance-confirmed; behaviour is untested.
+3. **Merge PR #1** (`worktree-schedule-blur-save`) — source-identical to what is already live via
+   cherry-pick, so merging is bookkeeping.
+4. **Non-owner verification of Phase 0/F** — rows 13–15 in `docs/NEEDS-LIVE-VERIFICATION.md`,
+   Mark Whitfield Jr named. **A broken bridge looks perfect to the owner while locking out every
+   band member, crew member, TM and management user.** This is the single biggest unretired risk.
+5. **Seed event grants for the 7 event-scoped people** from Base44 `event_access_grants`. The
+   mechanism works and is tested; no rows exist. They see their account but no shows until then.
+
+### 🟡 3. OWNER DECISIONS OPEN
+- Which `account_type` does a **BMC** use? `artist_admin_company` has templates and looks like the
+  intent, but nothing states it.
+- `booking_agency` has **ZERO role templates** → guaranteed lockout the day such an account is
+  created. Not urgent (none exist); is a trap.
+- The agency-visible financial surface: a view? per-event or per-agency?
+- Do agents reuse `users`/`memberships`? **DECIDED: yes** — one identity, memberships per agency.
+
+### ✅ 4. SHIPPED THIS SESSION (`0.7.0728` → `0.7.0730`)
+**Phase 0/F Step 2 — Base44→Supabase session bridge, LIVE.** `bridge-supabase-session` Edge
+Function + `src/api/supabaseSession.js`, wired into `App.jsx` with `clearSupabaseSession()` on all
+four logout paths. 7/7 security tests reject (incl. impersonation via request body).
+⚠️ **Mechanism changed from the scope doc**: Supabase mints the session itself via
+`generateLink` + `verifyOtp`, so **no signing key exists anywhere** — rejected minting our own
+JWTs as the same impersonation risk HS256 was rejected for.
+
+**Phase 0/F Step 3 — RLS, COMPLETE (3a–3f), applied to production.**
+- **3a** Three `SECURITY DEFINER` helpers; repaired 2 policies that had NEVER executed: infinite
+  recursion (`42P17`), and — worse because silent — `memberships.user_id` (FK to `public.users.id`)
+  compared against `auth.uid()` (`auth.users.id`). **All 31 rows differ; it matched nobody, with
+  no error.** The loud bug hid the quiet one.
+- **3b** Area permissions enforced in RLS, not just account isolation (owner correction: *"no
+  band/crew should have access to contracts"*). Reads the SAME `role_templates` the client does —
+  one source of truth, two readers. Verified 21/21 across all 7 artist roles.
+- **3c** Seeded 12 accounts + 41 memberships. ⚠️ Join key is `Account.account_id`, **not**
+  `Account.id`. Base44 allows many memberships per (user, account); Supabase allows one.
+- **3d** Event scoping corrected (it narrows ROWS, not PERMISSIONS — 3c had it backwards and
+  locked out 7 people); `users` + `team_payments` policed; `wire_instructions` moved to
+  `user_payment_details` (RLS on, zero policies, service-role only).
+- **3e** Linked management companies (AMC/BMC reach artist accounts via link+seat+assignment).
+- **3f** Trailing access implemented — read-only, date-scoped to `terminated_at`, expiring via
+  `access_scoped_until`. Found a pre-existing `enforce_termination_access_policy()` trigger already
+  doing half of it.
+
+**Other:** permission null-client guards (the 2026-08-24 outage fix) · CI env from repo secrets +
+a post-build bundle canary · Settings → **Support** tab (outline, "Coming soon") ·
+`supabase/tests/rls_probe.sql` (re-runnable, builds a throwaway fixture and cleans up).
+
+**Designed + logged, NOT built:** Booking Agency model · hub separation by host/path (Tier 3 #2) ·
+SystemHub cross-hub access (Tier 3 #3).
+
+### 🏛️ 5. ARCHITECTURE DECIDED (all in build phases, Tier 3)
+- **Each account type gets its OWN hub.** `app.` = artist + management (AMC/BMC get both surfaces,
+  because editing through the artist's own pages beats proxying). `agency.` / `venue.` / `systemhub.`
+  are fully siloed. Owner creating the subdomains; **point them at Vercel — but only after the
+  Vercel project exists**, since it dictates the DNS target. No project linked yet.
+- **Public share links stay FLAT** (`/Itinerary/:code`, `/GuestList/:code`) → structural rule:
+  **prefixed = authenticated, flat = public.**
+- **Support = impersonate + diagnose + named actions. NEVER elevate.** Session `auth.uid()` = the
+  target user, so RLS applies unchanged. A permission-explainer panel answers *why* a row is
+  hidden; fixes go through named service-role operations. Banner shows in the CUSTOMER's hub too.
+  Attribution = **support agent + support session ID** (`SS-YYMMDD-NN`) — never recorded as the
+  end user. ⚠️ "agent" alone means BOOKING agent in this product.
+- ⚠️ **When each subdomain goes live it must be added to `ALLOWED_ORIGINS`** on the
+  `bridge-supabase-session` Edge Function — a secret update, not a redeploy.
+
+### ▶️ 6. NEXT — pick up here
+1. The owner actions in §2 — **guest-list data check first**, it may be real data loss.
+2. **Phase 0/F Step 4** — fix the bad `useCurrentUser` import in `src/hooks/usePermissions.js`.
+3. **Steps 5–6** — OTP first login, then OTP as a standing option. **5 MUST precede 6** (Google
+   linking keys on a verified email; an unconfirmed one risks a duplicate identity).
+4. **Vercel move** — now arguably Tier 0-urgent, not parallel-when-convenient: it ends both the
+   worktree/env trap and the platform-revert class in one step.
+
+---
+
+## 📜 PREVIOUS BRIEF (2026-08-14 · superseded)
 
 > **LIVE = Serenova `0.7.0717` (bundle `index-BRt4H2pu.js`).** All repos pushed, trees clean.
 > Detail: decisions log **v2.249–v2.251**, build phases **v2.101**,
