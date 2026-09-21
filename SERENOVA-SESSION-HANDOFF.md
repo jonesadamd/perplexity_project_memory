@@ -3,11 +3,80 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-08-25T22:00 EDT
+> Last Updated: 2026-09-21T09:00 EDT
 
 ---
 
-## 🔝 TOP BRIEF — read FIRST (2026-08-25 · supersedes everything below)
+## 🔝 TOP BRIEF — read FIRST (2026-09-21 · supersedes everything below, including the 08-25 brief)
+
+> **LIVE = SerenovaHub `0.7.0789`.** Branch **`phase-0f`**, **PR #4 open** (management console
+> rebuild + print fixes + Phase 0/F status). Detail: decisions log **v2.277**, build phases
+> **v2.117**, `docs/SUPABASE-EMAIL-TEMPLATES.md`.
+
+### ✅ PHASE 0/F IS MOSTLY DONE — Steps 1, 2, 3, 4, 5 and 6a
+
+**Every password login now establishes a real Supabase session automatically.** `auth.uid()`
+resolves and the 38 RLS policies enforce. Verified as a NON-OWNER: 1 account + 17 memberships
+visible, exactly that account's membership count.
+
+Remaining: **Step 6b (OTP as a standing login option) is GATED ON PHASE 9** — a Supabase-only login
+leaves no Base44 session, and the data still lives in Base44, so the user would land in a
+working-looking app with **no data**. Do not build it before the data moves.
+
+### ⚠️ THE FOUR THINGS THAT COST THE MOST THIS SESSION
+
+**A. Probing with a CLI token proves nothing about a browser.** Base44 issues TWO token types
+validated at DIFFERENT endpoints — CLI/global at `/api/auth/me`, the **browser's app token** at
+`/api/apps/<appId>/entities/User/me`. Both our validators asked the global one, so every browser
+caller was refused. A CLI probe passed everywhere and "proved" the endpoint fine, sending four
+rounds after the token instead of the validator. **This also invalidated MC2-0, which is retracted
+— there is no cookie auth; a credentials-only request returns 401.**
+➡️ The CLI is an app admin AND a different token type. Verify from a real browser session.
+
+**B. A navigation CLEARS THE CONSOLE.** `Login.jsx` ends in `window.location.href = '/'`, so every
+diagnostic it logged was destroyed before it could be read — making a working fix look broken
+twice. Record outcomes to `sessionStorage` and report on the next load.
+
+**C. Cloudflare caches `index.html` on app.serenovahub.com.** A deploy can succeed and be invisible
+(`cf-cache-status: HIT`). **Always check `serenova-hub-3c4a53e2.base44.app` too.** A cache rule to
+bypass HTML while keeping `/assets/*` cached is STILL OUTSTANDING (owner action).
+
+**D. "Could not read" is not "is empty", and it cost us four separate bugs.** Management dashboard
+zeros, an empty artist roster, "my artists" resolving to none, and nav groups vanishing — all the
+same mistake. **Unknown must render "—" or stay loading, never 0.**
+
+### ⚠️ INVISIBLE FROM AN OWNER ACCOUNT
+
+The owner bypass returns `full` before permission resolution runs, so an owner cannot see a
+permissions failure. A **race** in `usePermissions` was publishing ZERO ACCESS app-wide before
+self-correcting (fixed `0.7.0782`) — it had been affecting every band and crew member on every page
+load, and was found only by testing as `jones_adamd@me.com` (admin, one artist account).
+➡️ **Test permission changes as a non-owner. Always.**
+
+### WHAT SHIPPED
+
+- **Management console rebuilt** on one seam (`src/api/managementRollup.js`): Dashboard, Artist
+  Roster as expanding rows, **ManagementArtistOverview** (reads an artist WITHOUT moving the RLS
+  scope), **Actions**, **Access & Linked Accounts**. Charcoal/tan chrome via `data-hub`.
+- **Print itinerary**: day list was built in UTC while contents were filtered airport-local, so
+  evening departures crossing midnight UTC vanished.
+- **`SerenovaHub` is canonical**, one word — 40 user-facing strings swept.
+- **All 13 Supabase auth email templates** — `docs/SUPABASE-EMAIL-TEMPLATES.md` is the source of
+  truth. Deliverability: **auth passes (spf/dkim/dmarc), reputation is the problem.** A code in a
+  junk folder is a user who cannot log in, so **SMS must be a real fallback in Step 6**.
+
+### NEXT
+
+1. Google sign-in bridging (redirects, so it takes the candidate path — unverified).
+2. Cloudflare cache rule (owner).
+3. `claimed_at` is stamped at MINT not at verification — fix before anything gates access on it.
+4. Then Phase 9 / data off Base44. Billing is the strongest early candidate: **no payments are
+   happening yet**, so migration risk is at its lowest, and its Stripe webhook can be a Supabase
+   Edge Function (see MC2-6).
+
+---
+
+## 🔝 TOP BRIEF — 2026-08-25 (SUPERSEDED, kept for history)
 
 > **LIVE = Serenova `0.7.0730` (bundle `index-BfeL_rZA.js`).**
 > Branch **`phase-0f`** pushed, NOT merged to main. **PR #1** (blur-save) open, NOT merged.
