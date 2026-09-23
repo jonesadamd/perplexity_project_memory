@@ -3,11 +3,76 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-09-21T09:00 EDT
+> Last Updated: 2026-09-23T07:40 EDT
 
 ---
 
-## 🔝 TOP BRIEF — read FIRST (2026-09-21 · supersedes everything below, including the 08-25 brief)
+## 🔝 TOP BRIEF — read FIRST (2026-09-23 · supersedes everything below)
+
+> **LIVE = SerenovaHub `0.8.0809`.** Branch **`phase-0f`**, all work pushed, both hosts verified.
+> Detail: decisions log **v2.300–v2.305**, build phases **v2.154**.
+
+### ✅ E1 (BILLING → SUPABASE) IS COMPLETE — `0.8.0809`
+
+Schema · backfill · Stripe webhook as a Supabase Edge Function · `src/api/billing.js` seam · the
+`ManagementBilling` rate card · **every billing screen repointed**. No page calls Base44 for
+billing directly any more; the remaining surface is **11 names** in `BASE44_DEPENDENT_OPERATIONS`.
+The **8 repair tools are deliberately NOT ported** — they exist because the platform misbehaves.
+
+### 🔴 TWO THINGS THAT NEED THE OWNER, NOT CODE
+
+1. **CONFIRMED MIS-SALE ON STORAGE.** The app grants **1 / 5 / 50 GB**; the marketing site
+   advertises **2 / 25 / 100** — Advanced overstated **5×**. Worse than a stale price, because a
+   price corrects itself at checkout. **Do NOT just edit the site down** — which set is correct is
+   genuinely open. Full action list: `serenovahub_site/docs/shared/SITE-UPDATES-REQUIRED.md`.
+2. **Annual discount anomaly, already customer-facing**: the plan cards say "Save 20%" on Basic
+   against "Save 25%" on Advanced and Pro. Unresolved.
+
+Also open: the 4 questions at the end of `docs/SERENOVA-ACCOUNT-LIFECYCLE-DUNNING.md` (grace
+periods 14/30/90, whether a lapsed AMC suspends its artists, a support "grace on request" lever,
+trial-expiry ladder).
+
+### ⚠️ OPERATIONAL RULE LEARNED THE HARD WAY — I TOOK THE STRIPE WEBHOOK DOWN
+
+**Deploy Supabase Edge Functions with the CLI, NEVER the MCP tool.** The MCP path takes file
+content *inline* (a wrong argument silently ships a placeholder) and **cannot set `verify_jwt`,
+defaulting it to `true`** — which made Stripe's unauthenticated POST fail **401 before the handler
+ran**. Restored; `supabase/config.toml` now pins the flag for all six functions. **Verify after
+every function deploy** with `curl -X POST <fn-url> -d '{}'` — expect **400**, not 401. A naive
+health check passes on 401, because 401 is a response.
+
+### ▶️ NEXT: E2 slice 2 — repoint the management console at Supabase
+
+**Preconditions verified 2026-09-23, work NOT started.** `public.events` holds 57 rows / 3
+accounts, `synced_at` 2026-09-21; **no drift** (Melonie Music LLC is 54 in Supabase and Base44
+reported 54 live). `account_id` is a **uuid**, so the seam maps Base44 ids → uuids.
+
+**Settle this first:** if RLS returns fewer rows than exist, the result is *a partial answer that
+looks complete* — the trap that had the console reporting 0 events for an artist with 51. For an
+artist with zero rows we cannot tell "no events" from "not permitted". Proposed: probe
+`has_perm(account, 'events', 'view')` per artist; permitted + 0 rows = truly zero, otherwise
+**unknown, rendered "—"**. Keep `fetchArtistEvents`'s return shape so **no call site changes**.
+Slice 2 should DELETE the fan-out caps (concurrency 3, budget, circuit breaker, cache) — they
+exist only because the fan-out is expensive.
+
+### 🧠 THE RECURRING BUG SHAPE IN THIS CODEBASE — worth reading before debugging anything
+
+**An empty or wrong result that looks like a fact.** Five instances in this session alone:
+- Representation read "none" for an artist with **3 saved records** — an unguarded
+  `amcAccount.display_name` on an RLS-scoped read threw, react-query swallowed it to `[]`.
+  **Found by instrumenting, after three fixes reasoned from code were wrong.** The tell was an
+  **absent** log line.
+- The AMC revenue figure: hardcoded `$29/$59/$99` **and** a status filter matching zero rows —
+  **two bugs cancelling into a plausible `$0`**.
+- `amc_entitlements` seeded 0% for every AMC because the seed read a **stale mirror column**.
+- Billing RLS let a **band_member** read invoices (membership existence ≠ permission).
+- Base44 `LinkedAccount` over-filtered on an optional field.
+
+**Instrument early.** Reading code lost three rounds; one round of logging won.
+
+---
+
+## 📦 PREVIOUS BRIEF (2026-09-21 · superseded by the above)
 
 > **LIVE = SerenovaHub `0.7.0789`.** Branch **`phase-0f`**, **PR #4 open** (management console
 > rebuild + print fixes + Phase 0/F status). Detail: decisions log **v2.277**, build phases
