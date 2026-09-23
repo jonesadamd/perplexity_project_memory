@@ -7,6 +7,24 @@
 
 ---
 
+## ⛔ BEFORE YOU START ANYTHING — run the pre-flight checks
+
+**`docs/SERENOVA-PREFLIGHT-CHECKS.md` in the app repo.** Owner instruction 2026-09-23: **checking
+and updating comes before the next feature, especially Stripe.** It is a gate, not a reference.
+
+**Verified 2026-09-23, so you can tell a fresh tick from a stale one:**
+- ✅ Webhook reachable — `curl -X POST <fn-url> -d '{}'` returns **400**, not 401. **Re-run after
+  every Edge Function deploy**; a naive health check passes on 401 because 401 is a response.
+- ✅ **All 8 catalogue prices match their Stripe Price objects exactly**, intervals included.
+  What we display is what Stripe charges. Re-run whenever a price changes on either side.
+- ✅ 6/6 webhook deliveries processed, **0 failed**, none during the outage window.
+
+**Outstanding there:** two `stripe trigger` junk products ("myproduct", $15/mo) to archive; three
+orphan prices on the retired Management Company Plan to deactivate (a Price stays chargeable even
+when its Product is archived); and the four owner decisions in section C, which block work.
+
+---
+
 ## 🔝 TOP BRIEF — read FIRST (2026-09-23 · supersedes everything below)
 
 > **LIVE = SerenovaHub `0.8.0809`.** Branch **`phase-0f`**, all work pushed, both hosts verified.
