@@ -3,7 +3,58 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-09-23T07:40 EDT
+> Last Updated: 2026-11-11T16:00 EDT
+
+---
+
+## 🔝 TOP BRIEF 2026-11-11 — read FIRST (supersedes the 2026-09-23 brief below)
+
+> **LIVE = SerenovaHub `0.8.0860`, VenueHub `0.5.0021`.** App repo branch `phase-0f`, all pushed (last commit `cbbbad4`).
+> Detail: decisions log **v2.324–v2.332**, build phases **v2.170** (section "Accommodations & Venues pages").
+
+### Where we are
+- **Base44 exit, Step 4 (schedule domain flip):** flip-prep code is deployed, but `public.data_sources.schedule` is **still `base44`**.
+  Migrations B (`20261007b`) and C (`20261018b`) are drafts, **NOT applied**. Do not apply them, flip the flag or deploy the flip
+  without an explicit go-ahead and a **quiet window with no edits from Lisa (Melonie Music live alpha customer)**. Rehearsal order:
+  final sync → apply B + C → rebuild every event's auto rows → set the flag → confirm the sync stops rebuilding → served-identity
+  read checks + a rolled-back edit test → browser-test `scheduleSupabase.js` (never run in a browser).
+- **Shipped since the Oct handoff (all live, owner-reviewed by screenshot):** staged-login-by-SMS + Add to Team staged default;
+  Artist menu (cold load / inside an artist); one shared phone input + verify-on-change (`verifyPhone`); **Accommodations page
+  rebuilt** (tabs, year/range filter, hotel dialog with notes/stars/contact/AI Enhance); **Venues page rebuilt** (Upcoming / All /
+  By place, venue dialog with Contacts / History / Deals / Notes); place rule (state level only for US, CA, AU, MX, BR, IN);
+  year banners; page-width fix (`min-w-0` on the main column); set-list song dropdown no longer clipped; itinerary flight journeys
+  span days with a bold layover; itinerary places "City, Country" abroad; itinerary lists the event's tour manager with phone.
+- **New on Supabase this session:** `public.hotel_notes` (migrations 20261111a/b/c) and `public.venue_notes` (20261111d), applied.
+  New Base44 function: `getEventTourManagers` (event-scoped name/email/phone; deployed).
+- **Deploy recipe (worked every time):** `src/version.js` bump → `npx eslint src` → `BASE44_LEGACY_SDK_IMPORTS=true ./node_modules/.bin/vite build` →
+  move `base44/entities` to `../_entities_HOLD` → `npx -y base44@0.0.56 --app-id 68c22e8ff3726c063c4a53e2 site deploy -y` → move it back →
+  verify the bundle hash on `serenova-hub-3c4a53e2.base44.app` AND `app.serenovahub.com`. **Functions:** `functions deploy <name>`; a NEW name is
+  needed to get current code (stale-build rule). **If a deploy says `expired_token`, the Base44 CLI login lapsed — ask the owner to run
+  `! npx -y base44@0.0.56 login`** (it silently "completes" without deploying; always check the bundle hash).
+
+### ⚠️ Untested with a signed-in session (ask the owner to try, or test with one)
+Saving a hotel note / stars / contact; AI Enhance on a hotel; venue edit, contact add/edit/remove, venue note save, Add Venue, the Deals
+tab; the SMS leg of verify-on-change; whether the owner's phone now prints on the itinerary (TM phone).
+
+### Open items for the owner
+- Delete in the app (API-key records cannot be removed by us): 4 leftover TEST events (Walk A / Walk B), two `kabinga.testband@example.com`
+  memberships on Test Band, the `sere-testband` test members. Orphan Supabase `public.events` row "Test Events NJ" (cleanup needs a go-ahead).
+- **Artist menu (report 2026-11-04):** diagnosed, NOT fixed — union Supabase roster with Base44 assignments in `Layout.jsx` (~line 790).
+  Awaiting go-ahead and whether Test Artist Band belongs in the menu.
+- Decide "what is free" for a staged member (MobileHub only is the default; web access is a paid upgrade).
+- Base44 CLI is on `0.0.56` (a `0.3.3` exists; the pin stands).
+
+### What's next (suggested order)
+1. Owner tests the list above; fix whatever fails.
+2. Artist-menu union fix (small, `Layout.jsx` only) once approved.
+3. Tour manager contact everywhere (`TourManagerQuickAccess`, MobileHub, `AllContactsDialog` → `getEventTourManagers`); tour itinerary print multi-day flights; Compact/Basic.
+4. Flip rehearsal (needs the quiet window). Then remaining exit re-plan steps 5–8 (docs/SERENOVA-BUILD-PHASES.md "Exit re-plan").
+5. Queued, held until after the moves: Viewer role (web user, free seat, cap 1/5/15), venue recommendations + claims, "based in" country on accounts,
+   merge duplicate venues, server-side gate for the Deals tab, accommodations + venues to Supabase.
+
+### Decisions made this session worth knowing
+Assigning a tour manager shares their phone + email with that event's team (nothing else). Phones elsewhere stay masked. Viewer role parked behind the
+moves, everything new on Supabase. Place trees: state level only for US, Canada, Australia, Mexico, Brazil, India.
 
 ---
 
