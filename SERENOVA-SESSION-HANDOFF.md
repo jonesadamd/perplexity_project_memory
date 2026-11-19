@@ -3,7 +3,41 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-11-11T16:00 EDT
+> Last Updated: 2026-11-18T13:00 EDT
+
+---
+
+## 🔝 TOP BRIEF 2026-11-18 — read FIRST (supersedes the 2026-11-11 brief below)
+
+> **LIVE = SerenovaHub `0.8.0882`.** App repo branch **`phase-0f`**. **PRODUCTION FREEZE until Monday 2026-11-23** (owner travelling; an event 2026-11-19, Lisa travels the week after):
+> no deploys, no flag flips, no live-table changes without the owner. Dark repo work only.
+> Detail: decisions log **v2.355–v2.364**, plan docs `docs/BASE44-EXIT-ACCELERATED-PLAN.md`, `docs/BASE44-IDENTITY-FLIP-PLAN.md`, `docs/BASE44-ENTITY-TRIAGE.md`.
+
+### Why everything changed (2026-11-16)
+Base44 disabled account API keys; the replacement workspace key costs $640/mo and the owner will not pay. From outside Base44's runtime there is no free way to read its data, so **we are exiting Base44 as fast as is safe**.
+Rule from now: **no new Base44 functions or entities; new work is Supabase-first.** Entities stay FROZEN.
+
+### Where we are
+- **P0 data extraction: done.** All 62 entities exported to Supabase `public.b44_export` (service-role only). Events refreshed (5 test events skipped).
+- **P1 identity (people, memberships, personal details):** S1/S2 done (clean `users` + `memberships` + consent-masked `user_private_profile`; 11 consents copied; test people left behind).
+  S3 **live in 0.8.0881**: `src/api/identity.js` seam with DUAL-WRITE (Base44 + Supabase mirror); Team page reads/removes through it; `data_sources.identity` still `base44`.
+  S4a: `staged_sessions` table (token hashes; 31 sessions carried over), edge function `staged-auth` (request/verify/validate/end) deployed and tested with a real SMS code, client code in 0.8.0882 routes by flag `staged_auth`.
+  **`staged_auth` is `base44` — it was flipped and ROLLED BACK the same day:** 18 Base44 functions (MobileHub data reader, profile save, guest requests, push, …) validate staged tokens against Base44's own list and 401 on Supabase sessions.
+- **Retired:** 24 dead Base44 functions and their admin UI (SystemHub migration tooling). 165 function folders remain; about 70 still to port.
+- **Supabase secrets set:** Twilio Verify (3), usage keys (2), `TWILIO_ACCOUNT_SID`, Resend. SendGrid deliberately not added.
+- **Still broken because of the key block:** person lookup (reads "new"), the Team-card "Send login help" button (calls an undeployed Base44 gateway), bulk scripts that read Base44, usage metering. Fixed by the identity move, not separately.
+
+### What is next (in order)
+1. **S4b — port the MobileHub staged readers/writers to Supabase:** `getStagedMobileDataV5` (659 lines) first, then `saveStagedProfileV2`, `submitStagedGuestRequest`, `dismissStagedNotice`, push functions, `verifyPhone`, `getUserContext`. List every call MobileHub makes on load; flip `staged_auth` only when ALL accept the Supabase session, after testing as a staged user.
+2. **S5** repoint the remaining screens by area (EditUserDialog held back: it saves `pending_profile_data` to Base44 — never feed it Supabase-shaped records); invite/accept by Resend; **S6** flip `identity` (verify as served identities, AMC user + linked artist first).
+3. Parallel, no identity dependency: P3 port ~70 functions; P4 file storage, PDF/AI, remaining email sends; then P2 event domains, P5 Supabase Auth, P6 Vercel cutover. No cutover date until S4/S5 are done.
+4. Not built yet: notify a person of a pending profile change, invitation email via Resend, proposal expiry, text-message login help (Twilio number + registration), usage metering.
+
+### Rules learned this stretch
+- **Before flipping any auth source, list every consumer of the token and test the app as that user** (the staged flip passed the login function and failed the app behind it).
+- Deploy recipe unchanged (bump `src/version.js` → eslint → build → move `base44/entities` aside → `site deploy -y` → move back → check bundle on both hosts).
+- New CLAUDE.md routine: **"update and sync"** (commit + pull --rebase + push both repos, docs, handoff, status report). Not iCloud — git is the sync.
+- Local-only: `docs/email-templates/staged-login.*` (generic staged-login email; now committed).
 
 ---
 
