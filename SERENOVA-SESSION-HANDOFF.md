@@ -3,7 +3,25 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-11-18T13:00 EDT
+> Last Updated: 2026-11-24T22:10 EDT
+
+---
+
+## 🔝 TOP BRIEF 2026-11-24 — read FIRST (the freeze ended 2026-11-23; supersedes the status line of the 2026-11-18 brief)
+
+> **LIVE = SerenovaHub `0.8.0895`** (both hosts, bundle `index-BfyZySEa.js`). App repo branch `phase-0f`; decisions log v2.365-v2.378.
+> This stretch was print itinerary / travel UI for the Berlin promo shoot (Lisa travelling). Frontend-only deploys; no Base44/Supabase schema changes.
+
+### Shipped 0.8.0883-0.8.0895
+- Flight times in airport-local time with zone codes (CET not GMT+1; `resolveAirportTz` because stored zone 'UTC' means unknown; BER added). "Check Updates" reports what changed.
+- Print itinerary: only the event's own flights (shared PNR no longer leaks other events' legs) — location rule (`eventFlightWindow.js`, `airportCities.json`) on top of the 4-before/5-after window; also applied on EventDetails' Full Event Itinerary. Single-row day strip (PERF./REH./TRAVEL/OFF/PROMO/WORK), promo days purple, one-line Travel Summary card, round trips split + date-ascending Travel Summary, print scales the 896px preview to the page (Safari PDF), promo contacts inside Band & Crew, flights and car legs as rounded travel cards, traveler names from email lookup, car duration "(5h 30m)", guest names on the Accommodations list.
+
+### Open / waiting on the owner
+- **Flight-page + Edit Booking redesign is COMMITTED AS WIP but NOT DEPLOYED and NOT REVIEWED** (`localhost:5173`). Every deploy stashes it; the next deploy must keep stashing it or ship it on purpose.
+- **Known bug live:** editing a check-out/arrival time inline in EventDetails' itinerary saves it on the check-in/departure DATE (`EventSchedule.jsx` init date = `check_in || check_out`). Fix + limited time-only editor agreed in principle, not built.
+- Proposed, owner holding: "Exclude from this itinerary" (per-event, per-flight; Supabase table), per-day promo locations, per-segment flight->event assignment + pricing, V3 server function for location parity.
+- Small: empty Venue box on print day pages; lowercase contact roles; stored 'UTC' zones still written by AddTravel/PnrSegmentManager; edge-function airport table lacks BER.
+- The Base44 exit plan in the 2026-11-18 brief below is unchanged and still the main line.
 
 ---
 
