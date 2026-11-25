@@ -3,14 +3,14 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-11-25T15:55 EDT
+> Last Updated: 2026-11-25T17:10 EDT
 
 ---
 
 ## 🔝 TOP BRIEF 2026-11-25 (PM) — read FIRST
 
-> **LIVE = SerenovaHub `0.8.0922`** (both hosts, bundle `index-PLJVv0bR.js`). App repo `phase-0f`; decisions log v2.397–v2.401 (newest at the top). Supabase: new table `tour_people` (migration `20261125a`).
-> **🔴 PROCESS MISS TO RESOLVE FIRST:** the unreviewed flight-page redesign (d110102: `PnrSegmentManager`, `flightBookingUi`, `EditFlightBooking`, `FlightBookingPreview`) has been LIVE since 0.8.0919 because those deploys were built from the working tree without the usual revert. Owner decides: redeploy without it (0.8.0923: revert the four files, build, grep the bundle for `Checked in` — must be absent — deploy, verify BOTH hosts, restore) or keep and review it. Add Travel works on live.
+> **LIVE = SerenovaHub `0.8.0924`** (both hosts, bundle `index-YZYpexBt.js`). App repo `phase-0f`, decisions log v2.397–v2.404 (newest at the top). Supabase: new table `tour_people` (migration `20261125a`).
+> **Flight-page redesign (d110102) is NOT live** — it was by mistake in 0.8.0919–0.8.0922, removed again in 0.8.0923/0.8.0924 (verified in the served bundle). It is still committed WIP, unreviewed. **EVERY deploy must follow the recipe in decisions log v2.402** (revert the four files, build, grep `label:"Checked in"` = 0, deploy, verify both hosts, restore). Owner has not decided: review it on its own branch, or drop it.
 
 ### Shipped 0.8.0914–0.8.0922 (all in one uncommitted tree until this sync)
 - **MobileHub pass 1:** SerenovaHub label, status-bar strip + theme-color, floating glass nav, glass notification card, glass drawers with a min height, Tour Manager guest list, venue/person/map drawers, Home "Happening now" for all active events. (v2.397)
@@ -23,7 +23,8 @@
 - Say "drawers", not "popups". Money on the tour page only for finance access.
 
 ### Open / next
-- **Next (owner):** check TABLET and PHONE views of the tour pages and MobileHub; then the **AMC platform** update (owner has not said which part: dashboard / roster / Access & Linked Accounts / workflow backlog).
+- **Next (owner):** MobileHub PHONE review (Home / Event Detail / venue drawer — only the tour pages, Dashboard and Schedule were checked on a phone); then the **AMC platform** update (owner has not said which part: dashboard / roster / Access & Linked Accounts / workflow backlog).
+- **Schedule:** owner to say whether the wide list should match the phone rows, and whether the date squares should be softer (neutral with a coloured edge). Day-type rule for arrival days changed (v2.404) — check the Dashboard calendar.
 - Tour **map** (airports, venues, routes) — needs an airport-coordinates list; not built. Print Tour Itinerary is one day per page (could pack). Reimbursable flights still count as full expenses in the finance calculators.
 - Mobile "Starting soon" (≤2 days) and mobile guest edit/delete not done. Flight page redesign review (above). Everything in the 2026-11-25 AM brief below still stands (shared Filters/Info control pattern, tablet pass on Team/Venues/Settings/FinancialHub, inline-edit date bug, etc.).
 
