@@ -3,7 +3,36 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-11-24T22:10 EDT
+> Last Updated: 2026-11-25T06:45 EDT
+
+---
+
+## 🔝 TOP BRIEF 2026-11-25 — read FIRST (supersedes the status line of the 2026-11-24 brief below)
+
+> **LIVE = SerenovaHub `0.8.0911`** (both hosts, bundle `index-BkOk5BS1.js`). App repo `phase-0f`, last commit `2cc3d50`; decisions log v2.379–v2.394 (newest at the top).
+> This stretch was a **small-screen / tablet UI pass across the web app**, all frontend-only (no Base44/Supabase schema changes). Each deploy reverts the unreviewed flight-page redesign (commit d110102) for the build, verifies `ClassSeatInline` is absent from the bundle on BOTH hosts, then restores it.
+
+### Shipped 0.8.0896–0.8.0911
+- **Print / EventDetails itinerary:** each hotel prints once with a people count; travel cards; the location rule (flights that arrive at / leave from the event's city).
+- **EventDetails (all tabs):** finance + Quick Actions bars (collapse to a button + popup), icon header (share square-arrow, pencil, status dot), Tour Manager chip, Promo card + hotel popup (`HotelDetailDialog`), flight/ground popup (`TravelDetailDialog`), People tab (collapsed Management, contact icons), Travel tab (connecting flights as one journey card, location decides Arriving/Departing, **no flight hidden**), Data Room, two-column Overview at ≥1000px, aligned itinerary rows, per-day `+` and per-day **day-sheet PDF** print (`utils/openWebDaySheet.js`).
+- **Pages:** Events (+ cards that measure their own width), Dashboard (compact tiles, **Artist Local Time** from the ACCOUNT's own flights/hotels/events — `utils/artistWhereabouts.js`; "Happening now"), Schedule (header band, Today-on default), Travel, Accommodations.
+- **App shell:** dark top bar with brand menu button + user menu; menu closes on navigation; **sidebar collapses to an icon rail** (group flyouts, Ctrl/⌘B, cookie-remembered); share menu split into "Share a link" and "Print & PDF" (+ standalone `PrintSetList` page).
+- **Hotfix 0.8.0903:** a hoisted `userMenuContent` read `user.full_name` before the user loaded → white page. Logged v2.386.
+
+### Rules learned this stretch (apply to the next page)
+1. **Measure the element, not the window** (`src/hooks/useElementWidth.js`): the sidebar eats ~290px, so sm:/md: breakpoints lie on a tablet. The pages NOT yet moved: Dashboard, Schedule, Team, Venues, Tours, EventDetails tabs, Settings, etc.
+2. **`npx eslint src` does NOT catch a missing import of a JSX tag** (`<Loader2 />`) — only `no-undef` on variables/functions. Scan changed .jsx for tags with no import before each deploy (a one-off script is in the session history; better: add `react/jsx-no-undef`).
+3. **Hoisting JSX out of a guard (`{user && …}`) means hoisting the guard too**; smoke-test the first-render path after any `Layout.jsx` change.
+4. Do not extend a filter to a new surface without being asked (the location filter stays on itinerary/print only).
+5. Owner design preferences: dates are the focus on Accommodations; "Home" only when truly home; state shown only for US/Canada/Australia, else "City, Country"; CET not GMT+1; guest names as initial + surname.
+
+### Open / waiting on the owner
+- **Tablet pass** still to do on the pages listed in rule 1.
+- **Known bug live:** editing a check-out/arrival time inline on EventDetails saves it onto the check-in/departure DATE (`EventSchedule.jsx` init date). Plus: sticky day heading, delete on itinerary rows (only reachable after starting an edit), Artist Local Time gaps (multi-zone countries with no state; home city read from account address — unverified).
+- **Flight-page + Edit Booking redesign: still committed WIP (d110102), unreviewed, undeployed** — consider its own branch.
+- Held by the owner: "Exclude from this itinerary", per-day promo locations, per-segment flight→event pricing, V3 server function.
+- Edge-function airport table lacks BER; stored 'UTC' zones still written by AddTravel/PnrSegmentManager; empty Venue box on print day pages; lowercase contact roles.
+- The Base44 exit plan (2026-11-18 brief) is unchanged and still the main line.
 
 ---
 
