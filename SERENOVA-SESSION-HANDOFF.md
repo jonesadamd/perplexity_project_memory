@@ -3,11 +3,33 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-11-25T08:40 EDT
+> Last Updated: 2026-11-25T15:55 EDT
 
 ---
 
-## 🔝 TOP BRIEF 2026-11-25 — read FIRST (supersedes the status line of the 2026-11-24 brief below)
+## 🔝 TOP BRIEF 2026-11-25 (PM) — read FIRST
+
+> **LIVE = SerenovaHub `0.8.0922`** (both hosts, bundle `index-PLJVv0bR.js`). App repo `phase-0f`; decisions log v2.397–v2.401 (newest at the top). Supabase: new table `tour_people` (migration `20261125a`).
+> **🔴 PROCESS MISS TO RESOLVE FIRST:** the unreviewed flight-page redesign (d110102: `PnrSegmentManager`, `flightBookingUi`, `EditFlightBooking`, `FlightBookingPreview`) has been LIVE since 0.8.0919 because those deploys were built from the working tree without the usual revert. Owner decides: redeploy without it (0.8.0923: revert the four files, build, grep the bundle for `Checked in` — must be absent — deploy, verify BOTH hosts, restore) or keep and review it. Add Travel works on live.
+
+### Shipped 0.8.0914–0.8.0922 (all in one uncommitted tree until this sync)
+- **MobileHub pass 1:** SerenovaHub label, status-bar strip + theme-color, floating glass nav, glass notification card, glass drawers with a min height, Tour Manager guest list, venue/person/map drawers, Home "Happening now" for all active events. (v2.397)
+- **Venues:** shared Stage & Tech + Files cards (web Venues dialog, Event Details, mobile `MobileVenueDrawer`); parking_info overwrite bug fixed. (v2.398)
+- **Tours rebuilt:** list, detail (Overview/Schedule/People/Travel & Stays/Financials), Create/Edit, print; shared day builder `utils/tourDays.js`; print flight times now airport-local; tour crew table; tour manager = the events' managers. (v2.399, v2.400)
+- **Fixed on the way:** Add Travel tour-only booking save, company/promoter reimbursement, on-page save errors; "View Tour" on the event header; share icons.
+
+### Owner rules saved this stretch
+- **People are shown by NAME ("First Last"), never an email or the part before the "@", always alphabetical** (memory + `tourView.byName`). Only the tour pages comply so far.
+- Say "drawers", not "popups". Money on the tour page only for finance access.
+
+### Open / next
+- **Next (owner):** check TABLET and PHONE views of the tour pages and MobileHub; then the **AMC platform** update (owner has not said which part: dashboard / roster / Access & Linked Accounts / workflow backlog).
+- Tour **map** (airports, venues, routes) — needs an airport-coordinates list; not built. Print Tour Itinerary is one day per page (could pack). Reimbursable flights still count as full expenses in the finance calculators.
+- Mobile "Starting soon" (≤2 days) and mobile guest edit/delete not done. Flight page redesign review (above). Everything in the 2026-11-25 AM brief below still stands (shared Filters/Info control pattern, tablet pass on Team/Venues/Settings/FinancialHub, inline-edit date bug, etc.).
+
+---
+
+## 🔝 TOP BRIEF 2026-11-25 — (AM — superseded by the PM brief above; supersedes the status line of the 2026-11-24 brief below)
 
 > **LIVE = SerenovaHub `0.8.0913`** (both hosts, bundle `index-jy61WwWC.js`). App repo `phase-0f`, last commit `7b74169`; decisions log v2.379–v2.396 (newest at the top).
 > This stretch was a **small-screen / tablet UI pass across the web app**, all frontend-only (no Base44/Supabase schema changes). Each deploy reverts the unreviewed flight-page redesign (commit d110102) for the build, verifies `ClassSeatInline` is absent from the bundle on BOTH hosts, then restores it.
