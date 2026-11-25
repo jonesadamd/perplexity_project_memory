@@ -3,20 +3,21 @@
 > **Always read this first. Then read the repo docs before touching any code.**
 > **Two-machine setup (desktop + laptop) share this memory repo via git — read
 > `SERENOVA-MACHINE-SYNC.md` (same folder) before starting so the two sessions don't collide.**
-> Last Updated: 2026-11-25T08:00 EDT
+> Last Updated: 2026-11-25T08:40 EDT
 
 ---
 
 ## 🔝 TOP BRIEF 2026-11-25 — read FIRST (supersedes the status line of the 2026-11-24 brief below)
 
-> **LIVE = SerenovaHub `0.8.0912`** (both hosts, bundle `index-Cr7F6qV3.js`). App repo `phase-0f`, last commit `2373321`; decisions log v2.379–v2.395 (newest at the top).
+> **LIVE = SerenovaHub `0.8.0913`** (both hosts, bundle `index-jy61WwWC.js`). App repo `phase-0f`, last commit `7b74169`; decisions log v2.379–v2.396 (newest at the top).
 > This stretch was a **small-screen / tablet UI pass across the web app**, all frontend-only (no Base44/Supabase schema changes). Each deploy reverts the unreviewed flight-page redesign (commit d110102) for the build, verifies `ClassSeatInline` is absent from the bundle on BOTH hosts, then restores it.
 
-### Shipped 0.8.0896–0.8.0912
+### Shipped 0.8.0896–0.8.0913
 - **Print / EventDetails itinerary:** each hotel prints once with a people count; travel cards; the location rule (flights that arrive at / leave from the event's city).
 - **EventDetails (all tabs):** finance + Quick Actions bars (collapse to a button + popup), icon header (share square-arrow, pencil, status dot), Tour Manager chip, Promo card + hotel popup (`HotelDetailDialog`), flight/ground popup (`TravelDetailDialog`), People tab (collapsed Management, contact icons), Travel tab (connecting flights as one journey card, location decides Arriving/Departing, **no flight hidden**), Data Room, two-column Overview at ≥1000px, aligned itinerary rows, per-day `+` and per-day **day-sheet PDF** print (`utils/openWebDaySheet.js`).
 - **Pages:** Events (+ cards that measure their own width), Dashboard (width-based layout, **Artist Local Time** from the ACCOUNT's own flights/hotels/events — `utils/artistWhereabouts.js`; "Happening now"), Schedule (header band, rows by page width, controls split: Hide-empty-days toggle / **Filters = date range incl. Custom range + bands** / Info = key / icon-only Print, sticky row), Travel, Accommodations.
 - **🔴→🟢 Sticky was dead app-wide** (0.8.0912): `Layout.jsx`'s page box was `overflow-auto` but never scrolled, and a sticky element binds to the nearest overflow box even if it doesn't scroll. Now `overflow-x-clip`, so sticky binds to the window (Events year bars etc. now stick). Watch for pages that relied on a horizontal scrollbar there.
+- **MobileHub share icon** = square-with-up-arrow (0.8.0913: event header + PDF preview Share). Still the old three-dot icon on web `EventsTable.jsx` and `TourDetails.jsx` (not asked; offered).
 - **App shell:** dark top bar with brand menu button + user menu; menu closes on navigation; **sidebar collapses to an icon rail** (group flyouts, Ctrl/⌘B, cookie-remembered); share menu split into "Share a link" and "Print & PDF" (+ standalone `PrintSetList` page).
 - **Hotfix 0.8.0903:** a hoisted `userMenuContent` read `user.full_name` before the user loaded → white page. Logged v2.386.
 
